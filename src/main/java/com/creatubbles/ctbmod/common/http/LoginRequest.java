@@ -7,7 +7,7 @@ import com.creatubbles.ctbmod.common.http.LoginRequest.LoginResponse;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 
-public class LoginRequest extends POSTBase<LoginResponse>
+public class LoginRequest extends HttpPostBase<LoginResponse, LoginResponse>
 {
     @Getter
     @ToString
@@ -36,8 +36,14 @@ public class LoginRequest extends POSTBase<LoginResponse>
     }
 
     @Override
-    protected LoginResponse getResult(JsonObject response)
+    protected LoginResponse getSuccessfulResult(JsonObject response)
     {
         return gson.fromJson(response, LoginResponse.class);
+    }
+
+    @Override
+    protected LoginResponse getFailedResult(JsonObject response)
+    {
+        return getSuccessfulResult(response);
     }
 }

@@ -4,13 +4,15 @@ import lombok.SneakyThrows;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 
-import com.creatubbles.ctbmod.common.http.HttpPostException;
+import com.creatubbles.ctbmod.common.http.HttpRequestException;
 import com.creatubbles.ctbmod.common.http.LoginRequest;
 import com.creatubbles.ctbmod.common.http.User;
 import com.enderio.core.common.util.ChatUtil;
 
 public class CommandLogin extends CommandBase
 {
+    public static String accessToken;
+    
     @Override
     public String getCommandName()
     {
@@ -38,9 +40,10 @@ public class CommandLogin extends CommandBase
             else
             {
                 ChatUtil.sendNoSpamClient("Access Token Received: " + req.getSuccessfulResult().getAccessToken());
+                accessToken = req.getSuccessfulResult().getAccessToken();
             }
         }
-        catch (HttpPostException e)
+        catch (HttpRequestException e)
         {
             ChatUtil.sendNoSpamClient("HTTP Error: " + e.getMessage());
         }

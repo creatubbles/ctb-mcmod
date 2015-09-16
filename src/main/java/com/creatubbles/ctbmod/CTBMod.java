@@ -2,6 +2,7 @@ package com.creatubbles.ctbmod;
 
 import java.util.Locale;
 
+import com.creatubbles.ctbmod.common.command.CommandGetCreators;
 import com.creatubbles.ctbmod.common.command.CommandLogin;
 
 import cpw.mods.fml.common.Mod;
@@ -21,5 +22,6 @@ public class CTBMod
     public void onServerStart(FMLServerStartingEvent event)
     {
         event.registerServerCommand(new CommandLogin());
+        event.registerServerCommand(new CommandGetCreators());
     }
 }

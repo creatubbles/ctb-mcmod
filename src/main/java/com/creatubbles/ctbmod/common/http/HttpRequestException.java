@@ -7,7 +7,7 @@ import lombok.Getter;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 
-public class HttpPostException extends HttpException
+public class HttpRequestException extends HttpException
 {
     private static final long serialVersionUID = 5970128938694742779L;
     
@@ -15,17 +15,17 @@ public class HttpPostException extends HttpException
     @Getter
     private HttpResponse response;
     
-    public HttpPostException(HttpResponse response)
+    public HttpRequestException(HttpResponse response)
     {
         this(null, response);
     }
     
-    public HttpPostException(String message)
+    public HttpRequestException(String message)
     {
         this(message, null);
     }
     
-    public HttpPostException(String message, HttpResponse response)
+    public HttpRequestException(String message, HttpResponse response)
     {
         super(message);
         this.response = response;

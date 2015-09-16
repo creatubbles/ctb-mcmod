@@ -1,0 +1,129 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url = "http://files.minecraftforge.net/maven" }
+        maven { url = "https://oss.sonatype.org/content/repositories/snapshots/" }
+    }
+    dependencies { classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT' }
+}
+
+apply plugin: 'forge'
+apply plugin: 'maven-publish'
+apply plugin: 'curseforge'
+
+ext.buildnumber = 0
+if (System.getenv('BUILD_NUMBER') != null)
+    project.buildnumber = System.getenv('BUILD_NUMBER')
+else {
+    try {
+        ext.buildnumber += "_" + "git rev-parse --abbrev-ref HEAD".execute().text.trim();
+        ext.buildnumber += "_" + "git rev-parse HEAD".execute().text.trim();
+    } catch (all) {}
+    logger.lifecycle "No build number detected, setting to ${ext.buildnumber}"
+}
+
+group = "com.creatubbles.ctbmod"
+archivesBaseName = "CTBMod"
+version = "${minecraft_version}-${mod_version}.${buildnumber}"
+boolean release = true
+
+if (project.hasProperty('mod_appendix')) {
+    version += "_${project.mod_appendix}"
+    release = false
+}
+
+minecraft {
+    version = "${minecraft_version}-${forge_version}-${minecraft_version}"
+    runDir = 'run'
+
+    replace "@VERSION@", project.version
+    replaceIn "CTBMod.java"
+}
+
+configurations {
+    compile.extendsFrom exportedCompile
+}
+
+repositories {
+    mavenCentral()
+    maven { url = "http://maven.tterrag.com" }
+}
+
+dependencies {
+    compile "com.enderio.core:EnderCore:${endercore_version}:dev"
+}
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    from(sourceSets.main.resources.srcDirs) {
+        include '**/*.info'
+        include '**/*.properties'
+
+        expand 'version': project.version, 'mcversion': project.minecraft.version
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude '**/*.info'
+        exclude '**/*.properties'
+    }
+}
+
+jar {
+    from { configurations.exportedCompile.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
+task deobfJar(type: Jar) {
+    from sourceSets.main.output
+    from { configurations.exportedCompile.collect { it.isDirectory() ? it : zipTree(it) } }
+    classifier = 'dev'
+}
+
+if (JavaVersion.current().isJava8Compatible()) {
+    allprojects {
+        tasks.withType(Javadoc) {
+            options.addStringOption('Xdoclint:none', '-quiet')
+        }
+    }
+}
+
+build.dependsOn deobfJar
+
+String getChangelogText() {
+    def changelogFile = new File('ReleaseNotes.txt')
+    String str = ''
+    String separator = '---'
+    int lineCount = 0
+    boolean done = false
+    changelogFile.eachLine {
+        if (done || it == null) {
+            return
+        }
+        if (lineCount < 3) {
+            lineCount++
+            if (it.startsWith(separator)) {return}
+        }
+        if (!it.startsWith(separator)) {
+            str += "$it" + (lineCount < 3 ? ':\n\n' : '\n')
+            return
+        }
+        done = true // once we go past the first version block, parse no more
+    }
+    return str
+}
+
+curse {
+    dependsOn 'reobf'
+    
+    onlyIf {
+        return project.hasProperty('curseforge_key') && System.getenv("CURSE") != null && System.getenv("CURSE").equalsIgnoreCase("true")
+    }
+
+    if (project.hasProperty('curseforge_key')) apiKey = project.curseforge_key
+    projectId = project.curse_projectId
+    changelog = System.getenv("CHANGELOG").equals("none") ? release ? getChangelogText() : project.changelog : System.getenv("CHANGELOG")
+    releaseType = project.hasProperty('mod_appendix') ? "${mod_appendix}".toString() : 'release'
+    additionalArtifact deobfJar
+    relatedProject 'endercore'
+}

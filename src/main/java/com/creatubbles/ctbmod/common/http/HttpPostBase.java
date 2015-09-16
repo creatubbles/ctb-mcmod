@@ -5,7 +5,6 @@ import java.io.UnsupportedEncodingException;
 import lombok.Getter;
 
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 
 import com.google.gson.JsonObject;
@@ -21,7 +20,7 @@ public abstract class HttpPostBase<SUCCESS, FAIL> extends HttpRequest<SUCCESS, F
     protected abstract JsonObject getObject();
 
     @Override
-    protected HttpRequestBase getRequest(String url) throws HttpRequestException
+    protected HttpPost getRequest(String url) throws HttpRequestException
     {
         HttpPost post = new HttpPost(url);
 

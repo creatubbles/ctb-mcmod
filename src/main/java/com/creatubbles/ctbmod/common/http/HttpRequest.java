@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import com.google.gson.Gson;
@@ -34,7 +34,7 @@ public abstract class HttpRequest<SUCCESS, FAIL>
      *            The url assembled from the {@link URL_BASE} and the passed apiPath
      * @return the HTTP request you need to send. The headers for JSON content-type and accept will be set automatically.
      */
-    protected abstract HttpRequestBase getRequest(String url) throws HttpRequestException;
+    protected abstract HttpUriRequest getRequest(String url) throws HttpRequestException;
 
     /**
      * Create a successful result from the received JSON data
@@ -59,7 +59,7 @@ public abstract class HttpRequest<SUCCESS, FAIL>
         String url = URL_BASE.concat(apiPath);
 
         HttpClient client = HttpClientBuilder.create().build();
-        HttpRequestBase req = getRequest(url);
+        HttpUriRequest req = getRequest(url);
 
         // Set content headers
         req.setHeader("content-type", "application/json");

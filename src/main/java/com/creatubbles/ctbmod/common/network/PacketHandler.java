@@ -10,6 +10,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 
 import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.repack.endercore.common.config.PacketConfigSync;
 import com.creatubbles.repack.endercore.common.util.ChatUtil.PacketNoSpamChat;
 
 public class PacketHandler
@@ -26,6 +27,7 @@ public class PacketHandler
     public static void init()
     {
         INSTANCE.registerMessage(PacketNoSpamChat.Handler.class, PacketNoSpamChat.class, nextID(), Side.CLIENT);
+        INSTANCE.registerMessage(PacketConfigSync.Handler.class, PacketConfigSync.class, nextID(), Side.CLIENT);
     }
 
     public static void sendToAllAround(IMessage message, TileEntity te, int range)

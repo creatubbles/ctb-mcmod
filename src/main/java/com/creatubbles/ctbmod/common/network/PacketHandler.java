@@ -9,11 +9,12 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 
+import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.repack.endercore.common.util.ChatUtil.PacketNoSpamChat;
 
 public class PacketHandler
 {
-    public static final SimpleNetworkWrapper INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel("enderio");
+    public static final SimpleNetworkWrapper INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel(CTBMod.MODID);
 
     private static int ID = 0;
 

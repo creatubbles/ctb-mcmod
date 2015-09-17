@@ -29,44 +29,41 @@ import com.creatubbles.repack.endercore.common.config.ConfigProcessor;
 import com.creatubbles.repack.enderlib.api.config.IConfigHandler;
 
 @Mod(modid = MODID, name = NAME, version = VERSION)
-public class CTBMod
-{
-    public static final String MODID = "CTBMod";
-    public static final String NAME = "Creatubbles Mod";
-    public static final String DOMAIN = MODID.toLowerCase(Locale.US);
-    public static final String VERSION = "@VERSION@";
+public class CTBMod {
 
-    @Instance
-    public static CTBMod instance;
+	public static final String MODID = "CTBMod";
+	public static final String NAME = "Creatubbles Mod";
+	public static final String DOMAIN = MODID.toLowerCase(Locale.US);
+	public static final String VERSION = "@VERSION@";
 
-    @SidedProxy(clientSide = "com.creatubbles.ctbmod.client.ClientProxy", serverSide = "com.creatubbles.ctbmod.common.CommonProxy")
-    public static CommonProxy proxy;
-    public static Logger logger = LogManager.getLogger(MODID);
+	@Instance
+	public static CTBMod instance;
 
-    public static BlockCreator creator;
+	@SidedProxy(clientSide = "com.creatubbles.ctbmod.client.ClientProxy", serverSide = "com.creatubbles.ctbmod.common.CommonProxy")
+	public static CommonProxy proxy;
+	public static Logger logger = LogManager.getLogger(MODID);
 
-    public List<IConfigHandler> configs;
+	public static BlockCreator creator;
 
-    @EventHandler
-    public void preInit(FMLPreInitializationEvent event)
-    {
-    	new ConfigProcessor(Configs.class, event.getSuggestedConfigurationFile(), MODID).process(true);
-    	
-        creator = BlockCreator.create();
-    }
+	public List<IConfigHandler> configs;
 
-    @EventHandler
-    public void init(FMLInitializationEvent event)
-    {
-        proxy.registerRenderers();
-        PacketHandler.init();
-        Configs.loadAccessToken();
-    }
+	@EventHandler
+	public void preInit(FMLPreInitializationEvent event) {
+		new ConfigProcessor(Configs.class, event.getSuggestedConfigurationFile(), MODID).process(true);
 
-    @EventHandler
-    public void onServerStart(FMLServerStartingEvent event)
-    {
-        event.registerServerCommand(new CommandLogin());
-        event.registerServerCommand(new CommandGetCreators());
-    }
+		creator = BlockCreator.create();
+	}
+
+	@EventHandler
+	public void init(FMLInitializationEvent event) {
+		proxy.registerRenderers();
+		PacketHandler.init();
+		Configs.loadAccessToken();
+	}
+
+	@EventHandler
+	public void onServerStart(FMLServerStartingEvent event) {
+		event.registerServerCommand(new CommandLogin());
+		event.registerServerCommand(new CommandGetCreators());
+	}
 }

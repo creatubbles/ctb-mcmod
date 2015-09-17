@@ -10,30 +10,25 @@ import org.apache.http.entity.StringEntity;
 import com.google.gson.JsonObject;
 
 @Getter
-public abstract class HttpPostBase<SUCCESS, FAIL> extends HttpRequest<SUCCESS, FAIL>
-{
-    public HttpPostBase(String apiPath)
-    {
-        super(apiPath);
-    }
+public abstract class HttpPostBase<SUCCESS, FAIL> extends HttpRequest<SUCCESS, FAIL> {
 
-    protected abstract JsonObject getObject();
+	public HttpPostBase(String apiPath) {
+		super(apiPath);
+	}
 
-    @Override
-    protected HttpPost getRequest(String url) throws HttpRequestException
-    {
-        HttpPost post = new HttpPost(url);
+	protected abstract JsonObject getObject();
 
-        try
-        {
-            // Add the JSON as a param
-            StringEntity params = new StringEntity(getObject().toString());
-            post.setEntity(params);
-            return post;
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            throw new HttpRequestException("Illegal object encoding!");
-        }
-    }
+	@Override
+	protected HttpPost getRequest(String url) throws HttpRequestException {
+		HttpPost post = new HttpPost(url);
+
+		try {
+			// Add the JSON as a param
+			StringEntity params = new StringEntity(getObject().toString());
+			post.setEntity(params);
+			return post;
+		} catch (UnsupportedEncodingException e) {
+			throw new HttpRequestException("Illegal object encoding!");
+		}
+	}
 }

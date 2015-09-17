@@ -14,178 +14,178 @@ import com.creatubbles.repack.enderlib.client.gui.widget.GuiToolTip;
 
 public class IconButton extends GuiButton {
 
-  public static final int DEFAULT_WIDTH = 16;
-  public static final int DEFAULT_HEIGHT = 16;
+	public static final int DEFAULT_WIDTH = 16;
+	public static final int DEFAULT_HEIGHT = 16;
 
-  protected IWidgetIcon icon;
-  private int xOrigin;
-  private int yOrigin;
+	protected IWidgetIcon icon;
+	private int xOrigin;
+	private int yOrigin;
 
-  protected IGuiScreen gui;
-  protected String[] toolTipText;
+	protected IGuiScreen gui;
+	protected String[] toolTipText;
 
-  private GuiToolTip toolTip;
-  private int marginY = 0;
-  private int marginX = 0;
-  
-  public IconButton(IGuiScreen gui, int id, int x, int y, IWidgetIcon icon) {
-    super(id, x, y, DEFAULT_WIDTH, DEFAULT_HEIGHT, "");
-    this.gui = gui;
-    this.icon = icon;
-    this.xOrigin = x;
-    this.yOrigin = y;
-  }
+	private GuiToolTip toolTip;
+	private int marginY = 0;
+	private int marginX = 0;
 
-  public void setToolTip(String... tooltipText) {
-    if (toolTip == null) {
-      toolTip = new GuiToolTip(getBounds(), tooltipText);
-      //gui.addToolTip(toolTip);
-    } else {
-      toolTip.setToolTipText(tooltipText);
-    }
-    this.toolTipText = tooltipText;
-  }
+	public IconButton(IGuiScreen gui, int id, int x, int y, IWidgetIcon icon) {
+		super(id, x, y, DEFAULT_WIDTH, DEFAULT_HEIGHT, "");
+		this.gui = gui;
+		this.icon = icon;
+		this.xOrigin = x;
+		this.yOrigin = y;
+	}
 
-  protected void setToolTip(GuiToolTip newToolTip) {
-    boolean addTooltip = false;
-    if (toolTip != null) {
-      addTooltip = gui.removeToolTip(toolTip);
-    }
-    toolTip = newToolTip;
-    if (addTooltip && toolTip != null) {
-      gui.addToolTip(toolTip);
-    }
-  }
+	public void setToolTip(String... tooltipText) {
+		if (toolTip == null) {
+			toolTip = new GuiToolTip(getBounds(), tooltipText);
+			// gui.addToolTip(toolTip);
+		} else {
+			toolTip.setToolTipText(tooltipText);
+		}
+		this.toolTipText = tooltipText;
+	}
 
-  public final Rectangle getBounds() {
-    return new Rectangle(xOrigin, yOrigin, getWidth(), getHeight());
-  }
+	protected void setToolTip(GuiToolTip newToolTip) {
+		boolean addTooltip = false;
+		if (toolTip != null) {
+			addTooltip = gui.removeToolTip(toolTip);
+		}
+		toolTip = newToolTip;
+		if (addTooltip && toolTip != null) {
+			gui.addToolTip(toolTip);
+		}
+	}
 
-  public void onGuiInit() {
-    gui.addButton(this);
-    if (toolTip != null) {
-      gui.addToolTip(toolTip);
-    }
-    xPosition = xOrigin + gui.getGuiLeft();
-    yPosition = yOrigin + gui.getGuiTop();
-  }
+	public final Rectangle getBounds() {
+		return new Rectangle(xOrigin, yOrigin, getWidth(), getHeight());
+	}
 
-  public void detach() {
-    gui.removeToolTip(toolTip);
-    gui.removeButton(this);
-  }
+	public void onGuiInit() {
+		gui.addButton(this);
+		if (toolTip != null) {
+			gui.addToolTip(toolTip);
+		}
+		xPosition = xOrigin + gui.getGuiLeft();
+		yPosition = yOrigin + gui.getGuiTop();
+	}
 
-  public void setSize(int width, int height) {
-    this.width = width;
-    this.height = height;
-    updateTooltipBounds();
-  }
+	public void detach() {
+		gui.removeToolTip(toolTip);
+		gui.removeButton(this);
+	}
 
-  public IconButton setPosition(int x, int y) {
-    this.xOrigin = x;
-    this.yOrigin = y;
-    updateTooltipBounds();
-    return this;
-  }
+	public void setSize(int width, int height) {
+		this.width = width;
+		this.height = height;
+		updateTooltipBounds();
+	}
 
-  private void updateTooltipBounds() {
-    if (toolTip != null) {
-      toolTip.setBounds(new Rectangle(xOrigin, yOrigin, width, height));
-    }
-  }
+	public IconButton setPosition(int x, int y) {
+		this.xOrigin = x;
+		this.yOrigin = y;
+		updateTooltipBounds();
+		return this;
+	}
 
-  public IconButton setIconMargin(int x, int y) {
-    marginX = x;
-    marginY = y;
-    return this;
-  }
+	private void updateTooltipBounds() {
+		if (toolTip != null) {
+			toolTip.setBounds(new Rectangle(xOrigin, yOrigin, width, height));
+		}
+	}
 
-  public int getWidth() {
-    return width;
-  }
+	public IconButton setIconMargin(int x, int y) {
+		marginX = x;
+		marginY = y;
+		return this;
+	}
 
-  public int getHeight() {
-    return height;
-  }
+	public int getWidth() {
+		return width;
+	}
 
-  public IWidgetIcon getIcon() {
-    return icon;
-  }
+	public int getHeight() {
+		return height;
+	}
 
-  public void setIcon(IWidgetIcon icon) {
-    this.icon = icon;
-  }
+	public IWidgetIcon getIcon() {
+		return icon;
+	}
 
-  public GuiToolTip getToolTip() {
-    return toolTip;
-  }
+	public void setIcon(IWidgetIcon icon) {
+		this.icon = icon;
+	}
 
-  /**
-   * Override this to handle mouse clicks with other buttons than the left
-   * 
-   * @param mc
-   *          The MC instance
-   * @param x
-   *          X coordinate of mouse click
-   * @param y
-   *          Y coordinate of mouse click
-   * @param button
-   *          the mouse button - only called for button {@literal >}= 1
-   * @return true if the mouse click is handled
-   */
-  public boolean mousePressedButton(Minecraft mc, int x, int y, int button) {
-    return false;
-  }
+	public GuiToolTip getToolTip() {
+		return toolTip;
+	}
 
-  protected boolean checkMousePress(Minecraft mc, int x, int y) {
-    // call super here so that we only get the area check
-    return super.mousePressed(mc, x, y);
-  }
+	/**
+	 * Override this to handle mouse clicks with other buttons than the left
+	 * 
+	 * @param mc
+	 *            The MC instance
+	 * @param x
+	 *            X coordinate of mouse click
+	 * @param y
+	 *            Y coordinate of mouse click
+	 * @param button
+	 *            the mouse button - only called for button {@literal >}= 1
+	 * @return true if the mouse click is handled
+	 */
+	public boolean mousePressedButton(Minecraft mc, int x, int y, int button) {
+		return false;
+	}
 
-  /**
-   * Draws this button to the screen.
-   */
-  @SuppressWarnings("synthetic-access")
-  @Override
-  public void drawButton(Minecraft mc, int mouseX, int mouseY) {
-    if (toolTip != null) {
-      toolTip.setVisible(visible);
-    }
-    if (visible) {
+	protected boolean checkMousePress(Minecraft mc, int x, int y) {
+		// call super here so that we only get the area check
+		return super.mousePressed(mc, x, y);
+	}
 
-      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-      this.hovered = mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + width && mouseY < this.yPosition + height;
-      int hoverState = getHoverState(this.hovered);
-      mouseDragged(mc, mouseX, mouseY);
+	/**
+	 * Draws this button to the screen.
+	 */
+	@SuppressWarnings("synthetic-access")
+	@Override
+	public void drawButton(Minecraft mc, int mouseX, int mouseY) {
+		if (toolTip != null) {
+			toolTip.setVisible(visible);
+		}
+		if (visible) {
 
-      IWidgetIcon background = getIconForHoverState(hoverState);
+			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+			this.hovered = mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + width && mouseY < this.yPosition + height;
+			int hoverState = getHoverState(this.hovered);
+			mouseDragged(mc, mouseX, mouseY);
 
-      GL11.glColor3f(1, 1, 1);
+			IWidgetIcon background = getIconForHoverState(hoverState);
 
-      int x = xPosition;
-      int y = yPosition;
+			GL11.glColor3f(1, 1, 1);
 
-      GL11.glPushAttrib(GL11.GL_ENABLE_BIT);
-      GL11.glEnable(GL11.GL_BLEND);
-      GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+			int x = xPosition;
+			int y = yPosition;
 
-      background.getMap().render(background, x, y, width, height, 0, true);
-      if (icon != null) {
-        icon.getMap().render(icon, x + marginX, y + marginY, width - (2 * marginX), height - (2 * marginY), 0, true);
-      }
+			GL11.glPushAttrib(GL11.GL_ENABLE_BIT);
+			GL11.glEnable(GL11.GL_BLEND);
+			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-      GL11.glPopAttrib();
+			background.getMap().render(background, x, y, width, height, 0, true);
+			if (icon != null) {
+				icon.getMap().render(icon, x + marginX, y + marginY, width - (2 * marginX), height - (2 * marginY), 0, true);
+			}
 
-    }
-  }
+			GL11.glPopAttrib();
 
-  protected IWidgetIcon getIconForHoverState(int hoverState) {
-    if (hoverState == 0) {
-      return EnderWidget.BUTTON_DISABLED;
-    }
-    if (hoverState == 2) {
-      return EnderWidget.BUTTON_HIGHLIGHT;
-    }
-    return EnderWidget.BUTTON;
-  }
+		}
+	}
+
+	protected IWidgetIcon getIconForHoverState(int hoverState) {
+		if (hoverState == 0) {
+			return EnderWidget.BUTTON_DISABLED;
+		}
+		if (hoverState == 2) {
+			return EnderWidget.BUTTON_HIGHLIGHT;
+		}
+		return EnderWidget.BUTTON;
+	}
 }

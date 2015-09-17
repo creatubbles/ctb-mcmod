@@ -6,11 +6,11 @@ import lombok.ToString;
 
 @Getter
 @ToString
-public class Creator
-{
-    private int id;
-    private String name, age;
-    
-    @Setter
-    private transient String accessToken;
+public class Creator {
+
+	private int id;
+	private String name, age;
+
+	@Setter
+	private transient String accessToken;
 }

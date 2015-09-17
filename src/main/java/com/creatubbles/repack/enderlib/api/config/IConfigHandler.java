@@ -10,21 +10,22 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import com.creatubbles.repack.enderlib.common.config.Section;
 
 public interface IConfigHandler {
-  void initialize(File cfg);
 
-  List<Section> getSections();
+	void initialize(File cfg);
 
-  ConfigCategory getCategory(String name);
+	List<Section> getSections();
 
-  String getModID();
+	ConfigCategory getCategory(String name);
 
-  /**
-   * A hook for the {@link FMLInitializationEvent}.
-   */
-  void initHook();
+	String getModID();
 
-  /**
-   * A hook for the {@link FMLPostInitializationEvent}.
-   */
-  void postInitHook();
+	/**
+	 * A hook for the {@link FMLInitializationEvent}.
+	 */
+	void initHook();
+
+	/**
+	 * A hook for the {@link FMLPostInitializationEvent}.
+	 */
+	void postInitHook();
 }

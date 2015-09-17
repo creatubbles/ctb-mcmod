@@ -7,43 +7,39 @@ import com.creatubbles.ctbmod.common.http.LoginRequest.LoginResponse;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 
-public class LoginRequest extends HttpPostBase<LoginResponse, LoginResponse>
-{
-    @Getter
-    @ToString
-    public static class LoginResponse
-    {
-        private String message;
-        
-        @SerializedName("access_token")
-        private String accessToken;
-    }
-    
-    private User user;
-    
-    public LoginRequest(User user)
-    {
-        super("users/sign_in.json");
-        this.user = user;
-    }
-    
-    @Override
-    protected JsonObject getObject()
-    {
-        JsonObject ret = new JsonObject();
-        ret.add("user", gson.toJsonTree(user));
-        return ret;
-    }
+public class LoginRequest extends HttpPostBase<LoginResponse, LoginResponse> {
 
-    @Override
-    protected LoginResponse getSuccessfulResult(JsonObject response)
-    {
-        return gson.fromJson(response, LoginResponse.class);
-    }
+	@Getter
+	@ToString
+	public static class LoginResponse {
 
-    @Override
-    protected LoginResponse getFailedResult(JsonObject response)
-    {
-        return getSuccessfulResult(response);
-    }
+		private String message;
+
+		@SerializedName("access_token")
+		private String accessToken;
+	}
+
+	private User user;
+
+	public LoginRequest(User user) {
+		super("users/sign_in.json");
+		this.user = user;
+	}
+
+	@Override
+	protected JsonObject getObject() {
+		JsonObject ret = new JsonObject();
+		ret.add("user", gson.toJsonTree(user));
+		return ret;
+	}
+
+	@Override
+	protected LoginResponse getSuccessfulResult(JsonObject response) {
+		return gson.fromJson(response, LoginResponse.class);
+	}
+
+	@Override
+	protected LoginResponse getFailedResult(JsonObject response) {
+		return getSuccessfulResult(response);
+	}
 }

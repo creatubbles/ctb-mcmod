@@ -4,7 +4,6 @@ import net.minecraft.nbt.NBTTagCompound;
 
 import com.creatubbles.repack.enderlib.common.TileEntityBase;
 
-
 public class TileCreator extends TileEntityBase {
 
 	@Override

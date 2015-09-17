@@ -8,12 +8,11 @@ import net.minecraft.item.Item;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.CommonProxy;
 
-public class ClientProxy extends CommonProxy
-{
-    @Override
-    public void registerRenderers()
-    {
-        RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();
-        renderItem.getItemModelMesher().register(Item.getItemFromBlock(CTBMod.creator), 0, new ModelResourceLocation(CTBMod.DOMAIN + ":creator", "inventory"));
-    }
+public class ClientProxy extends CommonProxy {
+
+	@Override
+	public void registerRenderers() {
+		RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();
+		renderItem.getItemModelMesher().register(Item.getItemFromBlock(CTBMod.creator), 0, new ModelResourceLocation(CTBMod.DOMAIN + ":creator", "inventory"));
+	}
 }

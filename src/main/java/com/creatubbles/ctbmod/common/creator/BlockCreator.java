@@ -12,7 +12,6 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.repack.enderlib.common.BlockEnder;
 
-
 public class BlockCreator extends BlockEnder<TileCreator> implements IGuiHandler {
 
 	public static BlockCreator create() {
@@ -20,11 +19,11 @@ public class BlockCreator extends BlockEnder<TileCreator> implements IGuiHandler
 		res.init();
 		return res;
 	}
-	
+
 	public BlockCreator() {
 		super("creator", TileCreator.class, Material.rock);
 	}
-	
+
 	@Override
 	protected void init() {
 		super.init();
@@ -32,7 +31,7 @@ public class BlockCreator extends BlockEnder<TileCreator> implements IGuiHandler
 		setUnlocalizedName(CTBMod.DOMAIN + "." + name);
 		NetworkRegistry.INSTANCE.registerGuiHandler(CTBMod.instance, this);
 	}
-	
+
 	@Override
 	protected boolean openGui(World world, BlockPos pos, EntityPlayer entityPlayer, EnumFacing side) {
 		entityPlayer.openGui(CTBMod.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());

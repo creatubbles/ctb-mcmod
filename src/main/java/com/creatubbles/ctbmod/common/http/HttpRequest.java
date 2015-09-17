@@ -18,90 +18,79 @@ import com.google.gson.JsonParser;
 
 @RequiredArgsConstructor
 @Getter
-public abstract class HttpRequest<SUCCESS, FAIL>
-{
-    public static final String URL_BASE = "https://www.creatubbles.com/api/v1/";
+public abstract class HttpRequest<SUCCESS, FAIL> {
 
-    protected final Gson gson = new Gson();
+	public static final String URL_BASE = "https://www.creatubbles.com/api/v1/";
 
-    protected final String apiPath;
+	protected final Gson gson = new Gson();
 
-    private SUCCESS successfulResult;
-    private FAIL failedResult;
+	protected final String apiPath;
 
-    /**
-     * @param url
-     *            The url assembled from the {@link URL_BASE} and the passed apiPath
-     * @return the HTTP request you need to send. The headers for JSON content-type and accept will be set automatically.
-     */
-    protected abstract HttpUriRequest getRequest(String url) throws HttpRequestException;
+	private SUCCESS successfulResult;
+	private FAIL failedResult;
 
-    /**
-     * Create a successful result from the received JSON data
-     * 
-     * @param response
-     *            The JSON data from the request parsed into an object
-     * @return An object representing a successful result
-     */
-    protected abstract SUCCESS getSuccessfulResult(JsonObject response);
+	/**
+	 * @param url
+	 *            The url assembled from the {@link URL_BASE} and the passed apiPath
+	 * @return the HTTP request you need to send. The headers for JSON content-type and accept will be set automatically.
+	 */
+	protected abstract HttpUriRequest getRequest(String url) throws HttpRequestException;
 
-    /**
-     * Create a failed result from the received JSON data
-     * 
-     * @param response
-     *            The JSON data from the request parsed into an object
-     * @return An object representing a failed result
-     */
-    protected abstract FAIL getFailedResult(JsonObject response);
+	/**
+	 * Create a successful result from the received JSON data
+	 * 
+	 * @param response
+	 *            The JSON data from the request parsed into an object
+	 * @return An object representing a successful result
+	 */
+	protected abstract SUCCESS getSuccessfulResult(JsonObject response);
 
-    public final void post() throws HttpRequestException
-    {
-        String url = URL_BASE.concat(apiPath);
+	/**
+	 * Create a failed result from the received JSON data
+	 * 
+	 * @param response
+	 *            The JSON data from the request parsed into an object
+	 * @return An object representing a failed result
+	 */
+	protected abstract FAIL getFailedResult(JsonObject response);
 
-        HttpClient client = HttpClientBuilder.create().build();
-        HttpUriRequest req = getRequest(url);
+	public final void post() throws HttpRequestException {
+		String url = URL_BASE.concat(apiPath);
 
-        // Set content headers
-        req.setHeader("content-type", "application/json");
-        req.setHeader("accept", "application/json");
+		HttpClient client = HttpClientBuilder.create().build();
+		HttpUriRequest req = getRequest(url);
 
-        HttpResponse response;
+		// Set content headers
+		req.setHeader("content-type", "application/json");
+		req.setHeader("accept", "application/json");
 
-        try
-        {
-            // Send POST
-            response = client.execute(req);
-        }
-        catch (IOException e)
-        {
-            throw new HttpRequestException("Error sending POST!");
-        }
+		HttpResponse response;
 
-        try
-        {
-            // Parse the result into a JsonObject
-            JsonObject res = new JsonParser().parse(new InputStreamReader(response.getEntity().getContent())).getAsJsonObject();
-            StatusLine status = response.getStatusLine();
-            int code = status.getStatusCode();
-            if (code != 200)
-            {
-                // If response is not 200, the POST has failed, so read the JSON into the failed object
-                failedResult = getFailedResult(res);
-            }
-            else
-            {
-                // If response is 200 continue as normal
-                successfulResult = getSuccessfulResult(res);
-            }
-        }
-        catch (IOException e)
-        {
-            throw new HttpRequestException("Error parsing response!", response);
-        }
-    }
+		try {
+			// Send POST
+			response = client.execute(req);
+		} catch (IOException e) {
+			throw new HttpRequestException("Error sending POST!");
+		}
 
-    public boolean failed()
-    {
-        return successfulResult == null;
-    }
+		try {
+			// Parse the result into a JsonObject
+			JsonObject res = new JsonParser().parse(new InputStreamReader(response.getEntity().getContent())).getAsJsonObject();
+			StatusLine status = response.getStatusLine();
+			int code = status.getStatusCode();
+			if (code != 200) {
+				// If response is not 200, the POST has failed, so read the JSON into the failed object
+				failedResult = getFailedResult(res);
+			} else {
+				// If response is 200 continue as normal
+				successfulResult = getSuccessfulResult(res);
+			}
+		} catch (IOException e) {
+			throw new HttpRequestException("Error parsing response!", response);
+		}
+	}
+
+	public boolean failed() {
+		return successfulResult == null;
+	}
 }

@@ -1,14 +1,13 @@
 package com.creatubbles.ctbmod.common.command;
 
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.ICommandSender;
 import scala.actors.threadpool.Arrays;
 
 import com.creatubbles.ctbmod.common.http.CreatorsRequest;
-import com.creatubbles.ctbmod.common.http.HttpRequestException;
 import com.creatubbles.ctbmod.common.http.CreatorsRequest.CreatorsResponse;
-import com.enderio.core.common.util.ChatUtil;
-
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.ICommandSender;
+import com.creatubbles.ctbmod.common.http.HttpRequestException;
+import com.creatubbles.repack.endercore.common.util.ChatUtil;
 
 public class CommandGetCreators extends CommandBase
 {

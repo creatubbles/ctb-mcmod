@@ -7,7 +7,7 @@ import net.minecraft.command.ICommandSender;
 import com.creatubbles.ctbmod.common.http.HttpRequestException;
 import com.creatubbles.ctbmod.common.http.LoginRequest;
 import com.creatubbles.ctbmod.common.http.User;
-import com.enderio.core.common.util.ChatUtil;
+import com.creatubbles.repack.endercore.common.util.ChatUtil;
 
 public class CommandLogin extends CommandBase
 {

@@ -2,6 +2,7 @@ package com.creatubbles.ctbmod.common.config;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 
 import lombok.SneakyThrows;
 
@@ -19,12 +20,15 @@ public class Configs {
 	public static boolean refreshAccessToken = false;
 
 	public static User cachedUser = null;
+	
+	private static File userCache;
 
 	@SneakyThrows
-	public static void loadAccessToken() {
+	public static void loadUser() {
 		File cacheFolder = new File(".", "creatubbles");
 		cacheFolder.mkdir();
-		File userCache = new File(cacheFolder, "usercache.json");
+		userCache = new File(cacheFolder, "usercache.json");
+		
 		if (userCache.exists() && refreshAccessToken) {
 			userCache.delete();
 			return;
@@ -35,5 +39,14 @@ public class Configs {
 		if (parsed != null && !parsed.isJsonNull()) {
 			cachedUser = new Gson().fromJson(parsed, User.class);
 		}
+	}
+
+	@SneakyThrows
+	public static void cacheUser() {
+		String json = new Gson().toJson(cachedUser);
+		FileWriter fw = new FileWriter(userCache);
+		fw.write(json);
+		fw.flush();
+		fw.close();
 	}
 }

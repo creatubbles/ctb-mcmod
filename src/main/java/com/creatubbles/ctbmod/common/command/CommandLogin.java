@@ -6,7 +6,7 @@ import net.minecraft.command.ICommandSender;
 
 import com.creatubbles.ctbmod.common.http.HttpRequestException;
 import com.creatubbles.ctbmod.common.http.LoginRequest;
-import com.creatubbles.ctbmod.common.http.User;
+import com.creatubbles.ctbmod.common.http.Login;
 import com.creatubbles.repack.endercore.common.util.ChatUtil;
 
 public class CommandLogin extends CommandBase {
@@ -26,7 +26,7 @@ public class CommandLogin extends CommandBase {
 	@Override
 	@SneakyThrows
 	public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_) {
-		LoginRequest req = new LoginRequest(new User(p_71515_2_[0], p_71515_2_[1]));
+		LoginRequest req = new LoginRequest(new Login(p_71515_2_[0], p_71515_2_[1]));
 		try {
 			req.post();
 			if (req.failed()) {

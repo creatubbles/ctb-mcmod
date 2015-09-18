@@ -19,9 +19,9 @@ public class LoginRequest extends HttpPostBase<LoginResponse, LoginResponse> {
 		private String accessToken;
 	}
 
-	private User user;
+	private Login user;
 
-	public LoginRequest(User user) {
+	public LoginRequest(Login user) {
 		super("users/sign_in.json");
 		this.user = user;
 	}

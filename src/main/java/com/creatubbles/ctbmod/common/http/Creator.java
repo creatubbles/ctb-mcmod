@@ -1,16 +1,16 @@
 package com.creatubbles.ctbmod.common.http;
 
-import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
+import lombok.Value;
+import lombok.experimental.NonFinal;
 
-@Getter
-@ToString
+@Value
 public class Creator {
 
 	private int id;
 	private String name, age;
 
 	@Setter
+	@NonFinal
 	private transient String accessToken;
 }

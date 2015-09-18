@@ -53,7 +53,7 @@ public class CTBMod {
 	public void init(FMLInitializationEvent event) {
 		proxy.registerRenderers();
 		PacketHandler.init();
-		Configs.loadAccessToken();
+		Configs.loadUser();
 	}
 
 	@EventHandler

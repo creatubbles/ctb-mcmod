@@ -29,6 +29,7 @@ public abstract class HttpRequest<SUCCESS, FAIL> implements Runnable {
 	private SUCCESS successfulResult;
 	private FAIL failedResult;
 	private HttpRequestException exception;
+	private boolean complete;
 
 	/**
 	 * @param url
@@ -71,6 +72,7 @@ public abstract class HttpRequest<SUCCESS, FAIL> implements Runnable {
 			// Send POST
 			response = client.execute(req);
 		} catch (IOException e) {
+			complete = true;
 			throw new HttpRequestException("Error sending POST!");
 		}
 
@@ -87,8 +89,10 @@ public abstract class HttpRequest<SUCCESS, FAIL> implements Runnable {
 				successfulResult = getSuccessfulResult(res);
 			}
 		} catch (IOException e) {
+			complete = true;
 			throw new HttpRequestException("Error parsing response!", response);
 		}
+		complete = true;
 	}
 
 	@Override

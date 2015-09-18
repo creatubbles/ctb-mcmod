@@ -1,13 +1,16 @@
 package com.creatubbles.ctbmod.common.config;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.util.Scanner;
+import java.io.FileReader;
 
 import lombok.SneakyThrows;
 
+import com.creatubbles.ctbmod.common.http.User;
 import com.creatubbles.repack.endercore.common.config.annot.Comment;
 import com.creatubbles.repack.endercore.common.config.annot.Config;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 public class Configs {
 
@@ -15,20 +18,22 @@ public class Configs {
 	@Comment("Setting this to true will cause the cached access token to be refreshed every time the game is launched.")
 	public static boolean refreshAccessToken = false;
 
-	public static String cachedAccessToken = null;
+	public static User cachedUser = null;
 
 	@SneakyThrows
 	public static void loadAccessToken() {
-		File accessTokenCache = new File(".", ".access_token");
-		if (accessTokenCache.createNewFile()) {
+		File cacheFolder = new File(".", "creatubbles");
+		cacheFolder.mkdir();
+		File userCache = new File(cacheFolder, "usercache.json");
+		if (userCache.exists() && refreshAccessToken) {
+			userCache.delete();
+			return;
+		} else if (userCache.createNewFile()) {
 			return;
 		}
-		Scanner scan = new Scanner(new FileInputStream(accessTokenCache));
-		if (scan.hasNextLine()) {
-			String token = scan.nextLine();
-			if (!token.isEmpty()) {
-				cachedAccessToken = token;
-			}
+		JsonElement parsed = new JsonParser().parse(new FileReader(userCache));
+		if (parsed != null && !parsed.isJsonNull()) {
+			cachedUser = new Gson().fromJson(parsed, User.class);
 		}
 	}
 }

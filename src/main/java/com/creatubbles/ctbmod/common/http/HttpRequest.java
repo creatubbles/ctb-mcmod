@@ -18,7 +18,7 @@ import com.google.gson.JsonParser;
 
 @RequiredArgsConstructor
 @Getter
-public abstract class HttpRequest<SUCCESS, FAIL> {
+public abstract class HttpRequest<SUCCESS, FAIL> implements Runnable {
 
 	public static final String URL_BASE = "https://www.creatubbles.com/api/v1/";
 
@@ -28,6 +28,7 @@ public abstract class HttpRequest<SUCCESS, FAIL> {
 
 	private SUCCESS successfulResult;
 	private FAIL failedResult;
+	private HttpRequestException exception;
 
 	/**
 	 * @param url
@@ -87,6 +88,15 @@ public abstract class HttpRequest<SUCCESS, FAIL> {
 			}
 		} catch (IOException e) {
 			throw new HttpRequestException("Error parsing response!", response);
+		}
+	}
+
+	@Override
+	public final void run() {
+		try {
+			post();
+		} catch (HttpRequestException e) {
+			this.exception = e;
 		}
 	}
 

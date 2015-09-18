@@ -93,7 +93,7 @@ public class GuiCreator extends GuiContainerBase {
 
 	@Override
 	public void initGui() {
-		Configs.cachedUser = null;
+		super.initGui();
 		addButton(loginButton = new GuiButton(ID_LOGIN, guiLeft + xSize / 2 - 50, guiTop + 75, 100, 20, "Log in"));
 	}
 

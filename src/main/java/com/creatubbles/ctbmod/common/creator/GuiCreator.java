@@ -6,6 +6,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 
 import com.creatubbles.ctbmod.CTBMod;
@@ -76,6 +77,7 @@ public class GuiCreator extends GuiContainerBase {
 	private GuiButton loginButton;
 	private LoginRequest loginReq;
 	private UserRequest userReq;
+	private String header = "Plesae log in to Creatubbles:";
 
 	public GuiCreator(InventoryPlayer inv) {
 		super(new ContainerCreator(inv));
@@ -94,7 +96,16 @@ public class GuiCreator extends GuiContainerBase {
 	@Override
 	public void initGui() {
 		super.initGui();
+		Configs.cachedUser = null;
 		addButton(loginButton = new GuiButton(ID_LOGIN, guiLeft + xSize / 2 - 50, guiTop + 75, 100, 20, "Log in"));
+	}
+	
+	@Override
+	protected void keyTyped(char c, int key) throws IOException {
+		if ((c == '\r' || c == '\n') && (tfEmail.isFocused() || tfVisualPassword.isFocused())) {
+			actionPerformed(loginButton);
+		}
+		super.keyTyped(c, key);
 	}
 
 	@Override
@@ -104,14 +115,19 @@ public class GuiCreator extends GuiContainerBase {
 			tfEmail.setVisible(false);
 			tfVisualPassword.setVisible(false);
 			loginButton.visible = false;
+		} else {
+			tfEmail.setVisible(true);
+			tfVisualPassword.setVisible(true);
+			loginButton.visible = true;
 		}
 		if (loginReq != null && loginReq.isComplete() && userReq == null) {
 			if (loginReq.failed()) {
 				if (loginReq.getException() != null) {
-					System.out.println(loginReq.getException().getLocalizedMessage());
+					header = loginReq.getException().getLocalizedMessage();
 				} else {
-					System.out.println(loginReq.getFailedResult().getMessage());
+					header = loginReq.getFailedResult().getMessage();
 				}
+				header = EnumChatFormatting.YELLOW.toString().concat(header);
 				loginReq = null;
 			} else {
 				new Thread(userReq = new UserRequest(loginReq.getSuccessfulResult().getAccessToken())).start();
@@ -144,7 +160,7 @@ public class GuiCreator extends GuiContainerBase {
 		case LOGGED_OUT:
 			x += xSize / 2;
 			y += 5;
-			drawCenteredString(getFontRenderer(), "Please log in to Creatubbles", x, y, 0xFFFFFF);
+			drawCenteredString(getFontRenderer(), header, x, y, 0xFFFFFF);
 
 			x = guiLeft + 13;
 			y = guiTop + 20;

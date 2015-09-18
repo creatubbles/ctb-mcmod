@@ -2,6 +2,7 @@ package com.creatubbles.ctbmod.common.http;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.UnknownHostException;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -71,9 +72,11 @@ public abstract class HttpRequest<SUCCESS, FAIL> implements Runnable {
 		try {
 			// Send POST
 			response = client.execute(req);
-		} catch (IOException e) {
+		} catch (UnknownHostException e) {
 			complete = true;
-			throw new HttpRequestException("Error sending POST!");
+			throw new HttpRequestException("No internet connection!");
+		} catch (IOException e) {
+			throw new HttpRequestException("Unknown request error!");
 		}
 
 		try {

@@ -164,7 +164,7 @@ public class GuiCreator extends GuiContainerBase {
 
 			x = guiLeft + 13;
 			y = guiTop + 20;
-			drawString(getFontRenderer(), "Email:", x, y, 0xFFFFFF);
+			drawString(getFontRenderer(), "Email/Username:", x, y, 0xFFFFFF);
 
 			y += 25;
 			drawString(getFontRenderer(), "Password:", x, y, 0xFFFFFF);

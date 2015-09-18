@@ -30,7 +30,6 @@ public abstract class HttpRequest<SUCCESS, FAIL> implements Runnable {
 	private SUCCESS successfulResult;
 	private FAIL failedResult;
 	private HttpRequestException exception;
-	private boolean complete;
 
 	/**
 	 * @param url
@@ -68,15 +67,13 @@ public abstract class HttpRequest<SUCCESS, FAIL> implements Runnable {
 		req.setHeader("accept", "application/json");
 
 		HttpResponse response;
-
+		
 		try {
 			// Send POST
 			response = client.execute(req);
 		} catch (UnknownHostException e) {
-			complete = true;
 			throw new HttpRequestException("No internet connection!");
 		} catch (IOException e) {
-			complete = true;
 			throw new HttpRequestException("Unknown request error!");
 		}
 
@@ -93,10 +90,8 @@ public abstract class HttpRequest<SUCCESS, FAIL> implements Runnable {
 				successfulResult = getSuccessfulResult(res);
 			}
 		} catch (IOException e) {
-			complete = true;
 			throw new HttpRequestException("Error parsing response!", response);
 		}
-		complete = true;
 	}
 
 	@Override
@@ -109,6 +104,10 @@ public abstract class HttpRequest<SUCCESS, FAIL> implements Runnable {
 	}
 
 	public boolean failed() {
-		return failedResult != null;
+		return isComplete() && getSuccessfulResult() == null;
+	}
+	
+	public boolean isComplete() {
+		return getSuccessfulResult() != null || getFailedResult() != null || getException() != null;
 	}
 }

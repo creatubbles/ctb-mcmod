@@ -11,12 +11,16 @@ import net.minecraft.util.ResourceLocation;
 
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.config.Configs;
+import com.creatubbles.ctbmod.common.http.Creation;
+import com.creatubbles.ctbmod.common.http.CreationsRequest;
+import com.creatubbles.ctbmod.common.http.CreatorsRequest;
 import com.creatubbles.ctbmod.common.http.Login;
 import com.creatubbles.ctbmod.common.http.LoginRequest;
 import com.creatubbles.ctbmod.common.http.User;
 import com.creatubbles.ctbmod.common.http.UserRequest;
 import com.creatubbles.repack.enderlib.client.gui.GuiContainerBase;
 import com.creatubbles.repack.enderlib.client.gui.widget.TextFieldEnder;
+import com.creatubbles.repack.enderlib.client.gui.widget.VScrollbar;
 
 public class GuiCreator extends GuiContainerBase {
 
@@ -63,6 +67,41 @@ public class GuiCreator extends GuiContainerBase {
 			super.deleteFromCursor(cursor);
 		}
 	}
+	
+	private class LoginRunnable implements Runnable {
+
+		@Override
+		public void run() {
+			loginReq = new LoginRequest(new Login(tfEmail.getText(), tfActualPassword.getText()));
+			loginReq.run();
+			if (loginReq.failed()) {
+				if (loginReq.getException() != null) {
+					header = loginReq.getException().getLocalizedMessage();
+				} else {
+					header = loginReq.getFailedResult().getMessage();
+				}
+				header = EnumChatFormatting.YELLOW.toString().concat(header);
+				loginReq = null;
+			} else {
+				userReq = new UserRequest(loginReq.getSuccessfulResult().getAccessToken());
+				userReq.run();
+				Configs.cachedUser = userReq.getSuccessfulResult();
+				Configs.cachedUser.setAccessToken(loginReq.getSuccessfulResult().getAccessToken());
+				Configs.cacheUser();
+				
+				CreatorsRequest creatorsReq =  new CreatorsRequest(Integer.toString(getUser().getId()));
+				creatorsReq.run();
+				
+				CreationsRequest creationsReq = new CreationsRequest(creatorsReq.getSuccessfulResult().getCreators()[0].getId());
+				creationsReq.run();
+				creations = creationsReq.getSuccessfulResult();
+				
+				for (Creation c : creations) {
+					c.getImage().download(c);
+				}
+			}
+		}
+	}
 
 	private enum State {
 		LOGGED_OUT,
@@ -73,11 +112,14 @@ public class GuiCreator extends GuiContainerBase {
 	private static final int ID_LOGIN = 0;
 
 	private TextFieldEnder tfEmail, tfActualPassword;
+	private VScrollbar scrollbar;
 	private PasswordTextField tfVisualPassword;
 	private GuiButton loginButton;
 	private LoginRequest loginReq;
 	private UserRequest userReq;
 	private String header = "Plesae log in to Creatubbles:";
+	
+	private Creation[] creations;
 
 	public GuiCreator(InventoryPlayer inv) {
 		super(new ContainerCreator(inv));
@@ -91,6 +133,9 @@ public class GuiCreator extends GuiContainerBase {
 
 		tfVisualPassword = new PasswordTextField(getFontRenderer(), (xSize / 2) - 75, 55, 150, 10);
 		textFields.add(tfVisualPassword);
+		
+		scrollbar = new VScrollbar(this, xSize - 10, 10, 100);
+		addScrollbar(scrollbar);
 	}
 
 	@Override
@@ -120,24 +165,6 @@ public class GuiCreator extends GuiContainerBase {
 			tfVisualPassword.setVisible(true);
 			loginButton.visible = true;
 		}
-		if (loginReq != null && loginReq.isComplete() && userReq == null) {
-			if (loginReq.failed()) {
-				if (loginReq.getException() != null) {
-					header = loginReq.getException().getLocalizedMessage();
-				} else {
-					header = loginReq.getFailedResult().getMessage();
-				}
-				header = EnumChatFormatting.YELLOW.toString().concat(header);
-				loginReq = null;
-			} else {
-				new Thread(userReq = new UserRequest(loginReq.getSuccessfulResult().getAccessToken())).start();
-			}
-		}
-		if (userReq != null && userReq.isComplete() && getUser() == null) {
-			Configs.cachedUser = userReq.getSuccessfulResult();
-			Configs.cachedUser.setAccessToken(loginReq.getSuccessfulResult().getAccessToken());
-			Configs.cacheUser();
-		}
 	}
 	
 	@Override
@@ -156,6 +183,10 @@ public class GuiCreator extends GuiContainerBase {
 			x += xSize / 2;
 			y += 25;
 			drawCenteredString(getFontRenderer(), "Logged in as: " + getUser().getUsername(), x, y, 0xFFFFFF);
+			if (creations != null && creations.length > 0) {
+				mc.getTextureManager().bindTexture(creations[0].getImage().getResource());
+				drawTexturedModalRect(0, 0, 0, 0, 256, 256);
+			}
 			break;
 		case LOGGED_OUT:
 			x += xSize / 2;
@@ -194,7 +225,7 @@ public class GuiCreator extends GuiContainerBase {
 	protected void actionPerformed(GuiButton button) throws IOException {
 		switch (button.id) {
 		case ID_LOGIN:
-			new Thread(loginReq = new LoginRequest(new Login(tfEmail.getText(), tfActualPassword.getText()))).start();
+			new Thread(new LoginRunnable()).start();
 			break;
 		}
 	}

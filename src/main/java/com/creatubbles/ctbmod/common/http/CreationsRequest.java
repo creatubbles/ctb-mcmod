@@ -1,12 +1,23 @@
 package com.creatubbles.ctbmod.common.http;
 
-import com.creatubbles.ctbmod.common.command.CommandLogin;
 import com.google.gson.JsonObject;
 
 public class CreationsRequest extends HttpGetBase<Creation[], Void> {
 
+	private static String createApiPath(int creatorId, String accessToken) {
+		String ret = "creators/" + creatorId + "/creations.json";
+		if (accessToken != null) {
+			ret += "?access_token=" + accessToken;
+		}
+		return ret;
+	}
+
 	public CreationsRequest(int creatorId) {
-		super("creators/" + creatorId + "/creations.json?access_token=" + CommandLogin.accessToken);
+		this(creatorId, null);
+	}
+
+	public CreationsRequest(int creatorId, String accessToken) {
+		super(createApiPath(creatorId, accessToken));
 	}
 
 	@Override

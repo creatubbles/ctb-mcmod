@@ -1,18 +1,18 @@
 package com.creatubbles.ctbmod.common.http;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.URL;
-
-import javax.imageio.ImageIO;
-
-import org.apache.logging.log4j.LogManager;
-
-import com.creatubbles.ctbmod.CTBMod;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.experimental.NonFinal;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.IImageBuffer;
+import net.minecraft.client.renderer.ThreadDownloadImageData;
+import net.minecraft.client.renderer.texture.ITextureObject;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.util.ResourceLocation;
+
+import com.creatubbles.ctbmod.CTBMod;
 
 @Value
 @RequiredArgsConstructor
@@ -21,31 +21,31 @@ public class Image {
 	private String url;
 
 	@NonFinal
-	private transient BufferedImage image;
+	private transient ResourceLocation resource;
 
 	public boolean downloaded() {
-		return image != null;
+		return resource != null;
 	}
 
-	public void download() {
-		// Spawn download thread so as to not pause the main thread
-		// Users of this class should be checking the downloaded() method to see if this has finished
-		new Thread(new Runnable() {
+	public void download(final Creation owner) {
+		TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
+		ResourceLocation res = new ResourceLocation(CTBMod.DOMAIN, "textures/creations5/" + owner.getUserId() + "/" + owner.getId());
+		ITextureObject texture = texturemanager.getTexture(res);
 
-			@Override
-			public void run() {
-				try {
-					image = ImageIO.read(new URL(url));
-				} catch (IOException e) {
-					LogManager.getLogger(CTBMod.MODID).error("Could not download image from " + url);
-					e.printStackTrace();
-				} finally {
-					// This is a recreation of the "no texture" texture
-					image = new BufferedImage(2, 2, BufferedImage.TYPE_INT_RGB);
-					image.setRGB(0, 0, 0xFF00FF);
-					image.setRGB(1, 1, 0xFF00FF);
+		if (texture == null) {
+			texture = new ThreadDownloadImageData(null, url, null, new IImageBuffer() {
+
+				@Override
+				public BufferedImage parseUserSkin(BufferedImage p_78432_1_) {
+					return p_78432_1_;
 				}
-			}
-		}).start();
+
+				@Override
+				public void func_152634_a() {
+				}
+			});
+			texturemanager.loadTexture(res, texture);
+		}
+		resource = res;
 	}
 }

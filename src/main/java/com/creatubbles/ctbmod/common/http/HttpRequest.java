@@ -76,6 +76,7 @@ public abstract class HttpRequest<SUCCESS, FAIL> implements Runnable {
 			complete = true;
 			throw new HttpRequestException("No internet connection!");
 		} catch (IOException e) {
+			complete = true;
 			throw new HttpRequestException("Unknown request error!");
 		}
 
@@ -108,6 +109,6 @@ public abstract class HttpRequest<SUCCESS, FAIL> implements Runnable {
 	}
 
 	public boolean failed() {
-		return successfulResult == null;
+		return failedResult != null;
 	}
 }

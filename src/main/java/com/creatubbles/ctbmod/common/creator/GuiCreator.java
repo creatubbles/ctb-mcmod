@@ -105,11 +105,13 @@ public class GuiCreator extends GuiContainerBase {
 					CreatorsRequest creatorsReq = new CreatorsRequest(Integer.toString(getUser().getId()));
 					creatorsReq.run();
 					allCreators = creatorsReq.getSuccessfulResult().getCreators();
-					creator = allCreators[0];
 				}
 
 				if (creations == null) {
 					for (Creator c : allCreators) {
+						if (c.getUserId() == getUser().getId()) {
+							creator = c;
+						}
 						CreationsRequest creationsReq = new CreationsRequest(c.getId());
 						creationsReq.run();
 						creations = ArrayUtils.addAll(creations, creationsReq.getSuccessfulResult());

@@ -1,51 +1,135 @@
 package com.creatubbles.ctbmod.common.http;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.lang.reflect.Field;
+import java.util.EnumMap;
+import java.util.Locale;
 
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
-import lombok.experimental.NonFinal;
+import lombok.Getter;
+import lombok.SneakyThrows;
+import lombok.ToString;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IImageBuffer;
 import net.minecraft.client.renderer.ThreadDownloadImageData;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
+
+import org.lwjgl.util.Dimension;
 
 import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.ctbmod.common.config.Configs;
+import com.google.common.collect.Maps;
 
-@Value
-@RequiredArgsConstructor
+@ToString
 public class Image {
 
-	private String url;
+	public enum ImageType {
+		ORIGINAL,
+		FULL_VIEW,
+		LIST_VIEW;
 
-	@NonFinal
-	private transient ResourceLocation resource;
-
-	public boolean downloaded() {
-		return resource != null;
+		public String toString() {
+			return name().toLowerCase(Locale.US);
+		}
 	}
 
+	private static final Field _bufferedImage = ReflectionHelper.findField(ThreadDownloadImageData.class, "bufferedImage");
+
+	static {
+		_bufferedImage.setAccessible(true);
+	}
+
+	@Getter
+	private final String fileName, urlBase;
+
+	private final EnumMap<ImageType, ResourceLocation> locations = Maps.newEnumMap(ImageType.class);
+	private EnumMap<ImageType, Dimension> sizes = Maps.newEnumMap(ImageType.class);
+
+	public Image(String url) {
+		fileName = url.substring(url.lastIndexOf("/") + 1, url.length());
+		urlBase = url.substring(0, url.indexOf("original"));
+		for (ImageType type : ImageType.values()) {
+			locations.put(type, new ResourceLocation("missingno"));
+			sizes.put(type, new Dimension());
+		}
+	}
+
+	/**
+	 * Gets the bindable {@link ResourceLocation} for the given {@link ImageType type}.
+	 * 
+	 * @param type
+	 *            The {@link ImageType} to get the resource for.
+	 * @return A {@link ResourceLocation}, which may be a dummy if this Image has not been downloaded, or is in the process of being downloaded.
+	 */
+	public ResourceLocation getResource(ImageType type) {
+		return locations.get(type);
+	}
+
+	/**
+	 * The dimensions for this image.
+	 * 
+	 * @param type
+	 *            The {@link ImageType} to get the dimensions for.
+	 * @return An {@link Dimension} representing the size of this image. May be zero if the image is not downloaded.
+	 */
+	public Dimension getSize(ImageType type) {
+		return sizes.get(type);
+	}
+
+	/**
+	 * The width of this image.
+	 * 
+	 * @param type
+	 *            The {@link ImageType} to get the width for.
+	 * @return The width of this image. May be zero if the image is not downloaded.
+	 */
+	public int getWidth(ImageType type) {
+		return getSize(type).getWidth();
+	}
+
+	/**
+	 * The height of this image.
+	 * 
+	 * @param type
+	 *            The {@link ImageType} to get the height for.
+	 * @return The height of this image. May be zero if the image is not downloaded.
+	 */
+	public int getHeight(ImageType type) {
+		return getSize(type).getHeight();
+	}
+
+	@SneakyThrows
 	public void download(final Creation owner) {
 		TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
-		ResourceLocation res = new ResourceLocation(CTBMod.DOMAIN, "textures/creations5/" + owner.getUserId() + "/" + owner.getId());
-		ITextureObject texture = texturemanager.getTexture(res);
 
-		if (texture == null) {
-			texture = new ThreadDownloadImageData(null, url, null, new IImageBuffer() {
+		for (ImageType type : ImageType.values()) {
+			String url = urlBase.concat(type.toString()).concat("/").concat(fileName);
+			String filepath = "creations/" + owner.getUserId() + "/" + type + "/" + owner.getId() + ".jpg";
+			File cache = new File(Configs.cacheFolder, filepath);
+			ResourceLocation res = new ResourceLocation(CTBMod.DOMAIN, filepath);
+			ITextureObject texture = texturemanager.getTexture(res);
 
-				@Override
-				public BufferedImage parseUserSkin(BufferedImage p_78432_1_) {
-					return p_78432_1_;
-				}
+			if (texture == null) {
+				texture = new ThreadDownloadImageData(cache, url, null, new IImageBuffer() {
 
-				@Override
-				public void func_152634_a() {
-				}
-			});
-			texturemanager.loadTexture(res, texture);
+					@Override
+					public BufferedImage parseUserSkin(BufferedImage p_78432_1_) {
+						return p_78432_1_;
+					}
+
+					@Override
+					public void func_152634_a() {
+					}
+				});
+				texturemanager.loadTexture(res, texture);
+			}
+
+			locations.put(type, res);
+			BufferedImage img = (BufferedImage) _bufferedImage.get(texture);
+			sizes.put(type, new Dimension(img.getWidth(), img.getHeight()));
 		}
-		resource = res;
 	}
 }

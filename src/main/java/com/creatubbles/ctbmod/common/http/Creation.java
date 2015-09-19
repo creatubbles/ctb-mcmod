@@ -11,6 +11,8 @@ public class Creation {
 
 	@SerializedName("user_id")
 	private int userId;
+	
+	private Creator[] creators;
 
 	private String name;
 	private Image image;

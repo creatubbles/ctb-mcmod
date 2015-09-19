@@ -23,7 +23,7 @@ public abstract class HttpRequest<SUCCESS, FAIL> implements Runnable {
 
 	public static final String URL_BASE = "https://www.creatubbles.com/api/v1/";
 
-	protected final Gson gson = new Gson();
+	protected final Gson gson = createGson();
 
 	protected final String apiPath;
 
@@ -101,6 +101,10 @@ public abstract class HttpRequest<SUCCESS, FAIL> implements Runnable {
 		} catch (HttpRequestException e) {
 			this.exception = e;
 		}
+	}
+	
+	protected Gson createGson() {
+		return new Gson();
 	}
 
 	public boolean failed() {

@@ -21,11 +21,12 @@ public class Configs {
 
 	public static User cachedUser = null;
 	
+	public static final File cacheFolder = new File(".", "creatubbles");
+	
 	private static File userCache;
 
 	@SneakyThrows
 	public static void loadUser() {
-		File cacheFolder = new File(".", "creatubbles");
 		cacheFolder.mkdir();
 		userCache = new File(cacheFolder, "usercache.json");
 		

@@ -14,6 +14,8 @@ import com.creatubbles.ctbmod.common.config.Configs;
 import com.creatubbles.ctbmod.common.http.Creation;
 import com.creatubbles.ctbmod.common.http.CreationsRequest;
 import com.creatubbles.ctbmod.common.http.CreatorsRequest;
+import com.creatubbles.ctbmod.common.http.Image;
+import com.creatubbles.ctbmod.common.http.Image.ImageType;
 import com.creatubbles.ctbmod.common.http.Login;
 import com.creatubbles.ctbmod.common.http.LoginRequest;
 import com.creatubbles.ctbmod.common.http.User;
@@ -181,11 +183,20 @@ public class GuiCreator extends GuiContainerBase {
 		switch(getState()) {
 		case LOGGED_IN:
 			x += xSize / 2;
-			y += 25;
+			y += 5;
 			drawCenteredString(getFontRenderer(), "Logged in as: " + getUser().getUsername(), x, y, 0xFFFFFF);
+			
+			x = guiLeft;
+			y = guiTop;
 			if (creations != null && creations.length > 0) {
-				mc.getTextureManager().bindTexture(creations[0].getImage().getResource());
-				drawTexturedModalRect(0, 0, 0, 0, 256, 256);
+				Image img = creations[0].getImage();
+				ImageType type = ImageType.LIST_VIEW;
+				ResourceLocation res = img.getResource(type);
+				if (res != null) {
+					int w = img.getWidth(type), h = img.getHeight(type);
+					mc.getTextureManager().bindTexture(res);
+					drawScaledCustomSizeModalRect(x + (xSize / 2) - 32, y + 20, 0, 0, w, h, 64, 64, w, h);
+				}
 			}
 			break;
 		case LOGGED_OUT:

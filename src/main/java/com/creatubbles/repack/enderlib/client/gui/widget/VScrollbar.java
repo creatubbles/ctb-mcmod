@@ -2,6 +2,8 @@ package com.creatubbles.repack.enderlib.client.gui.widget;
 
 import java.awt.Rectangle;
 
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
@@ -20,8 +22,11 @@ public class VScrollbar {
 	protected int yOrigin;
 	protected int height;
 
-	protected int xPosition;
-	protected int yPosition;
+	@Getter
+	protected int x;
+	@Getter
+	protected int y;
+	@Getter
 	protected Rectangle wholeArea;
 	protected Rectangle btnUp;
 	protected Rectangle btnDown;
@@ -35,6 +40,10 @@ public class VScrollbar {
 	protected boolean pressedThumb;
 	protected int scrollDir;
 	protected long timeNextScroll;
+	
+	@Getter
+	@Setter
+	protected boolean visible = true;
 
 	public VScrollbar(IGuiScreen gui, int xOrigin, int yOrigin, int height) {
 		this.gui = gui;
@@ -44,12 +53,12 @@ public class VScrollbar {
 	}
 
 	public void adjustPosition() {
-		xPosition = xOrigin + gui.getGuiLeft();
-		yPosition = yOrigin + gui.getGuiTop();
-		wholeArea = new Rectangle(xPosition, yPosition, (int) EnderWidget.VSCROLL_THUMB_OFF.width, height);
-		btnUp = new Rectangle(xPosition, yPosition, (int) EnderWidget.UP_ARROW_OFF.width, (int) EnderWidget.UP_ARROW_OFF.height);
-		btnDown = new Rectangle(xPosition, yPosition + Math.max(0, height - (int) EnderWidget.DOWN_ARROW_OFF.height), (int) EnderWidget.DOWN_ARROW_OFF.width, (int) EnderWidget.DOWN_ARROW_OFF.height);
-		thumbArea = new Rectangle(xPosition, yPosition + btnUp.height, (int) EnderWidget.VSCROLL_THUMB_OFF.width, Math.max(0, height - (btnUp.height + btnDown.height)));
+		x = xOrigin + gui.getGuiLeft();
+		y = yOrigin + gui.getGuiTop();
+		wholeArea = new Rectangle(x, y, (int) EnderWidget.VSCROLL_THUMB_OFF.width, height);
+		btnUp = new Rectangle(x, y, (int) EnderWidget.UP_ARROW_OFF.width, (int) EnderWidget.UP_ARROW_OFF.height);
+		btnDown = new Rectangle(x, y + Math.max(0, height - (int) EnderWidget.DOWN_ARROW_OFF.height), (int) EnderWidget.DOWN_ARROW_OFF.width, (int) EnderWidget.DOWN_ARROW_OFF.height);
+		thumbArea = new Rectangle(x, y + btnUp.height, (int) EnderWidget.VSCROLL_THUMB_OFF.width, Math.max(0, height - (btnUp.height + btnDown.height)));
 	}
 
 	public int getScrollPos() {
@@ -74,58 +83,60 @@ public class VScrollbar {
 	}
 
 	public void drawScrollbar(int mouseX, int mouseY) {
-		boolean hoverUp = btnUp.contains(mouseX, mouseY);
-		boolean hoverDown = btnDown.contains(mouseX, mouseY);
+		if (visible) {
+			boolean hoverUp = btnUp.contains(mouseX, mouseY);
+			boolean hoverDown = btnDown.contains(mouseX, mouseY);
 
-		IWidgetIcon iconUp;
-		if (pressedUp) {
-			iconUp = hoverUp ? EnderWidget.UP_ARROW_HOVER_ON : EnderWidget.UP_ARROW_ON;
-		} else {
-			iconUp = hoverUp ? EnderWidget.UP_ARROW_HOVER_OFF : EnderWidget.UP_ARROW_OFF;
-		}
-
-		IWidgetIcon iconDown;
-		if (pressedDown) {
-			iconDown = hoverDown ? EnderWidget.DOWN_ARROW_HOVER_ON : EnderWidget.DOWN_ARROW_ON;
-		} else {
-			iconDown = hoverDown ? EnderWidget.DOWN_ARROW_HOVER_OFF : EnderWidget.DOWN_ARROW_OFF;
-		}
-
-		if (scrollDir != 0) {
-			long time = Minecraft.getSystemTime();
-			if ((timeNextScroll - time) <= 0) {
-				timeNextScroll = time + 100;
-				scrollBy(scrollDir);
-			}
-		}
-
-		Minecraft.getMinecraft().getTextureManager().bindTexture(EnderWidget.TEXTURE);
-		GL11.glPushAttrib(GL11.GL_ENABLE_BIT);
-		GL11.glEnable(GL11.GL_BLEND);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glColor3f(1, 1, 1);
-
-		WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
-		renderer.startDrawingQuads();
-
-		iconUp.getMap().render(iconUp, btnUp.x, btnUp.y, false);
-		iconDown.getMap().render(iconDown, btnDown.x, btnDown.y, false);
-
-		if (scrollMax > 0) {
-			int thumbPos = getThumbPosition();
-			boolean hoverThumb = thumbArea.contains(mouseX, mouseY) && mouseY >= thumbPos && mouseY < thumbPos + (int) EnderWidget.VSCROLL_THUMB_OFF.height;
-
-			EnderWidget iconThumb;
-			if (pressedThumb) {
-				iconThumb = EnderWidget.VSCROLL_THUMB_HOVER_ON;
+			IWidgetIcon iconUp;
+			if (pressedUp) {
+				iconUp = hoverUp ? EnderWidget.UP_ARROW_HOVER_ON : EnderWidget.UP_ARROW_ON;
 			} else {
-				iconThumb = hoverThumb ? EnderWidget.VSCROLL_THUMB_HOVER_OFF : EnderWidget.VSCROLL_THUMB_OFF;
+				iconUp = hoverUp ? EnderWidget.UP_ARROW_HOVER_OFF : EnderWidget.UP_ARROW_OFF;
 			}
-			iconThumb.getMap().render(iconThumb, thumbArea.x, thumbPos, false);
-		}
 
-		renderer.draw();
-		GL11.glPopAttrib();
+			IWidgetIcon iconDown;
+			if (pressedDown) {
+				iconDown = hoverDown ? EnderWidget.DOWN_ARROW_HOVER_ON : EnderWidget.DOWN_ARROW_ON;
+			} else {
+				iconDown = hoverDown ? EnderWidget.DOWN_ARROW_HOVER_OFF : EnderWidget.DOWN_ARROW_OFF;
+			}
+
+			if (scrollDir != 0) {
+				long time = Minecraft.getSystemTime();
+				if ((timeNextScroll - time) <= 0) {
+					timeNextScroll = time + 100;
+					scrollBy(scrollDir);
+				}
+			}
+
+			Minecraft.getMinecraft().getTextureManager().bindTexture(EnderWidget.TEXTURE);
+			GL11.glPushAttrib(GL11.GL_ENABLE_BIT);
+			GL11.glEnable(GL11.GL_BLEND);
+			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+			GL11.glColor3f(1, 1, 1);
+
+			WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
+			renderer.startDrawingQuads();
+
+			iconUp.getMap().render(iconUp, btnUp.x, btnUp.y, false);
+			iconDown.getMap().render(iconDown, btnDown.x, btnDown.y, false);
+
+			if (scrollMax > 0) {
+				int thumbPos = getThumbPosition();
+				boolean hoverThumb = thumbArea.contains(mouseX, mouseY) && mouseY >= thumbPos && mouseY < thumbPos + (int) EnderWidget.VSCROLL_THUMB_OFF.height;
+
+				EnderWidget iconThumb;
+				if (pressedThumb) {
+					iconThumb = EnderWidget.VSCROLL_THUMB_HOVER_ON;
+				} else {
+					iconThumb = hoverThumb ? EnderWidget.VSCROLL_THUMB_HOVER_OFF : EnderWidget.VSCROLL_THUMB_OFF;
+				}
+				iconThumb.getMap().render(iconThumb, thumbArea.x, thumbPos, false);
+			}
+
+			Tessellator.getInstance().draw();
+			GL11.glPopAttrib();
+		}
 	}
 
 	public boolean mouseClicked(int x, int y, int button) {

@@ -15,7 +15,7 @@ public class ContainerCreator extends ContainerEnder<InventoryPlayer> {
 	@Override
 	public Point getPlayerInventoryOffset() {
 		Point p = super.getPlayerInventoryOffset();
-		p.translate(0, 22);
+		p.translate(16, 44);
 		return p;
 	}
 }

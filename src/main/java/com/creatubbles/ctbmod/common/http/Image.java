@@ -2,7 +2,6 @@ package com.creatubbles.ctbmod.common.http;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.EnumMap;
 import java.util.Locale;
 
@@ -14,8 +13,8 @@ import net.minecraft.client.renderer.IImageBuffer;
 import net.minecraft.client.renderer.ThreadDownloadImageData;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import org.lwjgl.util.Dimension;
 
@@ -36,10 +35,9 @@ public class Image {
 		}
 	}
 
-	private static final Field _bufferedImage = ReflectionHelper.findField(ThreadDownloadImageData.class, "bufferedImage");
-
+	public static final ResourceLocation MISSING_TEXTURE = new ResourceLocation("missingno");
 	static {
-		_bufferedImage.setAccessible(true);
+		Minecraft.getMinecraft().getTextureManager().loadTexture(MISSING_TEXTURE, TextureUtil.missingTexture);
 	}
 
 	@Getter
@@ -101,6 +99,12 @@ public class Image {
 		return getSize(type).getHeight();
 	}
 
+	/**
+	 * This method is <strong>blocking</strong>. Call it from your own separate thread.
+	 * 
+	 * @param owner
+	 *            The {@link Creation} that owns this image.
+	 */
 	@SneakyThrows
 	public void download(final Creation owner) {
 		TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
@@ -111,9 +115,10 @@ public class Image {
 			File cache = new File(Configs.cacheFolder, filepath);
 			ResourceLocation res = new ResourceLocation(CTBMod.DOMAIN, filepath);
 			ITextureObject texture = texturemanager.getTexture(res);
-
+			ThreadDownloadImageData dl = null;
+			
 			if (texture == null) {
-				texture = new ThreadDownloadImageData(cache, url, null, new IImageBuffer() {
+				texture = dl = new ThreadDownloadImageData(cache, url, null, new IImageBuffer() {
 
 					@Override
 					public BufferedImage parseUserSkin(BufferedImage p_78432_1_) {
@@ -125,10 +130,15 @@ public class Image {
 					}
 				});
 				texturemanager.loadTexture(res, texture);
+				if (dl.imageThread != null) {
+					((ThreadDownloadImageData) texture).imageThread.join(); // block until download is finished
+				}
+			} else if (texture instanceof ThreadDownloadImageData) {
+				dl = (ThreadDownloadImageData) texture;
 			}
 
 			locations.put(type, res);
-			BufferedImage img = (BufferedImage) _bufferedImage.get(texture);
+			BufferedImage img = dl.bufferedImage;
 			sizes.put(type, new Dimension(img.getWidth(), img.getHeight()));
 		}
 	}

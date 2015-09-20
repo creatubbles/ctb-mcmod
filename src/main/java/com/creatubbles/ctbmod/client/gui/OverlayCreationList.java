@@ -63,7 +63,7 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 	
 	private IGuiScreen gui;
 
-	private int scroll;
+	private int scroll = 0;
 
 	private boolean visible;
 
@@ -106,14 +106,9 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 
 		// This is the dimensions we have to work with for thumbnails
 		int usableWidth = size.getWidth() - (paddingX * 2);
-		int usableHeight = size.getHeight() - (paddingY * 2);
 
 		// The minimum size a thumbnail can take up
 		int widthPerThumbnail = thumbnailSize.getWidth() + minSpacing;
-		int heightPerThumbnail = thumbnailSize.getHeight() + minSpacing;
-
-		// The amount of thumbnails on each row/column
-		int rows = usableHeight / heightPerThumbnail;
 
 		// This fancy math figures out the max creations that can fit in the available width
 		// Simple division won't work due to it counting the spacing after the last item
@@ -127,35 +122,45 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 
 		// Use the max spacing possible, but no less than minSpacing
 		int minWidth = thumbnailSize.getWidth() * cols;
-		int spacing = (usableWidth - minWidth) / (cols - 1);
+		int spacing = usableWidth - minWidth; 
+		if (cols > 1) {
+			spacing /= cols - 1;
+		}
+		
 		spacing = Math.max(minSpacing, spacing);
 
 		for (Creation c : creations) {
 			int xMin = xRel + paddingX, yMin = yRel + paddingY;
 
 			int x = xMin + (col * (thumbnailSize.getWidth() + spacing));
-			int y = yMin + (row * (thumbnailSize.getHeight() + minSpacing)) + scroll;
+			int y = yMin + (row * (thumbnailSize.getHeight() + minSpacing)) - scroll;
 
-			CreationAndLocation data = new CreationAndLocation(c, new Point(x, y));
-			list.add(data);
-
-			// TODO more localization here
-			List<String> tt = Lists.newArrayList();
-			tt.add(c.getName());
-			tt.add(c.getCreators().length == 1 ? "Creator:" : "Creators:");
-			for (Creator creator : c.getCreators()) {
-				tt.add("    " + creator.getName() + " at " + creator.getAge());
+			// Anything below the border is a waste to draw
+			if (y > yRel + getHeight()) {
+				break;
 			}
 
-			gui.addToolTip(new GuiToolTip(data.getBounds(), tt));
+			// Anything completely above the border is a waste to draw
+			if (y + thumbnailSize.getHeight() > yRel) {
 
+				CreationAndLocation data = new CreationAndLocation(c, new Point(x, y));
+				list.add(data);
+
+				// TODO more localization here
+				List<String> tt = Lists.newArrayList();
+				tt.add(c.getName());
+				tt.add(c.getCreators().length == 1 ? "Creator:" : "Creators:");
+				for (Creator creator : c.getCreators()) {
+					tt.add("    " + creator.getName() + " at " + creator.getAge());
+				}
+
+				gui.addToolTip(new GuiToolTip(data.getBounds(), tt));
+			}
+			
 			col++;
 			if (col >= cols) {
 				row++;
 				col = 0;
-			}
-			if (row >= rows) {
-				break;
 			}
 		}
 	}

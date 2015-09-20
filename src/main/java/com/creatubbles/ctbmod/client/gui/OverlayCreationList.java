@@ -175,10 +175,11 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 					// so the rotation is centered
 					x = -10;
 					y = -10;
-					int w = 256, h = 256;
+					int w = 46, h = 46;
 					if (Image.MISSING_TEXTURE.equals(res)) {
+						GlStateManager.enableBlend();
 						res = LOADING_TEX;
-						float rot = (Minecraft.getMinecraft().theWorld.getTotalWorldTime() + partialTick) * 10;
+						float rot = (Minecraft.getMinecraft().theWorld.getTotalWorldTime() + partialTick) * 4;
 						GL11.glRotatef(rot, 0, 0, 1);
 					} else {
 						w = img.getWidth(type);

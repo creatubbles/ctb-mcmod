@@ -5,6 +5,7 @@ import java.awt.Rectangle;
 import java.util.List;
 
 import lombok.Getter;
+import lombok.Synchronized;
 import lombok.Value;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -12,15 +13,16 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.Dimension;
 
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.http.Creation;
+import com.creatubbles.ctbmod.common.http.Creator;
 import com.creatubbles.ctbmod.common.http.Image;
 import com.creatubbles.ctbmod.common.http.Image.ImageType;
 import com.creatubbles.repack.enderlib.api.client.gui.IGuiOverlay;
 import com.creatubbles.repack.enderlib.api.client.gui.IGuiScreen;
+import com.creatubbles.repack.enderlib.client.gui.widget.GuiToolTip;
 import com.google.common.collect.Lists;
 
 public class OverlayCreationList extends Gui implements IGuiOverlay {
@@ -39,7 +41,7 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 		}
 	}
 
-	public static final ResourceLocation LOADING_TEX = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/loading.png");
+	public static final ResourceLocation LOADING_TEX = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/bubble_outline.png");
 
 	@Getter
 	private Creation[] creations;
@@ -47,17 +49,19 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 	private int xRel, yRel, xAbs, yAbs;
 
 	@Getter
-	private int paddingX = 8, paddingY = 4;
+	private int paddingX = 4, paddingY = 4;
 
 	@Getter
-	private int minSpacing = 6;
+	private int minSpacing = 4;
 
 	@Getter
-	private Dimension thumbnailSize = new Dimension(20, 20);
+	private Dimension thumbnailSize = new Dimension(16, 16);
 
 	private List<CreationAndLocation> list = Lists.newArrayList();
 
 	private final Dimension size = new Dimension(88, 106);
+	
+	private IGuiScreen gui;
 
 	private int scroll;
 
@@ -75,6 +79,7 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 
 	@Override
 	public void init(IGuiScreen screen) {
+		this.gui = screen;
 		this.xAbs = xRel + screen.getGuiLeft();
 		this.yAbs = yRel + screen.getGuiTop();
 		rebuildList();
@@ -85,8 +90,10 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 		return new Rectangle(xAbs, yAbs, 88, 106);
 	}
 
+	@Synchronized("list")
 	private void rebuildList() {
 		list.clear();
+		gui.clearToolTips();
 
 		Creation[] creations = this.creations == null ? CTBMod.cache.getCreationCache() : this.creations;
 
@@ -128,8 +135,19 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 
 			int x = xMin + (col * (thumbnailSize.getWidth() + spacing));
 			int y = yMin + (row * (thumbnailSize.getHeight() + minSpacing)) + scroll;
-			
-			list.add(new CreationAndLocation(c, new Point(x, y)));
+
+			CreationAndLocation data = new CreationAndLocation(c, new Point(x, y));
+			list.add(data);
+
+			// TODO more localization here
+			List<String> tt = Lists.newArrayList();
+			tt.add(c.getName());
+			tt.add(c.getCreators().length == 1 ? "Creator:" : "Creators:");
+			for (Creator creator : c.getCreators()) {
+				tt.add("    " + creator.getName() + " at " + creator.getAge());
+			}
+
+			gui.addToolTip(new GuiToolTip(data.getBounds(), tt));
 
 			col++;
 			if (col >= cols) {
@@ -159,37 +177,33 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 					int x = c.getLocation().x;
 					int y = c.getLocation().y;
 
-					// Draw selection box
-					Rectangle bounds = c.getBounds();
-					if (c.getBounds().contains(mouseX, mouseY)) {
-						drawRect((int) bounds.getMinX() - 1, (int) bounds.getMinY() - 1, (int) bounds.getMaxX() + 1, (int) bounds.getMaxY() + 1, 0xFFFFFFFF);
-						GlStateManager.color(1, 1, 1, 1);
-					}
-
 					Image img = c.getCreation().getImage();
 					ImageType type = ImageType.LIST_VIEW;
 
 					ResourceLocation res = img.getResource(type);
-					GL11.glTranslatef(x + (thumbnailSize.getWidth() / 2), y + (thumbnailSize.getHeight() / 2), 0);
 
-					// so the rotation is centered
-					x = -10;
-					y = -10;
-					int w = 46, h = 46;
+					int w = 16, h = 16;
 					if (Image.MISSING_TEXTURE.equals(res)) {
 						GlStateManager.enableBlend();
 						res = LOADING_TEX;
-						float rot = (Minecraft.getMinecraft().theWorld.getTotalWorldTime() + partialTick) * 4;
-						GL11.glRotatef(rot, 0, 0, 1);
 					} else {
 						w = img.getWidth(type);
 						h = img.getHeight(type);
 					}
+					
 					if (res != null) {
+						if (res != LOADING_TEX) {
+							// Draw selection box
+							Rectangle bounds = c.getBounds();
+							if (c.getBounds().contains(mouseX, mouseY)) {
+								drawRect((int) bounds.getMinX() - 1, (int) bounds.getMinY() - 1, (int) bounds.getMaxX() + 1, (int) bounds.getMaxY() + 1, 0xFFFFFFFF);
+								GlStateManager.color(1, 1, 1, 1);
+							}
+						}
 						mc.getTextureManager().bindTexture(res);
 					}
 
-					drawScaledCustomSizeModalRect(x, y, 0, 0, w, h, 20, 20, w, h);
+					drawScaledCustomSizeModalRect(x, y, 0, 0, w, h, thumbnailSize.getHeight(), thumbnailSize.getHeight(), w, h);
 					GlStateManager.popMatrix();
 				}
 			}

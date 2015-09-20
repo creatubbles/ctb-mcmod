@@ -3,10 +3,12 @@ package com.creatubbles.repack.enderlib.client.gui;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import net.minecraft.client.gui.FontRenderer;
 
 import com.creatubbles.repack.enderlib.client.gui.widget.GuiToolTip;
+import com.google.common.collect.Sets;
 
 public class ToolTipManager {
 
@@ -23,16 +25,18 @@ public class ToolTipManager {
 		void drawHoveringText(List<String> par1List, int par2, int par3, FontRenderer font);
 	}
 
-	private List<GuiToolTip> toolTips = new ArrayList<GuiToolTip>();
+	private Set<GuiToolTip> toolTips = Sets.newHashSet();
 
 	public void addToolTip(GuiToolTip toolTip) {
-		if (!toolTips.contains(toolTip)) {
-			toolTips.add(toolTip);
-		}
+		toolTips.add(toolTip);
 	}
 
 	public boolean removeToolTip(GuiToolTip toolTip) {
 		return toolTips.remove(toolTip);
+	}
+	
+	public void clearToolTips() {
+		toolTips.clear();
 	}
 
 	protected final void drawTooltips(ToolTipRenderer renderer, int mouseX, int mouseY) {

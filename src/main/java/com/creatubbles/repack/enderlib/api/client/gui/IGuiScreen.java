@@ -14,6 +14,8 @@ public interface IGuiScreen {
 
 	boolean removeToolTip(GuiToolTip toolTip);
 
+	void clearToolTips();
+	
 	int getGuiLeft();
 
 	int getGuiTop();

@@ -461,6 +461,11 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 		return ttMan.removeToolTip(toolTip);
 	}
 
+	@Override
+	public void clearToolTips() {
+		ttMan.clearToolTips();
+	}
+	
 	protected void drawForegroundImpl(int mouseX, int mouseY) {
 		super.drawGuiContainerForegroundLayer(mouseX, mouseY);
 	}

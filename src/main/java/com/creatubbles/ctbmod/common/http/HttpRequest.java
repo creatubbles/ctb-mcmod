@@ -11,7 +11,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -59,7 +59,7 @@ public abstract class HttpRequest<SUCCESS, FAIL> implements Runnable {
 	public final void post() throws HttpRequestException {
 		String url = URL_BASE.concat(apiPath);
 
-		HttpClient client = HttpClientBuilder.create().build();
+		HttpClient client = HttpClients.createMinimal();
 		HttpUriRequest req = getRequest(url);
 
 		// Set content headers

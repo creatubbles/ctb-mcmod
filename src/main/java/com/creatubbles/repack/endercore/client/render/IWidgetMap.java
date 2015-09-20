@@ -79,7 +79,7 @@ public interface IWidgetMap {
 				widget.getOverlay().getMap().render(widget.getOverlay(), x, y, width, height, zLevel, false, flipY);
 			}
 			if (doDraw) {
-				renderer.draw();
+				Tessellator.getInstance().draw();
 			}
 		}
 	}

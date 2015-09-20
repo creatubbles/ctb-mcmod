@@ -10,6 +10,7 @@ import net.minecraftforge.fml.common.network.IGuiHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.ctbmod.client.gui.GuiCreator;
 import com.creatubbles.repack.enderlib.common.BlockEnder;
 
 public class BlockCreator extends BlockEnder<TileCreator> implements IGuiHandler {

@@ -19,7 +19,7 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.util.Dimension;
 
 import com.creatubbles.ctbmod.CTBMod;
-import com.creatubbles.ctbmod.common.config.Configs;
+import com.creatubbles.ctbmod.common.config.DataCache;
 import com.google.common.collect.Maps;
 
 @ToString
@@ -112,7 +112,7 @@ public class Image {
 		for (ImageType type : ImageType.values()) {
 			String url = urlBase.concat(type.toString()).concat("/").concat(fileName);
 			String filepath = "creations/" + owner.getUserId() + "/" + type + "/" + owner.getId() + ".jpg";
-			File cache = new File(Configs.cacheFolder, filepath);
+			File cache = new File(DataCache.cacheFolder, filepath);
 			ResourceLocation res = new ResourceLocation(CTBMod.DOMAIN, filepath);
 			ITextureObject texture = texturemanager.getTexture(res);
 			ThreadDownloadImageData dl = null;
@@ -135,6 +135,10 @@ public class Image {
 				}
 			} else if (texture instanceof ThreadDownloadImageData) {
 				dl = (ThreadDownloadImageData) texture;
+			}
+			
+			while (dl.bufferedImage == null) {
+				Thread.sleep(100);
 			}
 
 			locations.put(type, res);

@@ -2,7 +2,9 @@ package com.creatubbles.repack.enderlib.api.client.gui;
 
 import java.awt.Rectangle;
 
-public interface IGuiOverlay {
+import com.creatubbles.ctbmod.client.gui.IHideable;
+
+public interface IGuiOverlay extends IHideable {
 
 	void init(IGuiScreen screen);
 
@@ -16,10 +18,6 @@ public interface IGuiOverlay {
 	// boolean mouseClickMove(int par1, int par2, int par3, long p_146273_4_);
 	//
 	// boolean mouseMovedOrUp(int par1, int par2, int par3);
-
-	void setVisible(boolean visible);
-
-	boolean isVisible();
 
 	boolean handleMouseInput(int x, int y, int b);
 

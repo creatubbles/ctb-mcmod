@@ -9,6 +9,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
@@ -17,7 +18,6 @@ import net.minecraftforge.common.ForgeHooks;
 
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 import com.creatubbles.repack.enderlib.api.client.gui.IGuiOverlay;
 import com.creatubbles.repack.enderlib.api.client.gui.IGuiScreen;
@@ -309,7 +309,7 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 			GL11.glDisable(GL11.GL_DEPTH_TEST);
 			for (IGuiOverlay overlay : overlays) {
 				if (overlay != null && overlay.isVisible()) {
-					overlay.draw(realMx, realMy, t.renderPartialTicks);
+					overlay.draw(realMx - getGuiLeft(), realMy - getGuiTop(), t.renderPartialTicks);
 				}
 			}
 			GL11.glEnable(GL11.GL_DEPTH_TEST);
@@ -328,6 +328,7 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 			}
 		}
 		drawGhostSlots(mouseX, mouseY);
+		GlStateManager.color(1, 1, 1, 1);
 	}
 
 	@Override
@@ -375,10 +376,10 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 	protected void drawFakeItemsStart() {
 		zLevel = 100.0F;
 		itemRender.zLevel = 100.0F;
-		GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
-		GL11.glEnable(GL11.GL_LIGHTING);
-		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
+
+		GlStateManager.enableLighting();
+		GlStateManager.enableRescaleNormal();
+		GlStateManager.enableDepth();
 		RenderHelper.enableGUIStandardItemLighting();
 	}
 
@@ -387,13 +388,13 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 	}
 
 	protected void drawFakeItemHover(int x, int y) {
-		GL11.glDisable(GL11.GL_LIGHTING);
-		GL11.glDisable(GL11.GL_DEPTH_TEST);
-		GL11.glColorMask(true, true, true, false);
+		GlStateManager.disableLighting();
+		GlStateManager.disableDepth();
+		GlStateManager.colorMask(true, true, true, false);
 		drawGradientRect(x, y, x + 16, y + 16, 0x80FFFFFF, 0x80FFFFFF);
-		GL11.glColorMask(true, true, true, true);
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
-		GL11.glEnable(GL11.GL_LIGHTING);
+		GlStateManager.colorMask(true, true, true, true);
+		GlStateManager.enableDepth();
+		GlStateManager.enableLighting();
 	}
 
 	protected void drawFakeItemsEnd() {
@@ -467,21 +468,17 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void drawHoveringText(List par1List, int par2, int par3, FontRenderer font) {
-		GL11.glPushAttrib(GL11.GL_ENABLE_BIT);
-		GL11.glPushAttrib(GL11.GL_LIGHTING_BIT);
 		copyOfdrawHoveringText(par1List, par2, par3, font);
-		GL11.glPopAttrib();
-		GL11.glPopAttrib();
 	}
 
 	// This is a copy of the super class method due to 'Method not found' errors
 	// reported with some mods installed.
 	protected void copyOfdrawHoveringText(List<String> par1List, int par2, int par3, FontRenderer font) {
 		if (!par1List.isEmpty()) {
-			GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+			GlStateManager.disableRescaleNormal();
 			RenderHelper.disableStandardItemLighting();
-			GL11.glDisable(GL11.GL_LIGHTING);
-			GL11.glDisable(GL11.GL_DEPTH_TEST);
+			GlStateManager.disableLighting();
+			GlStateManager.disableDepth();
 			int k = 0;
 			Iterator<String> iterator = par1List.iterator();
 
@@ -538,10 +535,10 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 
 			this.zLevel = 0.0F;
 			// itemRenderer.zLevel = 0.0F;
-			GL11.glEnable(GL11.GL_LIGHTING);
-			GL11.glEnable(GL11.GL_DEPTH_TEST);
+			GlStateManager.enableLighting();
+			GlStateManager.enableDepth();
 			RenderHelper.enableStandardItemLighting();
-			GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+			GlStateManager.enableRescaleNormal();
 		}
 	}
 

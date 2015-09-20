@@ -6,10 +6,11 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
+import com.creatubbles.ctbmod.client.gui.IHideable;
 import com.creatubbles.repack.enderlib.api.client.gui.IGuiScreen;
 import com.google.common.base.Strings;
 
-public class TextFieldEnder extends GuiTextField {
+public class TextFieldEnder extends GuiTextField implements IHideable {
 
 	public interface ICharFilter {
 
@@ -99,5 +100,10 @@ public class TextFieldEnder extends GuiTextField {
 
 	public boolean contains(int x, int y) {
 		return x >= this.xPosition && x < this.xPosition + this.width && y >= this.yPosition && y < this.yPosition + this.height;
+	}
+
+	@Override
+	public boolean isVisible() {
+		return getVisible();
 	}
 }

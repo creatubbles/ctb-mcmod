@@ -21,6 +21,7 @@ import com.creatubbles.ctbmod.common.CommonProxy;
 import com.creatubbles.ctbmod.common.command.CommandGetCreators;
 import com.creatubbles.ctbmod.common.command.CommandLogin;
 import com.creatubbles.ctbmod.common.config.Configs;
+import com.creatubbles.ctbmod.common.config.DataCache;
 import com.creatubbles.ctbmod.common.creator.BlockCreator;
 import com.creatubbles.ctbmod.common.network.PacketHandler;
 import com.creatubbles.repack.endercore.common.config.ConfigProcessor;
@@ -41,6 +42,8 @@ public class CTBMod {
 	public static Logger logger = LogManager.getLogger(MODID);
 
 	public static BlockCreator creator;
+	
+	public static DataCache cache;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
@@ -53,7 +56,7 @@ public class CTBMod {
 	public void init(FMLInitializationEvent event) {
 		proxy.registerRenderers();
 		PacketHandler.init();
-		Configs.loadUser();
+		cache = DataCache.loadCache();
 	}
 
 	@EventHandler

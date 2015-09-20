@@ -10,11 +10,12 @@ import net.minecraft.client.renderer.WorldRenderer;
 
 import org.lwjgl.opengl.GL11;
 
+import com.creatubbles.ctbmod.client.gui.IHideable;
 import com.creatubbles.repack.endercore.client.render.EnderWidget;
 import com.creatubbles.repack.endercore.client.render.IWidgetIcon;
 import com.creatubbles.repack.enderlib.api.client.gui.IGuiScreen;
 
-public class VScrollbar {
+public class VScrollbar implements IHideable {
 
 	protected final IGuiScreen gui;
 

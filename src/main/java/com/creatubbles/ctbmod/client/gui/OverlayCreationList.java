@@ -33,7 +33,7 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 		private Creation creation;
 		private Point location;
 		private Rectangle bounds;
-		
+
 		private CreationAndLocation(Creation c, Point p) {
 			this.creation = c;
 			this.location = p;
@@ -53,14 +53,17 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 
 	@Getter
 	private int minSpacing = 4;
+	
+	private int rows, cols;
 
 	@Getter
-	private Dimension thumbnailSize = new Dimension(16, 16);
+	private Dimension thumbnailSize = new Dimension(64, 64);
 
 	private List<CreationAndLocation> list = Lists.newArrayList();
+	private List<CreationAndLocation> listAbsolute = Lists.newArrayList();
 
 	private final Dimension size = new Dimension(88, 106);
-	
+
 	private IGuiScreen gui;
 
 	private int scroll = 0;
@@ -93,6 +96,8 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 	@Synchronized("list")
 	private void rebuildList() {
 		list.clear();
+		listAbsolute.clear();
+		
 		gui.clearToolTips();
 
 		Creation[] creations = this.creations == null ? CTBMod.cache.getCreationCache() : this.creations;
@@ -100,7 +105,7 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 		if (creations == null || creations.length == 0) {
 			return;
 		}
-				
+
 		int row = 0;
 		int col = 0;
 
@@ -112,21 +117,24 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 
 		// This fancy math figures out the max creations that can fit in the available width
 		// Simple division won't work due to it counting the spacing after the last item
-		int cols = 0;
+		cols = 0;
 		// So the initial width ignores the spacing
 		int usedWidth = thumbnailSize.getWidth();
 		while (usedWidth <= usableWidth) {
 			cols++;
 			usedWidth += widthPerThumbnail;
 		}
+		
+		// The amount of thumbnails on each row/column
+		rows = creations.length / cols;
 
 		// Use the max spacing possible, but no less than minSpacing
 		int minWidth = thumbnailSize.getWidth() * cols;
-		int spacing = usableWidth - minWidth; 
+		int spacing = usableWidth - minWidth;
 		if (cols > 1) {
 			spacing /= cols - 1;
 		}
-		
+
 		spacing = Math.max(minSpacing, spacing);
 
 		for (Creation c : creations) {
@@ -135,15 +143,18 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 			int x = xMin + (col * (thumbnailSize.getWidth() + spacing));
 			int y = yMin + (row * (thumbnailSize.getHeight() + minSpacing)) - scroll;
 
+			CreationAndLocation data = new CreationAndLocation(c, new Point(x, y));
+			CreationAndLocation absoluteData = new CreationAndLocation(c, new Point(x, y + scroll));
+
 			// Anything below the border is a waste to draw
 			if (y > yRel + getHeight()) {
+				listAbsolute.add(absoluteData);
 				break;
 			}
 
 			// Anything completely above the border is a waste to draw
 			if (y + thumbnailSize.getHeight() > yRel) {
 
-				CreationAndLocation data = new CreationAndLocation(c, new Point(x, y));
 				list.add(data);
 
 				// TODO more localization here
@@ -157,6 +168,8 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 				gui.addToolTip(new GuiToolTip(data.getBounds(), tt));
 			}
 			
+			listAbsolute.add(absoluteData);
+
 			col++;
 			if (col >= cols) {
 				row++;
@@ -195,20 +208,26 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 						w = img.getWidth(type);
 						h = img.getHeight(type);
 					}
-					
+
 					if (res != null) {
 						if (res != LOADING_TEX) {
 							// Draw selection box
 							Rectangle bounds = c.getBounds();
-							if (c.getBounds().contains(mouseX, mouseY)) {
-								drawRect((int) bounds.getMinX() - 1, (int) bounds.getMinY() - 1, (int) bounds.getMaxX() + 1, (int) bounds.getMaxY() + 1, 0xFFFFFFFF);
+							if (isMouseInBounds(mouseX, mouseY) && c.getBounds().contains(mouseX - gui.getGuiLeft(), mouseY - gui.getGuiTop())) {
+								drawRect((int) bounds.getMinX() - 1, (int) Math.max(bounds.getMinY() - 1, yRel + 1), (int) bounds.getMaxX() + 1, (int) Math.min(bounds.getMaxY() + 1, yRel + getHeight()), 0xFFFFFFFF);
 								GlStateManager.color(1, 1, 1, 1);
 							}
 						}
 						mc.getTextureManager().bindTexture(res);
 					}
 
-					drawScaledCustomSizeModalRect(x, y, 0, 0, w, h, thumbnailSize.getHeight(), thumbnailSize.getHeight(), w, h);
+					int height = thumbnailSize.getHeight();
+					int past = (y + height) - (yRel + getHeight() - 1);
+					if (past >= 1) {
+						height -= past;
+					}
+					double heightRatio = (double) height / thumbnailSize.getHeight();
+					drawScaledCustomSizeModalRect(x, y, 0, 0, w, (int) (h * heightRatio), thumbnailSize.getWidth(), height, w, h);
 					GlStateManager.popMatrix();
 				}
 			}
@@ -224,18 +243,18 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 	public boolean isVisible() {
 		return visible;
 	}
-	
+
 	public int getWidth() {
 		return (int) getBounds().getWidth();
 	}
-	
+
 	public int getHeight() {
 		return (int) getBounds().getHeight();
 	}
 
 	@Override
 	public boolean handleMouseInput(int x, int y, int b) {
-		return isMouseInBounds(x, y);
+		return false;
 	}
 
 	@Override
@@ -248,8 +267,10 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 	}
 
 	public void setX(int x) {
-		this.xAbs = x;
-		rebuildList();
+		if (this.xAbs != x) {
+			this.xAbs = x;
+			rebuildList();
+		}
 	}
 
 	public int getY() {
@@ -257,28 +278,48 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 	}
 
 	public void setY(int y) {
-		this.yAbs = y;
-		rebuildList();
+		if (this.yAbs != y) {
+			this.yAbs = y;
+			rebuildList();
+		}
 	}
 
 	public void setPaddingX(int paddingX) {
-		this.paddingX = paddingX;
-		rebuildList();
+		if (this.paddingX != paddingX) {
+			this.paddingX = paddingX;
+			rebuildList();
+		}
 	}
 
 	public void setPaddingY(int paddingY) {
-		this.paddingY = paddingY;
-		rebuildList();
+		if (this.paddingY != paddingY) {
+			this.paddingY = paddingY;
+			rebuildList();
+		}
 	}
 
 	public void setMinSpacing(int minSpacing) {
-		this.minSpacing = minSpacing;
-		rebuildList();
+		if (this.minSpacing != minSpacing) {
+			this.minSpacing = minSpacing;
+			rebuildList();
+		}
 	}
 
 	public void setThumbnailSize(Dimension thumbnailSize) {
-		this.thumbnailSize = thumbnailSize;
-		rebuildList();
+		if (!this.thumbnailSize.equals(thumbnailSize)) {
+			this.thumbnailSize = thumbnailSize;
+			rebuildList();
+		}
 	}
 
+	public int getMaxScroll() {
+		return (rows * (thumbnailSize.getHeight() + minSpacing)) - getHeight() + minSpacing;
+	}
+
+	public void setScroll(int scroll) {
+		if (this.scroll != scroll) {
+			this.scroll = scroll;
+			rebuildList();
+		}
+	}
 }

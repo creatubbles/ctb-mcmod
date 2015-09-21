@@ -122,7 +122,7 @@ public class VScrollbar implements IHideable {
 			iconUp.getMap().render(iconUp, btnUp.x, btnUp.y, false);
 			iconDown.getMap().render(iconDown, btnDown.x, btnDown.y, false);
 
-			if (scrollMax > 0) {
+			if (getScrollMax() > 0) {
 				int thumbPos = getThumbPosition();
 				boolean hoverThumb = thumbArea.contains(mouseX, mouseY) && mouseY >= thumbPos && mouseY < thumbPos + (int) EnderWidget.VSCROLL_THUMB_OFF.height;
 
@@ -142,7 +142,7 @@ public class VScrollbar implements IHideable {
 
 	public boolean mouseClicked(int x, int y, int button) {
 		if (button == 0) {
-			if (scrollMax > 0 && thumbArea.contains(x, y)) {
+			if (getScrollMax() > 0 && thumbArea.contains(x, y)) {
 				int thumbPos = getThumbPosition();
 				pressedUp = y < thumbPos;
 				pressedDown = y >= thumbPos + (int) EnderWidget.VSCROLL_THUMB_OFF.height;
@@ -167,7 +167,7 @@ public class VScrollbar implements IHideable {
 			int pos = y - (thumbArea.y + (int) EnderWidget.VSCROLL_THUMB_OFF.height / 2);
 			int len = thumbArea.height - (int) EnderWidget.VSCROLL_THUMB_OFF.height;
 			if (len > 0) {
-				setScrollPos(Math.round(pos * (float) scrollMax / (float) len));
+				setScrollPos(Math.round(pos * (float) getScrollMax() / (float) len));
 			}
 			return true;
 		}
@@ -182,7 +182,7 @@ public class VScrollbar implements IHideable {
 	}
 
 	public void mouseWheel(int x, int y, int delta) {
-		if (!isDragActive() && wholeArea.contains(x, y)) {
+		if (!isDragActive()) {
 			scrollBy(-Integer.signum(delta));
 		}
 	}
@@ -192,10 +192,10 @@ public class VScrollbar implements IHideable {
 	}
 
 	protected int getThumbPosition() {
-		return thumbArea.y + (thumbArea.height - (int) EnderWidget.VSCROLL_THUMB_OFF.height) * scrollPos / scrollMax;
+		return thumbArea.y + (thumbArea.height - (int) EnderWidget.VSCROLL_THUMB_OFF.height) * scrollPos / getScrollMax();
 	}
 
 	protected int limitPos(int pos) {
-		return Math.max(0, Math.min(pos, scrollMax));
+		return Math.max(0, Math.min(pos, getScrollMax()));
 	}
 }

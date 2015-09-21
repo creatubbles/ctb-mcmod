@@ -166,7 +166,20 @@ public class GuiCreator extends GuiContainerBase {
 		visibleMap.put(tfVisualPassword, State.LOGGED_OUT);
 		textFields.add(tfVisualPassword);
 
-		scrollbar = new VScrollbar(this, 178, 12, 106);
+		scrollbar = new VScrollbar(this, 178, 12, 106) {
+
+			@Override
+			public int getScrollMax() {
+				return creationList.getMaxScroll();
+			}
+			
+			@Override
+			public void mouseWheel(int x, int y, int delta) {
+				if (!isDragActive()) {
+					scrollBy(-Integer.signum(delta) * 4);
+				}
+			}
+		};
 
 		creationList = new OverlayCreationList(90, 12);
 		visibleMap.put(creationList, State.LOGGED_IN);
@@ -176,8 +189,8 @@ public class GuiCreator extends GuiContainerBase {
 	@Override
 	@SneakyThrows
 	public void initGui() {
-//		CTBMod.cache.activateUser(null);
-//		CTBMod.cache.setCreators(null);
+		// CTBMod.cache.activateUser(null);
+		// CTBMod.cache.setCreators(null);
 
 		super.initGui();
 
@@ -203,7 +216,7 @@ public class GuiCreator extends GuiContainerBase {
 		}
 		super.keyTyped(c, key);
 	}
-	
+
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
 		GlStateManager.color(1, 1, 1, 1);
@@ -224,6 +237,8 @@ public class GuiCreator extends GuiContainerBase {
 
 		switch(state) {
 		case LOGGED_IN:
+			creationList.setScroll(scrollbar.getScrollPos());
+			
 			x += 40;
 			y += 5;
 			drawCenteredString(getFontRenderer(), EnumChatFormatting.UNDERLINE + getUser().getUsername(), x, y, 0xFFFFFF);

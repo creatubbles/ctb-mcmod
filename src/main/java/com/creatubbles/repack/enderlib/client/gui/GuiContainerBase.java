@@ -309,7 +309,7 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 			GL11.glDisable(GL11.GL_DEPTH_TEST);
 			for (IGuiOverlay overlay : overlays) {
 				if (overlay != null && overlay.isVisible()) {
-					overlay.draw(realMx - getGuiLeft(), realMy - getGuiTop(), t.renderPartialTicks);
+					overlay.draw(realMx, realMy, t.renderPartialTicks);
 				}
 			}
 			GL11.glEnable(GL11.GL_DEPTH_TEST);

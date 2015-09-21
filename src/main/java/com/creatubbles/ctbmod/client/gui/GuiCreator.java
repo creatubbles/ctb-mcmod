@@ -256,7 +256,7 @@ public class GuiCreator extends GuiContainerBase {
 			y = guiTop + 12;
 			
 			mc.getTextureManager().bindTexture(OVERLAY_TEX);
-			drawTexturedModalRect(scrollbar.getX(), scrollbar.getY() + 8, 88, 0, 11, scrollbar.getWholeArea().height - 16);
+			drawTexturedModalRect(scrollbar.getX(), scrollbar.getY() + 8, creationList.getWidth() * 2, 8, 11, scrollbar.getWholeArea().height - 16);
 
 			break;
 		case LOGGED_OUT:

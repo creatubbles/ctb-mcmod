@@ -182,7 +182,7 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 	public void draw(int mouseX, int mouseY, float partialTick) {
 		if (visible) {
 			Minecraft.getMinecraft().getTextureManager().bindTexture(GuiCreator.OVERLAY_TEX);
-			drawTexturedModalRect(xRel, yRel, 0, 0, 88, 106);
+			drawTexturedModalRect(xRel, yRel, 0, 0, 87, 106);
 
 			Minecraft mc = Minecraft.getMinecraft();
 			FontRenderer fr = mc.fontRendererObj;
@@ -231,6 +231,9 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 					GlStateManager.popMatrix();
 				}
 			}
+			
+			Minecraft.getMinecraft().getTextureManager().bindTexture(GuiCreator.OVERLAY_TEX);
+			drawTexturedModalRect(xRel, yRel, 88, 0, 88, 106);
 		}
 	}
 

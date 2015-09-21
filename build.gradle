@@ -40,6 +40,12 @@ minecraft {
     replaceIn "CTBMod.java"
 }
 
+jar {
+    manifest {
+        attributes 'FMLAT': 'ctbmod_at.cfg'
+    }
+}
+
 configurations {
     compile.extendsFrom exportedCompile
 }

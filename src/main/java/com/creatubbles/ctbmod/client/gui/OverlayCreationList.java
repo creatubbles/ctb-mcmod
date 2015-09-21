@@ -215,6 +215,7 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 							Rectangle bounds = c.getBounds();
 							if (isMouseInBounds(mouseX, mouseY) && c.getBounds().contains(mouseX - gui.getGuiLeft(), mouseY - gui.getGuiTop())) {
 								drawRect((int) bounds.getMinX() - 1, (int) Math.max(bounds.getMinY() - 1, yRel + 1), (int) bounds.getMaxX() + 1, (int) Math.min(bounds.getMaxY() + 1, yRel + getHeight()), 0xFFFFFFFF);
+								GlStateManager.enableBlend();
 								GlStateManager.color(1, 1, 1, 1);
 							}
 						}

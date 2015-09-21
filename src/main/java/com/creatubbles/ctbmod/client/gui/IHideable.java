@@ -3,7 +3,7 @@ package com.creatubbles.ctbmod.client.gui;
 
 public interface IHideable {
 
-	void setVisible(boolean visible);
+	void setIsVisible(boolean visible);
 	
 	boolean isVisible();
 	

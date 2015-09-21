@@ -3,7 +3,6 @@ package com.creatubbles.repack.enderlib.client.gui.widget;
 import java.awt.Rectangle;
 
 import lombok.Getter;
-import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
@@ -43,7 +42,6 @@ public class VScrollbar implements IHideable {
 	protected long timeNextScroll;
 	
 	@Getter
-	@Setter
 	protected boolean visible = true;
 
 	public VScrollbar(IGuiScreen gui, int xOrigin, int yOrigin, int height) {
@@ -197,5 +195,10 @@ public class VScrollbar implements IHideable {
 
 	protected int limitPos(int pos) {
 		return Math.max(0, Math.min(pos, getScrollMax()));
+	}
+
+	@Override
+	public void setIsVisible(boolean visible) {
+		this.visible = visible;
 	}
 }

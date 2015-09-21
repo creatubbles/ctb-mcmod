@@ -134,7 +134,7 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 	public boolean hideOverlays() {
 		for (IGuiOverlay overlay : overlays) {
 			if (overlay.isVisible()) {
-				overlay.setVisible(false);
+				overlay.setIsVisible(false);
 				return true;
 			}
 		}

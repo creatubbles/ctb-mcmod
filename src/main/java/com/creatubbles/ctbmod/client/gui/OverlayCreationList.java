@@ -239,7 +239,7 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 	}
 
 	@Override
-	public void setVisible(boolean visible) {
+	public void setIsVisible(boolean visible) {
 		this.visible = visible;
 	}
 

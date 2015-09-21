@@ -106,4 +106,9 @@ public class TextFieldEnder extends GuiTextField implements IHideable {
 	public boolean isVisible() {
 		return getVisible();
 	}
+
+	@Override
+	public void setIsVisible(boolean visible) {
+		setVisible(visible);
+	}
 }

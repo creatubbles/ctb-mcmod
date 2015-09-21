@@ -14,7 +14,7 @@ public class GuiButtonHideable extends GuiButton implements IHideable {
 	}
 
 	@Override
-	public void setVisible(boolean visible) {
+	public void setIsVisible(boolean visible) {
 		this.visible = visible;
 	}
 

@@ -225,7 +225,7 @@ public class GuiCreator extends GuiContainerBase {
 
 		for (Entry<IHideable, Collection<State>> e : visibleMap.asMap().entrySet()) {
 			boolean visible = e.getValue().contains(state);
-			e.getKey().setVisible(visible);
+			e.getKey().setIsVisible(visible);
 		}
 
 		mc.getTextureManager().bindTexture(BG_TEX);

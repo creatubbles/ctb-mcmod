@@ -38,15 +38,12 @@ minecraft {
 
     replace "@VERSION@", project.version
     replaceIn "CTBMod.java"
-}
 
-jar {
-    manifest {
-        attributes 'FMLAT': 'ctbmod_at.cfg'
-    }
 }
 
 configurations {
+    shade
+    compile.extendsFrom shade
     compile.extendsFrom exportedCompile
 }
 
@@ -56,6 +53,20 @@ repositories {
 
 dependencies {
     compile "org.projectlombok:lombok:1.16.6"
+    shade 'org.apache.httpcomponents:httpcore:4.3.2'
+    shade "org.apache.httpcomponents:httpclient:4.3.3"
+}
+
+jar {
+    from { configurations.exportedCompile.collect { it.isDirectory() ? it : zipTree(it) } }
+    configurations.shade.each { dep ->
+        from(project.zipTree(dep)){
+            exclude 'META-INF', 'META-INF/**'
+        }
+    }
+    manifest {
+        attributes 'FMLAT': 'ctbmod_at.cfg'
+    }
 }
 
 processResources {
@@ -73,10 +84,6 @@ processResources {
         exclude '**/*.info'
         exclude '**/*.properties'
     }
-}
-
-jar {
-    from { configurations.exportedCompile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 
 task deobfJar(type: Jar) {

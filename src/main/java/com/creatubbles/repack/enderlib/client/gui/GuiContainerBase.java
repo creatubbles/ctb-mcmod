@@ -304,16 +304,16 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 		Timer t = RenderUtil.getTimer();
 
 		if (t != null) {
-			GL11.glPushMatrix();
-			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-			GL11.glDisable(GL11.GL_DEPTH_TEST);
+			GlStateManager.pushMatrix();
+			GlStateManager.color(1, 1, 1, 1);
+			GlStateManager.disableDepth();
 			for (IGuiOverlay overlay : overlays) {
 				if (overlay != null && overlay.isVisible()) {
 					overlay.draw(realMx, realMy, t.renderPartialTicks);
 				}
 			}
-			GL11.glEnable(GL11.GL_DEPTH_TEST);
-			GL11.glPopMatrix();
+			GlStateManager.enableDepth();
+			GlStateManager.popMatrix();
 		}
 	}
 

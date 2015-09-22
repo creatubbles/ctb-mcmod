@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Map.Entry;
 
 import lombok.SneakyThrows;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
@@ -152,6 +153,8 @@ public class GuiCreator extends GuiContainerBase {
 	
 	public GuiCreator(InventoryPlayer inv) {
 		super(new ContainerCreator(inv));
+		this.mc = Minecraft.getMinecraft();
+		
 		ySize += 44;
 		xSize += 32;
 		tfEmail = new TextFieldEnder(getFontRenderer(), (xSize / 2) - 75, 35, 150, 12);
@@ -220,6 +223,7 @@ public class GuiCreator extends GuiContainerBase {
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
 		GlStateManager.color(1, 1, 1, 1);
+		GlStateManager.disableLighting();
 
 		State state = getState();
 

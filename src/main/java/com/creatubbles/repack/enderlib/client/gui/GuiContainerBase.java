@@ -9,7 +9,6 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
@@ -18,6 +17,7 @@ import net.minecraftforge.common.ForgeHooks;
 
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 
 import com.creatubbles.repack.enderlib.api.client.gui.IGuiOverlay;
 import com.creatubbles.repack.enderlib.api.client.gui.IGuiScreen;
@@ -61,7 +61,7 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 	}
 
 	@Override
-	protected void keyTyped(char c, int key) throws IOException {
+	protected void keyTyped(char c, int key) {
 		TextFieldEnder focused = null;
 		for (TextFieldEnder f : textFields) {
 			if (f.isFocused()) {
@@ -160,7 +160,7 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 	}
 
 	@Override
-	public void handleMouseInput() throws IOException {
+	public void handleMouseInput() {
 		int x = Mouse.getEventX() * this.width / this.mc.displayWidth;
 		int y = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
 		int b = Mouse.getEventButton();
@@ -177,7 +177,7 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 	}
 
 	@Override
-	protected boolean isPointInRegion(int p_146978_1_, int p_146978_2_, int p_146978_3_, int p_146978_4_, int p_146978_5_, int p_146978_6_) {
+	protected boolean func_146978_c(int p_146978_1_, int p_146978_2_, int p_146978_3_, int p_146978_4_, int p_146978_5_, int p_146978_6_) {
 		int x = Mouse.getEventX() * this.width / this.mc.displayWidth;
 		int y = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
 		for (IGuiOverlay overlay : overlays) {
@@ -185,7 +185,7 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 				return false;
 			}
 		}
-		return super.isPointInRegion(p_146978_1_, p_146978_2_, p_146978_3_, p_146978_4_, p_146978_5_, p_146978_6_);
+		return super.func_146978_c(p_146978_1_, p_146978_2_, p_146978_3_, p_146978_4_, p_146978_5_, p_146978_6_);
 	}
 
 	@Override
@@ -199,7 +199,7 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 	}
 
 	@Override
-	protected void mouseClicked(int x, int y, int button) throws IOException {
+	protected void mouseClicked(int x, int y, int button) {
 		for (GuiTextField f : textFields) {
 			f.mouseClicked(x, y, button);
 		}
@@ -236,7 +236,7 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 				if (obj instanceof IconButton) {
 					IconButton btn = (IconButton) obj;
 					if (btn.mousePressedButton(mc, x, y, button)) {
-						btn.playPressSound(this.mc.getSoundHandler());
+						btn.func_146113_a(this.mc.getSoundHandler());
 						actionPerformedButton(btn, button);
 					}
 				}
@@ -246,12 +246,12 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 	}
 
 	@Override
-	protected void mouseReleased(int x, int y, int button) {
+	protected void mouseMovedOrUp(int x, int y, int button) {
 		if (draggingScrollbar != null) {
 			draggingScrollbar.mouseMovedOrUp(x, y, button);
 			draggingScrollbar = null;
 		}
-		super.mouseReleased(x, y, button);
+		super.mouseMovedOrUp(x, y, button);
 	}
 
 	@Override
@@ -271,7 +271,7 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 		}
 	}
 
-	protected void actionPerformedButton(IconButton btn, int mouseButton) throws IOException {
+	protected void actionPerformedButton(IconButton btn, int mouseButton) {
 		actionPerformed(btn);
 	}
 
@@ -304,16 +304,16 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 		Timer t = RenderUtil.getTimer();
 
 		if (t != null) {
-			GlStateManager.pushMatrix();
-			GlStateManager.color(1, 1, 1, 1);
-			GlStateManager.disableDepth();
+			GL11.glPushMatrix();
+			GL11.glColor4f(1, 1, 1, 1);
+			GL11.glDisable(GL11.GL_DEPTH_TEST);
 			for (IGuiOverlay overlay : overlays) {
 				if (overlay != null && overlay.isVisible()) {
 					overlay.draw(realMx, realMy, t.renderPartialTicks);
 				}
 			}
-			GlStateManager.enableDepth();
-			GlStateManager.popMatrix();
+            GL11.glEnable(GL11.GL_DEPTH_TEST);
+			GL11.glPopMatrix();
 		}
 	}
 
@@ -328,7 +328,7 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 			}
 		}
 		drawGhostSlots(mouseX, mouseY);
-		GlStateManager.color(1, 1, 1, 1);
+        GL11.glColor4f(1, 1, 1, 1);
 	}
 
 	@Override
@@ -367,8 +367,8 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 		if (font == null) {
 			font = fontRendererObj;
 		}
-		itemRender.func_180450_b(stack, mouseX, mouseY);
-		itemRender.func_180453_a(font, stack, mouseX, mouseY, str);
+		itemRender.renderItemAndEffectIntoGUI(font, mc.getTextureManager(), stack, mouseX, mouseY);
+		itemRender.renderItemOverlayIntoGUI(font, mc.getTextureManager(), stack, mouseX, mouseY, str);
 		this.zLevel = 0.0F;
 		itemRender.zLevel = 0.0F;
 	}
@@ -377,24 +377,24 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 		zLevel = 100.0F;
 		itemRender.zLevel = 100.0F;
 
-		GlStateManager.enableLighting();
-		GlStateManager.enableRescaleNormal();
-		GlStateManager.enableDepth();
+		GL11.glEnable(GL11.GL_LIGHTING);
+		GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		RenderHelper.enableGUIStandardItemLighting();
 	}
 
 	protected void drawFakeItemStack(int x, int y, ItemStack stack) {
-		itemRender.func_180450_b(stack, x, y);
+		itemRender.renderItemAndEffectIntoGUI(getFontRenderer(), mc.getTextureManager(), stack, x, y);
 	}
 
 	protected void drawFakeItemHover(int x, int y) {
-		GlStateManager.disableLighting();
-		GlStateManager.disableDepth();
-		GlStateManager.colorMask(true, true, true, false);
+		GL11.glDisable(GL11.GL_LIGHTING);
+		GL11.glDisable(GL11.GL_DEPTH_TEST);
+		GL11.glColorMask(true, true, true, false);
 		drawGradientRect(x, y, x + 16, y + 16, 0x80FFFFFF, 0x80FFFFFF);
-		GlStateManager.colorMask(true, true, true, true);
-		GlStateManager.enableDepth();
-		GlStateManager.enableLighting();
+		GL11.glColorMask(true, true, true, true);
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
+		GL11.glEnable(GL11.GL_LIGHTING);
 	}
 
 	protected void drawFakeItemsEnd() {
@@ -480,10 +480,10 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 	// reported with some mods installed.
 	protected void copyOfdrawHoveringText(List<String> par1List, int par2, int par3, FontRenderer font) {
 		if (!par1List.isEmpty()) {
-			GlStateManager.disableRescaleNormal();
+			GL11.glDisable(GL12.GL_RESCALE_NORMAL);
 			RenderHelper.disableStandardItemLighting();
-			GlStateManager.disableLighting();
-			GlStateManager.disableDepth();
+			GL11.glDisable(GL11.GL_LIGHTING);
+			GL11.glDisable(GL11.GL_DEPTH_TEST);
 			int k = 0;
 			Iterator<String> iterator = par1List.iterator();
 
@@ -529,7 +529,7 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 
 			for (int k2 = 0; k2 < par1List.size(); ++k2) {
 				String s1 = (String) par1List.get(k2);
-				font.func_175063_a(s1, i1, j1, -1);
+				font.drawStringWithShadow(s1, i1, j1, -1);
 
 				if (k2 == 0) {
 					j1 += 2;
@@ -540,10 +540,10 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 
 			this.zLevel = 0.0F;
 			// itemRenderer.zLevel = 0.0F;
-			GlStateManager.enableLighting();
-			GlStateManager.enableDepth();
+			GL11.glEnable(GL11.GL_LIGHTING);
+			GL11.glEnable(GL11.GL_DEPTH_TEST);
 			RenderHelper.enableStandardItemLighting();
-			GlStateManager.enableRescaleNormal();
+	        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
 		}
 	}
 
@@ -585,7 +585,7 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 
 	@Override
 	public FontRenderer getFontRenderer() {
-		return Minecraft.getMinecraft().fontRendererObj;
+		return Minecraft.getMinecraft().fontRenderer;
 	}
 
 	@SuppressWarnings("unchecked")

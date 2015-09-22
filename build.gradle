@@ -33,7 +33,7 @@ if (project.hasProperty('mod_appendix')) {
 }
 
 minecraft {
-    version = "${minecraft_version}-${forge_version}"
+    version = "${minecraft_version}-${forge_version}-${minecraft_version}"
     runDir = 'run'
 
     replace "@VERSION@", project.version

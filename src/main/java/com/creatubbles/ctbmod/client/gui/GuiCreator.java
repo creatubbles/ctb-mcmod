@@ -1,6 +1,5 @@
 package com.creatubbles.ctbmod.client.gui;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Map.Entry;
 
@@ -8,13 +7,13 @@ import lombok.SneakyThrows;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.lwjgl.opengl.GL11;
 
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.creator.ContainerCreator;
@@ -208,12 +207,10 @@ public class GuiCreator extends GuiContainerBase {
 		if (getUser() != null) {
 			actionPerformed(loginButton);
 		}
-
-		updateScreen();
 	}
 	
 	@Override
-	protected void keyTyped(char c, int key) throws IOException {
+	protected void keyTyped(char c, int key) {
 		if ((c == '\r' || c == '\n') && (tfEmail.isFocused() || tfVisualPassword.isFocused())) {
 			actionPerformed(loginButton);
 		}
@@ -222,8 +219,8 @@ public class GuiCreator extends GuiContainerBase {
 
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-		GlStateManager.color(1, 1, 1, 1);
-		GlStateManager.disableLighting();
+		GL11.glColor4f(1, 1, 1, 1);
+		GL11.glDisable(GL11.GL_LIGHTING);
 
 		State state = getState();
 
@@ -303,7 +300,7 @@ public class GuiCreator extends GuiContainerBase {
 	}
 
 	@Override
-	protected void actionPerformed(GuiButton button) throws IOException {
+	protected void actionPerformed(GuiButton button) {
 		switch (button.id) {
 		case ID_LOGIN:
 			new Thread(new LoginRunnable()).start();

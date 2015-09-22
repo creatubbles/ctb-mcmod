@@ -1,18 +1,6 @@
 package com.creatubbles.ctbmod;
 
-import static com.creatubbles.ctbmod.CTBMod.MODID;
-import static com.creatubbles.ctbmod.CTBMod.NAME;
-import static com.creatubbles.ctbmod.CTBMod.VERSION;
-
 import java.util.Locale;
-
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.Mod.Instance;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,6 +13,16 @@ import com.creatubbles.ctbmod.common.config.DataCache;
 import com.creatubbles.ctbmod.common.creator.BlockCreator;
 import com.creatubbles.ctbmod.common.network.PacketHandler;
 import com.creatubbles.repack.endercore.common.config.ConfigProcessor;
+
+import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.Mod.EventHandler;
+import cpw.mods.fml.common.Mod.Instance;
+import cpw.mods.fml.common.SidedProxy;
+import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerStartingEvent;
+
+import static com.creatubbles.ctbmod.CTBMod.*;
 
 @Mod(modid = MODID, name = NAME, version = VERSION)
 public class CTBMod {

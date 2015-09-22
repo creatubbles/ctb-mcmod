@@ -4,10 +4,11 @@ import java.io.File;
 import java.util.List;
 
 import net.minecraftforge.common.config.ConfigCategory;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 
 import com.creatubbles.repack.enderlib.common.config.Section;
+
+import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 
 public interface IConfigHandler {
 

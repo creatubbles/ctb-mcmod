@@ -10,9 +10,9 @@ import lombok.Value;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.Dimension;
 
 import com.creatubbles.ctbmod.CTBMod;
@@ -185,12 +185,12 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 			drawTexturedModalRect(xRel, yRel, 0, 0, 87, 106);
 
 			Minecraft mc = Minecraft.getMinecraft();
-			FontRenderer fr = mc.fontRendererObj;
+			FontRenderer fr = mc.fontRenderer;
 			if (list.size() == 0) {
 				drawCenteredString(fr, "No Creations", xRel + (getWidth() / 2), yRel + 4, 0xFFFFFF);
 			} else {
 				for (CreationAndLocation c : list) {
-					GlStateManager.pushMatrix();
+					GL11.glPushMatrix();
 
 					int x = c.getLocation().x;
 					int y = c.getLocation().y;
@@ -202,7 +202,7 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 
 					int w = 16, h = 16;
 					if (Image.MISSING_TEXTURE.equals(res)) {
-						GlStateManager.enableBlend();
+						GL11.glEnable(GL11.GL_BLEND);
 						res = LOADING_TEX;
 					} else {
 						w = img.getWidth(type);
@@ -215,8 +215,8 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 							Rectangle bounds = c.getBounds();
 							if (isMouseInBounds(mouseX, mouseY) && c.getBounds().contains(mouseX - gui.getGuiLeft(), mouseY - gui.getGuiTop())) {
 								drawRect((int) bounds.getMinX() - 1, (int) Math.max(bounds.getMinY() - 1, yRel + 1), (int) bounds.getMaxX() + 1, (int) Math.min(bounds.getMaxY() + 1, yRel + getHeight()), 0xFFFFFFFF);
-								GlStateManager.enableBlend();
-								GlStateManager.color(1, 1, 1, 1);
+								GL11.glEnable(GL11.GL_BLEND);
+								GL11.glColor4f(1, 1, 1, 1);
 							}
 						}
 						mc.getTextureManager().bindTexture(res);
@@ -228,8 +228,8 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 						height -= past;
 					}
 					double heightRatio = (double) height / thumbnailSize.getHeight();
-					drawScaledCustomSizeModalRect(x, y, 0, 0, w, (int) (h * heightRatio), thumbnailSize.getWidth(), height, w, h);
-					GlStateManager.popMatrix();
+					func_152125_a(x, y, 0, 0, w, (int) (h * heightRatio), thumbnailSize.getWidth(), height, w, h);
+					GL11.glPopMatrix();
 				}
 			}
 			

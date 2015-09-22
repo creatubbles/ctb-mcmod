@@ -3,15 +3,14 @@ package com.creatubbles.ctbmod.common.creator;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.network.IGuiHandler;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.client.gui.GuiCreator;
 import com.creatubbles.repack.enderlib.common.BlockEnder;
+
+import cpw.mods.fml.common.network.IGuiHandler;
+import cpw.mods.fml.common.network.NetworkRegistry;
 
 public class BlockCreator extends BlockEnder<TileCreator> implements IGuiHandler {
 
@@ -29,13 +28,14 @@ public class BlockCreator extends BlockEnder<TileCreator> implements IGuiHandler
 	protected void init() {
 		super.init();
 		setCreativeTab(CreativeTabs.tabDecorations);
-		setUnlocalizedName(CTBMod.DOMAIN + "." + name);
+		setBlockName(CTBMod.DOMAIN + "." + name);
+		setBlockTextureName(CTBMod.DOMAIN + ":" + name);
 		NetworkRegistry.INSTANCE.registerGuiHandler(CTBMod.instance, this);
 	}
 
 	@Override
-	protected boolean openGui(World world, BlockPos pos, EntityPlayer entityPlayer, EnumFacing side) {
-		entityPlayer.openGui(CTBMod.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
+	protected boolean openGui(World world, int x, int y, int z, EntityPlayer entityPlayer, int side) {
+		entityPlayer.openGui(CTBMod.instance, 0, world, x, y, z);
 		return true;
 	}
 

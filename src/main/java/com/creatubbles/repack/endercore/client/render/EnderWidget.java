@@ -57,7 +57,7 @@ public enum EnderWidget implements IWidgetIcon {
 	X_BUT_HOVER(200, 48, 8, 8),
 	X_BUT_HOVER_PRESSED(200, 56, 8, 8);
 
-	public static final ResourceLocation TEXTURE = new ResourceLocation(CTBMod.MODID, "textures/gui/widgets.png");
+	public static final ResourceLocation TEXTURE = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/widgets.png");
 
 	public static final IWidgetMap map = new IWidgetMap.WidgetMapImpl(256, TEXTURE);
 

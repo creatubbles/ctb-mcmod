@@ -5,7 +5,6 @@ import java.awt.Rectangle;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
 
 import org.lwjgl.opengl.GL11;
 
@@ -114,7 +113,7 @@ public class VScrollbar implements IHideable {
 			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			GL11.glColor3f(1, 1, 1);
 
-			WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
+			Tessellator renderer = Tessellator.instance;
 			renderer.startDrawingQuads();
 
 			iconUp.getMap().render(iconUp, btnUp.x, btnUp.y, false);
@@ -133,7 +132,7 @@ public class VScrollbar implements IHideable {
 				iconThumb.getMap().render(iconThumb, thumbArea.x, thumbPos, false);
 			}
 
-			Tessellator.getInstance().draw();
+			renderer.draw();
 			GL11.glPopAttrib();
 		}
 	}

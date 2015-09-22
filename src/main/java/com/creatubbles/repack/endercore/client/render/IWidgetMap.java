@@ -1,9 +1,10 @@
 package com.creatubbles.repack.endercore.client.render;
 
+import org.lwjgl.opengl.GL11;
+
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.util.ResourceLocation;
 
 public interface IWidgetMap {
@@ -53,8 +54,8 @@ public interface IWidgetMap {
 
 		@Override
 		public void render(IWidgetIcon widget, double x, double y, double width, double height, double zLevel, boolean doDraw, boolean flipY) {
-
-			WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
+			GL11.glColor4f(1, 1, 1, 1);
+			Tessellator renderer = Tessellator.instance;
 			if (doDraw) {
 				Minecraft.getMinecraft().getTextureManager().bindTexture(getTexture());
 				renderer.startDrawingQuads();
@@ -79,7 +80,7 @@ public interface IWidgetMap {
 				widget.getOverlay().getMap().render(widget.getOverlay(), x, y, width, height, zLevel, false, flipY);
 			}
 			if (doDraw) {
-				Tessellator.getInstance().draw();
+				renderer.draw();
 			}
 		}
 	}

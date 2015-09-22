@@ -4,11 +4,12 @@ import java.lang.reflect.Field;
 
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiTextField;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import com.creatubbles.ctbmod.client.gui.IHideable;
 import com.creatubbles.repack.enderlib.api.client.gui.IGuiScreen;
 import com.google.common.base.Strings;
+
+import cpw.mods.fml.relauncher.ReflectionHelper;
 
 public class TextFieldEnder extends GuiTextField implements IHideable {
 
@@ -61,7 +62,7 @@ public class TextFieldEnder extends GuiTextField implements IHideable {
 	}
 
 	public TextFieldEnder(FontRenderer fnt, int x, int y, int width, int height, ICharFilter charFilter) {
-		super(0, fnt, x, y, width, height);
+		super(fnt, x, y, width, height);
 		this.xOrigin = x;
 		this.yOrigin = y;
 		this.filter = charFilter;

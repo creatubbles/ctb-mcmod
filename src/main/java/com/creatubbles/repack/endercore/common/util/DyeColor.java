@@ -1,8 +1,5 @@
 package com.creatubbles.repack.endercore.common.util;
 
-import org.apache.commons.lang3.ArrayUtils;
-
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
@@ -46,17 +43,18 @@ public enum DyeColor {
 		return DyeColor.values()[ord];
 	}
 
+	@SuppressWarnings("deprecation")
 	public static DyeColor getColorFromDye(ItemStack dye) {
 		if (dye == null) {
 			return null;
 		}
-		int[] ids = OreDictionary.getOreIDs(dye);
-		if (ids.length == 0) {
+		int oreId = OreDictionary.getOreID(dye);
+		if (oreId < 0) {
 			return null;
 		}
 		for (int i = 0; i < DYE_ORE_NAMES.length; i++) {
 			String dyeName = DYE_ORE_NAMES[i];
-			if (ArrayUtils.contains(ids, OreDictionary.getOreID(dyeName))) {
+			if (OreDictionary.getOreID(dyeName) == oreId) {
 				return DyeColor.values()[i];
 			}
 		}
@@ -71,11 +69,11 @@ public enum DyeColor {
 	}
 
 	public int getColor() {
-		return ItemDye.dyeColors[ordinal()];
+		return ItemDye.field_150922_c[ordinal()];
 	}
 
 	public String getName() {
-		return EnumDyeColor.func_176764_b(ordinal()).getName();
+		return ItemDye.field_150921_b[ordinal()];
 	}
 
 	public String getLocalisedName() {

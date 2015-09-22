@@ -179,6 +179,7 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 	}
 
 	@Override
+	@Synchronized("list")
 	public void draw(int mouseX, int mouseY, float partialTick) {
 		if (visible) {
 			Minecraft.getMinecraft().getTextureManager().bindTexture(GuiCreator.OVERLAY_TEX);

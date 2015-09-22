@@ -57,7 +57,7 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 	private int rows, cols;
 
 	@Getter
-	private Dimension thumbnailSize = new Dimension(64, 64);
+	private Dimension thumbnailSize = new Dimension(16, 16);
 
 	private List<CreationAndLocation> list = Lists.newArrayList();
 	private List<CreationAndLocation> listAbsolute = Lists.newArrayList();

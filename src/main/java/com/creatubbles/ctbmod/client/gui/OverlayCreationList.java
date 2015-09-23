@@ -97,7 +97,8 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 	private void rebuildList() {
 		list.clear();
 		listAbsolute.clear();
-		
+		this.thumbnailSize = 64;
+
 		gui.clearToolTips();
 
 		Creation[] creations = this.creations == null ? CTBMod.cache.getCreationCache() : this.creations;
@@ -224,12 +225,21 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 					}
 
 					int height = thumbnailSize;
-					int past = (y + height) - (yRel + getHeight() - 1);
-					if (past >= 1) {
-						height -= past;
+					float v = 0;
+					int pastBottom = (y + height) - (yRel + getHeight() - 1);
+					int pastTop = (yRel + 1) - y;
+					boolean clipV = false;
+					if (pastBottom > 0) {
+						height -= pastBottom;
+					} else if (pastTop > 0) {
+						clipV = true;
+						height -= pastTop;
 					}
 					double heightRatio = (double) height / thumbnailSize;
-					drawScaledCustomSizeModalRect(x, y, 0, 0, w, (int) (h * heightRatio), thumbnailSize, height, w, h);
+					if (clipV) {
+						v = h - ((float) heightRatio * h);
+					}
+					drawScaledCustomSizeModalRect(x, y + Math.max(0, pastTop), 0, v, w, (int) (h * heightRatio), thumbnailSize, height, w, h);
 					GlStateManager.popMatrix();
 				}
 			}

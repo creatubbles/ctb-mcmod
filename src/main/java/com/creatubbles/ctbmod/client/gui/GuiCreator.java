@@ -26,6 +26,7 @@ import com.creatubbles.ctbmod.common.http.Login;
 import com.creatubbles.ctbmod.common.http.LoginRequest;
 import com.creatubbles.ctbmod.common.http.User;
 import com.creatubbles.ctbmod.common.http.UserRequest;
+import com.creatubbles.ctbmod.common.http.Image.ImageType;
 import com.creatubbles.repack.enderlib.client.gui.GuiContainerBase;
 import com.creatubbles.repack.enderlib.client.gui.widget.TextFieldEnder;
 import com.creatubbles.repack.enderlib.client.gui.widget.VScrollbar;
@@ -121,7 +122,7 @@ public class GuiCreator extends GuiContainerBase {
 				}
 
 				for (Creation c : creations) {
-					c.getImage().download(c);
+					c.getImage().download(ImageType.LIST_VIEW, true);
 				}
 			}
 		}

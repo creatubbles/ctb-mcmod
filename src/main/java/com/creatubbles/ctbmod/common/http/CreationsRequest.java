@@ -19,7 +19,7 @@ public class CreationsRequest extends HttpGetBase<Creation[], Void> {
 			return new Image(json.getAsJsonObject().get("url").getAsString());
 		}
 	}
-	
+
 	private static String createApiPath(int creatorId, String accessToken) {
 		String ret = "creators/" + creatorId + "/creations.json";
 		if (accessToken != null) {
@@ -35,7 +35,7 @@ public class CreationsRequest extends HttpGetBase<Creation[], Void> {
 	public CreationsRequest(int creatorId, String accessToken) {
 		super(createApiPath(creatorId, accessToken));
 	}
-	
+
 	@Override
 	protected Gson createGson() {
 		return new GsonBuilder().registerTypeAdapter(Image.class, new ImageDeserializer()).create();
@@ -43,7 +43,11 @@ public class CreationsRequest extends HttpGetBase<Creation[], Void> {
 
 	@Override
 	protected Creation[] getSuccessfulResult(JsonObject response) {
-		return gson.fromJson(response.get("creations"), Creation[].class);
+		Creation[] ret = gson.fromJson(response.get("creations"), Creation[].class);
+		for (Creation c : ret) {
+			c.getImage().setOwner(c);
+		}
+		return ret;
 	}
 
 	@Override

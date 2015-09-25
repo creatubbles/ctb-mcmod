@@ -97,7 +97,6 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 	private void rebuildList() {
 		list.clear();
 		listAbsolute.clear();
-		this.thumbnailSize = 64;
 
 		gui.clearToolTips();
 

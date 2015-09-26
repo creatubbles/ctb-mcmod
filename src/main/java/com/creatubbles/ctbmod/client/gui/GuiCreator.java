@@ -134,6 +134,7 @@ public class GuiCreator extends GuiContainerBase {
 		LOGGED_IN;
 	}
 
+	private static final int XSIZE_DEFAULT = 208, XSIZE_SIDEBAR = 250;
 	private static final int ID_LOGIN = 0, ID_USER = 1;
 	private static final ResourceLocation BG_TEX = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/creator.png");
 	static final ResourceLocation OVERLAY_TEX = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/creator_overlays.png");
@@ -156,7 +157,7 @@ public class GuiCreator extends GuiContainerBase {
 		this.mc = Minecraft.getMinecraft();
 		
 		ySize += 44;
-		xSize += 32;
+		xSize = XSIZE_DEFAULT;
 		tfEmail = new TextFieldEnder(getFontRenderer(), (xSize / 2) - 75, 35, 150, 12);
 		visibleMap.put(tfEmail, State.LOGGED_OUT);
 		tfEmail.setFocused(true);
@@ -235,6 +236,18 @@ public class GuiCreator extends GuiContainerBase {
 		int y = guiTop;
 		drawTexturedModalRect(x, y, 0, 0, xSize, ySize);
 
+		if (getState() == State.LOGGED_IN) {
+			if (xSize == XSIZE_DEFAULT) {
+				xSize = XSIZE_SIDEBAR;
+				initGui();
+			}
+		} else {
+			if (xSize == XSIZE_SIDEBAR) {
+				xSize = XSIZE_DEFAULT;
+				initGui();
+			}
+		}
+
 		// TODO localize all the things
 
 		switch(state) {
@@ -283,7 +296,7 @@ public class GuiCreator extends GuiContainerBase {
 		}
 		super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
 	}
-	
+
 	State getState() {
 		if (loginReq != null) {
 			return userReq != null && userReq.isComplete() && getUser() != null ? State.LOGGED_IN : State.LOGGING_IN;

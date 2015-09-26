@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import lombok.Getter;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -18,10 +19,14 @@ public class ContainerEnder<T extends IInventory> extends Container {
 
 	protected Map<Slot, Point> playerSlotLocations = Maps.newLinkedHashMap();
 
-	protected final int startPlayerSlot;
-	protected final int endPlayerSlot;
-	protected final int startHotBarSlot;
-	protected final int endHotBarSlot;
+	@Getter
+	private int startPlayerSlot;
+	@Getter
+	private int endPlayerSlot;
+	@Getter
+	private int startHotBarSlot;
+	@Getter
+	private int endHotBarSlot;
 
 	private T inv;
 	private InventoryPlayer playerInv;
@@ -31,7 +36,10 @@ public class ContainerEnder<T extends IInventory> extends Container {
 		this.playerInv = playerInv;
 
 		addSlots(playerInv);
-
+		addPlayerSlots();
+	}
+	
+	protected void addPlayerSlots() {
 		int x = getPlayerInventoryOffset().x;
 		int y = getPlayerInventoryOffset().y;
 

@@ -20,5 +20,5 @@ public class User {
 
 	@Setter
 	@NonFinal
-	private String accessToken;
+	private transient String accessToken;
 }

@@ -11,11 +11,11 @@ public class ContainerCreator extends ContainerEnder<InventoryPlayer> {
 	public ContainerCreator(InventoryPlayer playerInv) {
 		super(playerInv, playerInv);
 	}
-	
+
 	@Override
 	public Point getPlayerInventoryOffset() {
 		Point p = super.getPlayerInventoryOffset();
-		p.translate(16, 44);
+		p.translate(0, 44);
 		return p;
 	}
 }

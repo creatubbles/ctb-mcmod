@@ -9,7 +9,6 @@ import lombok.Synchronized;
 import lombok.Value;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
@@ -20,12 +19,11 @@ import com.creatubbles.ctbmod.common.http.Creation;
 import com.creatubbles.ctbmod.common.http.Creator;
 import com.creatubbles.ctbmod.common.http.Image;
 import com.creatubbles.ctbmod.common.http.Image.ImageType;
-import com.creatubbles.repack.enderlib.api.client.gui.IGuiOverlay;
 import com.creatubbles.repack.enderlib.api.client.gui.IGuiScreen;
 import com.creatubbles.repack.enderlib.client.gui.widget.GuiToolTip;
 import com.google.common.collect.Lists;
 
-public class OverlayCreationList extends Gui implements IGuiOverlay {
+public class OverlayCreationList extends OverlayBase {
 
 	@Value
 	private class CreationAndLocation {
@@ -46,14 +44,12 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 	@Getter
 	private Creation[] creations;
 
-	private int xRel, yRel, xAbs, yAbs;
-
 	@Getter
 	private int paddingX = 4, paddingY = 4;
 
 	@Getter
-	private int minSpacing = 4;
-	
+	private int minSpacing = 2;
+
 	private int rows, cols;
 
 	@Getter
@@ -62,17 +58,10 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 	private List<CreationAndLocation> list = Lists.newArrayList();
 	private List<CreationAndLocation> listAbsolute = Lists.newArrayList();
 
-	private final Dimension size = new Dimension(88, 106);
-
-	private IGuiScreen gui;
-
 	private int scroll = 0;
 
-	private boolean visible;
-
 	public OverlayCreationList(int x, int y) {
-		this.xRel = x;
-		this.yRel = y;
+		super(x, y, new Dimension(83, 210));
 	}
 
 	public void setCreations(Creation[] creations) {
@@ -82,15 +71,8 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 
 	@Override
 	public void init(IGuiScreen screen) {
-		this.gui = screen;
-		this.xAbs = xRel + screen.getGuiLeft();
-		this.yAbs = yRel + screen.getGuiTop();
+		super.init(screen);
 		rebuildList();
-	}
-
-	@Override
-	public Rectangle getBounds() {
-		return new Rectangle(xAbs, yAbs, 88, 106);
 	}
 
 	@Synchronized("list")
@@ -98,7 +80,7 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 		list.clear();
 		listAbsolute.clear();
 
-		gui.clearToolTips();
+		getGui().clearToolTips();
 
 		Creation[] creations = this.creations == null ? CTBMod.cache.getCreationCache() : this.creations;
 
@@ -110,7 +92,7 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 		int col = 0;
 
 		// This is the dimensions we have to work with for thumbnails
-		int usableWidth = size.getWidth() - (paddingX * 2);
+		int usableWidth = getSize().getWidth() - (paddingX * 2);
 
 		// The minimum size a thumbnail can take up
 		int widthPerThumbnail = thumbnailSize + minSpacing;
@@ -124,7 +106,7 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 			cols++;
 			usedWidth += widthPerThumbnail;
 		}
-		
+
 		// The amount of thumbnails on each row/column
 		rows = creations.length / cols;
 
@@ -165,9 +147,9 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 					tt.add("    " + creator.getName() + " at " + creator.getAge());
 				}
 
-				gui.addToolTip(new GuiToolTip(data.getBounds(), tt));
+				getGui().addToolTip(new GuiToolTip(data.getBounds(), tt));
 			}
-			
+
 			listAbsolute.add(absoluteData);
 
 			col++;
@@ -180,122 +162,82 @@ public class OverlayCreationList extends Gui implements IGuiOverlay {
 
 	@Override
 	@Synchronized("list")
-	public void draw(int mouseX, int mouseY, float partialTick) {
-		if (visible) {
-			Minecraft.getMinecraft().getTextureManager().bindTexture(GuiCreator.OVERLAY_TEX);
-			drawTexturedModalRect(xRel, yRel, 0, 0, 87, 106);
+	public void doDraw(int mouseX, int mouseY, float partialTick) {
+		Minecraft.getMinecraft().getTextureManager().bindTexture(GuiCreator.OVERLAY_TEX);
+		drawTexturedModalRect(xRel, yRel, 0, 0, getWidth() + 10, getHeight());
 
-			Minecraft mc = Minecraft.getMinecraft();
-			FontRenderer fr = mc.fontRendererObj;
-			if (list.size() == 0) {
-				drawCenteredString(fr, "No Creations", xRel + (getWidth() / 2), yRel + 4, 0xFFFFFF);
-			} else {
-				for (CreationAndLocation c : list) {
-					GlStateManager.pushMatrix();
+		Minecraft mc = Minecraft.getMinecraft();
+		FontRenderer fr = mc.fontRendererObj;
+		if (list.size() == 0) {
+			drawCenteredString(fr, "No Creations", xRel + (getWidth() / 2), yRel + 4, 0xFFFFFF);
+		} else {
+			for (CreationAndLocation c : list) {
+				GlStateManager.pushMatrix();
 
-					int x = c.getLocation().x;
-					int y = c.getLocation().y;
+				int x = c.getLocation().x;
+				int y = c.getLocation().y;
 
-					Image img = c.getCreation().getImage();
-					ImageType type = ImageType.LIST_VIEW;
+				Image img = c.getCreation().getImage();
+				ImageType type = ImageType.LIST_VIEW;
 
-					ResourceLocation res = img.getResource(type);
+				ResourceLocation res = img.getResource(type);
 
-					int w = 16, h = 16;
-					if (Image.MISSING_TEXTURE.equals(res)) {
-						GlStateManager.enableBlend();
-						res = LOADING_TEX;
-					} else {
-						w = img.getWidth(type);
-						h = img.getHeight(type);
-					}
-
-					if (res != null) {
-						if (res != LOADING_TEX) {
-							// Draw selection box
-							Rectangle bounds = c.getBounds();
-							if (isMouseInBounds(mouseX, mouseY) && c.getBounds().contains(mouseX - gui.getGuiLeft(), mouseY - gui.getGuiTop())) {
-								drawRect((int) bounds.getMinX() - 1, (int) Math.max(bounds.getMinY() - 1, yRel + 1), (int) bounds.getMaxX() + 1, (int) Math.min(bounds.getMaxY() + 1, yRel + getHeight()), 0xFFFFFFFF);
-								GlStateManager.enableBlend();
-								GlStateManager.color(1, 1, 1, 1);
-							}
-						}
-						mc.getTextureManager().bindTexture(res);
-					}
-
-					int height = thumbnailSize;
-					float v = 0;
-					int pastBottom = (y + height) - (yRel + getHeight() - 1);
-					int pastTop = (yRel + 1) - y;
-					boolean clipV = false;
-					if (pastBottom > 0) {
-						height -= pastBottom;
-					} else if (pastTop > 0) {
-						clipV = true;
-						height -= pastTop;
-					}
-					double heightRatio = (double) height / thumbnailSize;
-					if (clipV) {
-						v = h - ((float) heightRatio * h);
-					}
-					drawScaledCustomSizeModalRect(x, y + Math.max(0, pastTop), 0, v, w, (int) (h * heightRatio), thumbnailSize, height, w, h);
-					GlStateManager.popMatrix();
+				int w = 16, h = 16;
+				if (Image.MISSING_TEXTURE.equals(res)) {
+					GlStateManager.enableBlend();
+					res = LOADING_TEX;
+				} else {
+					w = img.getWidth(type);
+					h = img.getHeight(type);
 				}
+
+				if (res != null) {
+					if (res != LOADING_TEX) {
+						// Draw selection box
+						Rectangle bounds = c.getBounds();
+						if (isMouseInBounds(mouseX, mouseY) && c.getBounds().contains(mouseX - getGui().getGuiLeft(), mouseY - getGui().getGuiTop())) {
+							drawRect((int) bounds.getMinX() - 1, (int) Math.max(bounds.getMinY() - 1, yRel + 1), (int) bounds.getMaxX() + 1, (int) Math.min(bounds.getMaxY() + 1, yRel + getHeight()),
+									0xFFFFFFFF);
+							GlStateManager.enableBlend();
+							GlStateManager.color(1, 1, 1, 1);
+						}
+					}
+					mc.getTextureManager().bindTexture(res);
+				}
+
+				int height = thumbnailSize;
+				float v = 0;
+				int pastBottom = (y + height) - (yRel + getHeight() - 1);
+				int pastTop = (yRel + 1) - y;
+				boolean clipV = false;
+				if (pastBottom > 0) {
+					height -= pastBottom;
+				} else if (pastTop > 0) {
+					clipV = true;
+					height -= pastTop;
+				}
+				double heightRatio = (double) height / thumbnailSize;
+				if (clipV) {
+					v = h - ((float) heightRatio * h);
+				}
+				drawScaledCustomSizeModalRect(x, y + Math.max(0, pastTop), 0, v, w, (int) (h * heightRatio), thumbnailSize, height, w, h);
+				GlStateManager.popMatrix();
 			}
-			
-			Minecraft.getMinecraft().getTextureManager().bindTexture(GuiCreator.OVERLAY_TEX);
-			drawTexturedModalRect(xRel, yRel, 88, 0, 88, 106);
 		}
-	}
-
-	@Override
-	public void setIsVisible(boolean visible) {
-		this.visible = visible;
-	}
-
-	@Override
-	public boolean isVisible() {
-		return visible;
-	}
-
-	public int getWidth() {
-		return (int) getBounds().getWidth();
-	}
-
-	public int getHeight() {
-		return (int) getBounds().getHeight();
-	}
-
-	@Override
-	public boolean handleMouseInput(int x, int y, int b) {
-		return false;
-	}
-
-	@Override
-	public boolean isMouseInBounds(int mouseX, int mouseY) {
-		return getBounds().contains(mouseX, mouseY);
-	}
-
-	public int getX() {
-		return xAbs;
 	}
 
 	public void setX(int x) {
-		if (this.xAbs != x) {
-			this.xAbs = x;
+		if (getX() != x) {
 			rebuildList();
 		}
-	}
-
-	public int getY() {
-		return yAbs;
+		super.setX(x);
 	}
 
 	public void setY(int y) {
-		if (this.yAbs != y) {
-			this.yAbs = y;
+		if (getY() != y) {
 			rebuildList();
 		}
+		super.setY(y);
 	}
 
 	public void setPaddingX(int paddingX) {

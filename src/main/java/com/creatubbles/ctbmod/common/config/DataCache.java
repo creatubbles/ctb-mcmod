@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Set;
 
 import lombok.Getter;
@@ -42,7 +43,10 @@ public class DataCache {
 	 */
 	@Getter
 	@Setter
-	private Creation[] creationCache;
+	private transient Creation[] creationCache;
+	
+	@Getter
+	private boolean dirty;
 
 	@SneakyThrows
 	public static DataCache loadCache() {
@@ -85,7 +89,7 @@ public class DataCache {
 		save();
 	}
 
-	public Iterable<User> getSavedUsers() {
+	public Collection<User> getSavedUsers() {
 		return ImmutableSet.copyOf(savedUsers);
 	}
 
@@ -96,5 +100,9 @@ public class DataCache {
 		fw.write(json);
 		fw.flush();
 		fw.close();
+	}
+
+	public void dirty(boolean dirty) {
+		this.dirty = dirty;
 	}
 }

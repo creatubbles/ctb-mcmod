@@ -164,7 +164,7 @@ public abstract class GuiScreenBase extends GuiScreen implements ToolTipRenderer
 
 			for (int k2 = 0; k2 < par1List.size(); ++k2) {
 				String s1 = (String) par1List.get(k2);
-				font.func_175063_a(s1, i1, j1, -1);
+				font.drawStringWithShadow(s1, i1, j1, -1);
 
 				if (k2 == 0) {
 					j1 += 2;

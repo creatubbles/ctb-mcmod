@@ -75,7 +75,7 @@ public enum DyeColor {
 	}
 
 	public String getName() {
-		return EnumDyeColor.func_176764_b(ordinal()).getName();
+		return EnumDyeColor.byMetadata(ordinal()).getName();
 	}
 
 	public String getLocalisedName() {

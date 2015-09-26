@@ -357,18 +357,20 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 
 	// copied from super with hate
 	protected void drawItemStack(ItemStack stack, int mouseX, int mouseY, String str) {
+		if (stack == null) {
+			return;
+		}
+		
 		GL11.glTranslatef(0.0F, 0.0F, 32.0F);
 		this.zLevel = 200.0F;
 		itemRender.zLevel = 200.0F;
 		FontRenderer font = null;
-		if (stack != null) {
-			font = stack.getItem().getFontRenderer(stack);
-		}
+		font = stack.getItem().getFontRenderer(stack);
 		if (font == null) {
 			font = fontRendererObj;
 		}
-		itemRender.func_180450_b(stack, mouseX, mouseY);
-		itemRender.func_180453_a(font, stack, mouseX, mouseY, str);
+		itemRender.renderItemIntoGUI(stack, mouseX, mouseY);
+		itemRender.renderItemOverlayIntoGUI(font, stack, mouseX, mouseY, str);
 		this.zLevel = 0.0F;
 		itemRender.zLevel = 0.0F;
 	}
@@ -384,7 +386,7 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 	}
 
 	protected void drawFakeItemStack(int x, int y, ItemStack stack) {
-		itemRender.func_180450_b(stack, x, y);
+		itemRender.renderItemIntoGUI(stack, x, y);
 	}
 
 	protected void drawFakeItemHover(int x, int y) {
@@ -529,7 +531,7 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 
 			for (int k2 = 0; k2 < par1List.size(); ++k2) {
 				String s1 = (String) par1List.get(k2);
-				font.func_175063_a(s1, i1, j1, -1);
+				font.drawStringWithShadow(s1, i1, j1, -1);
 
 				if (k2 == 0) {
 					j1 += 2;

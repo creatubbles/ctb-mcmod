@@ -94,13 +94,13 @@ public class ColorButton extends IconButton {
 			GL11.glDisable(GL11.GL_TEXTURE_2D);
 
 			int col = ItemDye.dyeColors[colorIndex];
-			renderer.func_178991_c(col);
+			renderer.setColorOpaque_I(col);
 			renderer.addVertex(x, y + height - 4, zLevel);
 			renderer.addVertex(x + width - 4, y + height - 4, zLevel);
 			renderer.addVertex(x + width - 4, y + 0, zLevel);
 			renderer.addVertex(x, y + 0, zLevel);
 
-			renderer.draw();
+			Tessellator.getInstance().draw();
 
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
 

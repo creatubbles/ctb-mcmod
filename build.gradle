@@ -33,6 +33,8 @@ if (project.hasProperty('mod_appendix')) {
 }
 
 minecraft {
+    mappings = "snapshot_20150404"
+
     version = "${minecraft_version}-${forge_version}"
     runDir = 'run'
 

@@ -134,7 +134,7 @@ public class Image {
 				}
 
 				@Override
-				public void func_152634_a() {
+				public void skinAvailable() {
 				}
 			});
 			texturemanager.loadTexture(res, texture);

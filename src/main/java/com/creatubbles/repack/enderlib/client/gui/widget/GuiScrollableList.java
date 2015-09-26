@@ -204,17 +204,17 @@ public abstract class GuiScrollableList<T> {
 					GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 					GL11.glDisable(GL11.GL_TEXTURE_2D);
 					renderer.startDrawingQuads();
-					renderer.func_178991_c(8421504);
+					renderer.setColorOpaque_I(8421504);
 					renderer.addVertexWithUV(minX, elementY + slotHeight + 2, 0.0D, 0.0D, 1.0D);
 					renderer.addVertexWithUV(maxX, elementY + slotHeight + 2, 0.0D, 1.0D, 1.0D);
 					renderer.addVertexWithUV(maxX, elementY - 2, 0.0D, 1.0D, 0.0D);
 					renderer.addVertexWithUV(minX, elementY - 2, 0.0D, 0.0D, 0.0D);
-					renderer.func_178991_c(0);
+					renderer.setColorOpaque_I(0);
 					renderer.addVertexWithUV(minX + 1, elementY + slotHeight + 1, 0.0D, 0.0D, 1.0D);
 					renderer.addVertexWithUV(maxX - 1, elementY + slotHeight + 1, 0.0D, 1.0D, 1.0D);
 					renderer.addVertexWithUV(maxX - 1, elementY - 1, 0.0D, 1.0D, 0.0D);
 					renderer.addVertexWithUV(minX + 1, elementY - 1, 0.0D, 0.0D, 0.0D);
-					renderer.draw();
+					Tessellator.getInstance().draw();
 					GL11.glEnable(GL11.GL_TEXTURE_2D);
 				}
 
@@ -232,21 +232,21 @@ public abstract class GuiScrollableList<T> {
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 
 		renderer.startDrawingQuads();
-		renderer.func_178974_a(0, 0);
+		renderer.setColorRGBA_I(0, 0);
 		renderer.addVertexWithUV(this.minX, this.minY + margin, 0.0D, 0.0D, 1.0D);
 		renderer.addVertexWithUV(this.maxX, this.minY + margin, 0.0D, 1.0D, 1.0D);
-		renderer.func_178974_a(0, 255);
+		renderer.setColorRGBA_I(0, 255);
 		renderer.addVertexWithUV(this.maxX, this.minY, 0.0D, 1.0D, 0.0D);
 		renderer.addVertexWithUV(this.minX, this.minY, 0.0D, 0.0D, 0.0D);
-		renderer.draw();
+		Tessellator.getInstance().draw();
 		renderer.startDrawingQuads();
-		renderer.func_178974_a(0, 255);
+		renderer.setColorRGBA_I(0, 255);
 		renderer.addVertexWithUV(this.minX, this.maxY, 0.0D, 0.0D, 1.0D);
 		renderer.addVertexWithUV(this.maxX, this.maxY, 0.0D, 1.0D, 1.0D);
-		renderer.func_178974_a(0, 0);
+		renderer.setColorRGBA_I(0, 0);
 		renderer.addVertexWithUV(this.maxX, this.maxY - margin, 0.0D, 1.0D, 0.0D);
 		renderer.addVertexWithUV(this.minX, this.maxY - margin, 0.0D, 0.0D, 0.0D);
-		renderer.draw();
+		Tessellator.getInstance().draw();
 
 		renderScrollBar(renderer);
 
@@ -281,25 +281,25 @@ public abstract class GuiScrollableList<T> {
 			int scrollBarMaxX = scrollBarMinX + 6;
 			renderer.startDrawingQuads();
 
-			renderer.func_178974_a(0, 255);
+			renderer.setColorRGBA_I(0, 255);
 			renderer.addVertexWithUV(scrollBarMinX, maxY, 0.0D, 0.0D, 1.0D);
 			renderer.addVertexWithUV(scrollBarMaxX, maxY, 0.0D, 1.0D, 1.0D);
 			renderer.addVertexWithUV(scrollBarMaxX, minY, 0.0D, 1.0D, 0.0D);
 			renderer.addVertexWithUV(scrollBarMinX, minY, 0.0D, 0.0D, 0.0D);
 
-			renderer.func_178960_a(0.3f, 0.3f, 0.3f, 1);
+			renderer.setColorRGBA_F(0.3f, 0.3f, 0.3f, 1);
 			renderer.addVertexWithUV(scrollBarMinX, (y + clear), 0.0D, 0.0D, 1.0D);
 			renderer.addVertexWithUV(scrollBarMaxX, (y + clear), 0.0D, 1.0D, 1.0D);
 			renderer.addVertexWithUV(scrollBarMaxX, y, 0.0D, 1.0D, 0.0D);
 			renderer.addVertexWithUV(scrollBarMinX, y, 0.0D, 0.0D, 0.0D);
 
-			renderer.func_178960_a(0.7f, 0.7f, 0.7f, 1);
+			renderer.setColorRGBA_F(0.7f, 0.7f, 0.7f, 1);
 			renderer.addVertexWithUV(scrollBarMinX, (y + clear - 1), 0.0D, 0.0D, 1.0D);
 			renderer.addVertexWithUV((scrollBarMaxX - 1), (y + clear - 1), 0.0D, 1.0D, 1.0D);
 			renderer.addVertexWithUV((scrollBarMaxX - 1), y, 0.0D, 1.0D, 0.0D);
 			renderer.addVertexWithUV(scrollBarMinX, y, 0.0D, 0.0D, 0.0D);
 
-			renderer.draw();
+			Tessellator.getInstance().draw();
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
 		}
 	}
@@ -397,12 +397,12 @@ public abstract class GuiScrollableList<T> {
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		renderer.startDrawingQuads();
-		renderer.func_178991_c(2105376);
+		renderer.setColorOpaque_I(2105376);
 		renderer.addVertex(minX, maxY, 0.0D);
 		renderer.addVertex(maxX, maxY, 0.0D);
 		renderer.addVertex(maxX, minY, 0.0D);
 		renderer.addVertex(minX, minY, 0.0D);
-		renderer.draw();
+		Tessellator.getInstance().draw();
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 
 	}

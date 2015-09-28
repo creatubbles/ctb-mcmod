@@ -120,7 +120,7 @@ public class OverlayUserSelection extends OverlayBase {
 				break;
 			}
 		}
-		if (found != null) {
+		if (found != null && found != GuiCreator.DUMMY_USER) {
 			clear();
 			CTBMod.cache.activateUser(found);
 			CTBMod.cache.dirty(true);

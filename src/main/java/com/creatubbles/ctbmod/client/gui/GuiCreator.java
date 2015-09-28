@@ -122,13 +122,13 @@ public class GuiCreator extends GuiContainerBase {
 					creationList.setCreations(creations);
 					CTBMod.cache.setCreationCache(creations);
 				}
-				
+
 				if (thread.isInterrupted()) {
 					return;
 				}
 
 				for (Creation c : creations) {
-					c.getImage().download(ImageType.LIST_VIEW, true);
+					c.getImage().download(ImageType.LIST_VIEW);
 				}
 			}
 		}
@@ -144,7 +144,9 @@ public class GuiCreator extends GuiContainerBase {
 	private static final int XSIZE_DEFAULT = 176, XSIZE_SIDEBAR = 270;
 	private static final int ID_LOGIN = 0, ID_USER = 1, ID_CANCEL = 2, ID_LOGOUT = 3;
 	private static final ResourceLocation BG_TEX = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/creator.png");
+	
 	static final ResourceLocation OVERLAY_TEX = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/creator_overlays.png");
+	static final User DUMMY_USER = new User(0, "No Users", "", "", "", false, false);
 
 	private Multimap<IHideable, State> visibleMap = MultimapBuilder.hashKeys().enumSetValues(State.class).build();
 	
@@ -160,7 +162,6 @@ public class GuiCreator extends GuiContainerBase {
 	private LoginRequest loginReq;
 	private UserRequest userReq;
 	
-	private static final User DUMMY_USER = new User(0, "No Users", "", "", "", false, false);
 
 	private String header = "Plesae log in to Creatubbles:";
 
@@ -229,6 +230,7 @@ public class GuiCreator extends GuiContainerBase {
 		visibleMap.putAll(cancelButton, Lists.newArrayList(State.USER_SELECT, State.LOGGING_IN));
 		visibleMap.put(logoutButton, State.LOGGED_IN);
 
+		// TODO this needs to go
 		if (thread == null && getUser() != null) {
 			actionPerformed(loginButton);
 		}

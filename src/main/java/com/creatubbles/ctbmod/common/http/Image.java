@@ -4,8 +4,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.EnumMap;
 import java.util.Locale;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.ToString;
@@ -36,7 +39,26 @@ public class Image {
 		}
 	}
 
+	@RequiredArgsConstructor
+	private class DownloadWatchdog implements Runnable {
+
+		private final ImageType type;
+		private final ThreadDownloadImageData thread;
+
+		@Override
+		@SneakyThrows
+		public void run() {
+			while (thread.bufferedImage == null) {
+				Thread.sleep(100);
+			}
+			Image.this.updateSize(thread.bufferedImage, type);
+		}
+	}
+
 	public static final ResourceLocation MISSING_TEXTURE = new ResourceLocation("missingno");
+
+	private static Executor watchdogExecutor = Executors.newSingleThreadExecutor();
+
 	static {
 		Minecraft.getMinecraft().getTextureManager().loadTexture(MISSING_TEXTURE, TextureUtil.missingTexture);
 	}
@@ -105,17 +127,14 @@ public class Image {
 	}
 
 	/**
-	 * This method is <strong>blocking</strong>. Call it from your own separate thread.
+	 * This method is not blocking, but note that {@link #getSize(ImageType)} will return a 0-size rectangle before the image finishes downloading. Check for this with {@link #hasSize(ImageType)}.
 	 * 
 	 * @param type
 	 *            The {@link ImageType} to download.
-	 * @param block
-	 *            If true, the method will block until the download is finished. If false, a thread will be spawned to download the image. In this case {@link #updateSize(ImageType)} <b>MUST BE
-	 *            CALLED</b> to initialize the size data once downloaded.
 	 * @see #updateSize(ImageType)
 	 */
 	@SneakyThrows
-	public void download(ImageType type, boolean block) {
+	public void download(ImageType type) {
 		TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
 
 		String url = urlBase.concat(type.toString()).concat("/").concat(fileName);
@@ -138,22 +157,12 @@ public class Image {
 				}
 			});
 			texturemanager.loadTexture(res, texture);
-			if (dl.imageThread != null) {
-				((ThreadDownloadImageData) texture).imageThread.join(); // block until download is finished
-			}
 		} else if (texture instanceof ThreadDownloadImageData) {
 			dl = (ThreadDownloadImageData) texture;
 		}
 
 		locations.put(type, res);
-
-		if (block) {
-			while (dl.bufferedImage == null) {
-				Thread.sleep(100);
-			}
-
-			updateSize(dl.bufferedImage, type);
-		}
+		watchdogExecutor.execute(new DownloadWatchdog(type, dl));
 	}
 
 	/**
@@ -164,21 +173,7 @@ public class Image {
 	 * @return True if the size for this type has been initialized. False otherwise.
 	 */
 	public boolean hasSize(ImageType type) {
-		return sizes.get(type).getHeight() == 0;
-	}
-
-	/**
-	 * Call this to manually update the size once an image is downloaded. Will not fail if the image hasn't been downloaded, so this can be called while checking {@link #hasSize(ImageType)} to check
-	 * successfulness.
-	 * 
-	 * @param type
-	 *            The {@link ImageType} to update the size for.
-	 */
-	public void updateSize(ImageType type) {
-		ITextureObject obj = Minecraft.getMinecraft().getTextureManager().getTexture(getResource(type));
-		if (obj != null && obj instanceof ThreadDownloadImageData) {
-			updateSize(((ThreadDownloadImageData) obj).bufferedImage, type);
-		}
+		return sizes.get(type).getHeight() != 0;
 	}
 
 	private void updateSize(BufferedImage img, ImageType type) {

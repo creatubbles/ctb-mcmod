@@ -183,7 +183,7 @@ public class OverlayCreationList extends OverlayBase {
 				ResourceLocation res = img.getResource(type);
 
 				int w = 16, h = 16;
-				if (Image.MISSING_TEXTURE.equals(res)) {
+				if (!img.hasSize(type)) {
 					GL11.glEnable(GL11.GL_BLEND);
 					res = LOADING_TEX;
 				} else {

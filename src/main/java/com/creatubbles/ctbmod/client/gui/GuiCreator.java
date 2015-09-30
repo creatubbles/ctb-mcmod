@@ -88,6 +88,8 @@ public class GuiCreator extends GuiContainerBase {
 			try {
 				checkCancel();
 
+				setState(State.LOGGING_IN);
+				
 				if (getUser() == null) {
 					loginReq = new LoginRequest(new Login(tfEmail.getText(), tfActualPassword.getText()));
 					loginReq.run();
@@ -103,16 +105,17 @@ public class GuiCreator extends GuiContainerBase {
 					}
 					header = EnumChatFormatting.YELLOW.toString().concat(header);
 					loginReq = null;
+					logout();
 				} else {
 					if (getUser() == null) {
 						userReq = new UserRequest(loginReq.getSuccessfulResult().getAccessToken());
 						userReq.run();
-						// Run here so that the cancel is processed before telling the GUI that the user has logged in
-						checkCancel();
 						CTBMod.cache.activateUser(userReq.getSuccessfulResult());
 						CTBMod.cache.getActiveUser().setAccessToken(loginReq.getSuccessfulResult().getAccessToken());
 						CTBMod.cache.save();
 					}
+
+					checkCancel();
 
 					if (getCreator() == null) {
 						CreatorsRequest creatorsReq = new CreatorsRequest(Integer.toString(getUser().getId()));
@@ -134,7 +137,9 @@ public class GuiCreator extends GuiContainerBase {
 					}
 
 					checkCancel();
-
+					// Once we have all creation data, we can say we are "logged in" while the images download
+					setState(State.LOGGED_IN);
+					
 					for (Creation c : creations) {
 						c.getImage().download(ImageType.LIST_VIEW);
 						checkCancel();
@@ -182,8 +187,9 @@ public class GuiCreator extends GuiContainerBase {
 	private PasswordTextField tfVisualPassword;
 	private GuiButtonHideable loginButton, userButton, cancelButton, logoutButton;
 	private OverlayCreationList creationList;
-	// Only empty when the "select user" state is active
 	private OverlayUserSelection userSelection;
+	
+	private State state = State.LOGGED_OUT;
 	
 	private Thread thread;
 	
@@ -302,12 +308,6 @@ public class GuiCreator extends GuiContainerBase {
 		int y = guiTop;
 		drawTexturedModalRect(x, y, 0, 0, XSIZE_DEFAULT, ySize);
 
-		if (getState() == State.LOGGED_IN) {
-			updateSize(XSIZE_SIDEBAR);
-		} else {
-			updateSize(XSIZE_DEFAULT);
-		}
-
 		// TODO localize all the things
 
 		switch(state) {
@@ -358,7 +358,8 @@ public class GuiCreator extends GuiContainerBase {
 		super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
 	}
 	
-	private void updateSize(int newSize) {
+	private void updateSize() {
+		int newSize = getState() == State.LOGGED_IN ? XSIZE_SIDEBAR : XSIZE_DEFAULT;
 		if (xSize != newSize) {
 			xSize = newSize;
 			initGui();
@@ -366,13 +367,12 @@ public class GuiCreator extends GuiContainerBase {
 	}
 
 	State getState() {
-		if (!userSelection.isEmpty()) {
-			return State.USER_SELECT;
-		} else if (getUser() != null) {
-			return State.LOGGED_IN;
-		} else {
-			return loginReq != null || (thread != null && (thread.isInterrupted() || !thread.isAlive())) ? State.LOGGING_IN : State.LOGGED_OUT;
-		}
+		return state;
+	}
+	
+	private void setState(State state) {
+		this.state = state;
+		updateSize();
 	}
 
 	private User getUser() {
@@ -393,17 +393,19 @@ public class GuiCreator extends GuiContainerBase {
 			thread.start();
 			break;
 		case ID_USER:
+			userSelection.clear();
 			userSelection.addAll(CTBMod.cache.getSavedUsers());
 			if (userSelection.isEmpty()) {
 				userSelection.add(DUMMY_USER);
 			}
+			setState(State.USER_SELECT);
 			break;
 		case ID_CANCEL:
 			if (getState() == State.LOGGING_IN) {
 				thread.interrupt();
 				cancelButton.enabled = false;
 			} else {
-				userSelection.clear();
+				logout();
 			}
 			break;
 		case ID_LOGOUT:
@@ -421,5 +423,6 @@ public class GuiCreator extends GuiContainerBase {
 		CTBMod.cache.setCreators(null);
 		CTBMod.cache.setCreationCache(null);
 		creationList.setCreations(null);
+		setState(State.LOGGED_OUT);
 	}
 }

@@ -46,7 +46,7 @@ public class DataCache {
 	private transient Creation[] creationCache;
 	
 	@Getter
-	private boolean dirty;
+	private transient boolean dirty;
 
 	@SneakyThrows
 	public static DataCache loadCache() {

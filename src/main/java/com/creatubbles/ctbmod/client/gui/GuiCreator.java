@@ -84,52 +84,78 @@ public class GuiCreator extends GuiContainerBase {
 
 		@Override
 		public void run() {
-			// thread.isInterrupted() checks throughout to quit execution if the action is canceled
-			if (!thread.isInterrupted() && getUser() == null) {
-				loginReq = new LoginRequest(new Login(tfEmail.getText(), tfActualPassword.getText()));
-				loginReq.run();
-			}
-			if (!thread.isInterrupted() && loginReq != null && loginReq.failed()) {
-				if (loginReq.getException() != null) {
-					header = loginReq.getException().getLocalizedMessage();
-				} else {
-					header = loginReq.getFailedResult().getMessage();
-				}
-				header = EnumChatFormatting.YELLOW.toString().concat(header);
-				loginReq = null;
-			} else {
-				if (!thread.isInterrupted() && getUser() == null) {
-					userReq = new UserRequest(loginReq.getSuccessfulResult().getAccessToken());
-					userReq.run();
-					CTBMod.cache.activateUser(userReq.getSuccessfulResult());
-					CTBMod.cache.getActiveUser().setAccessToken(loginReq.getSuccessfulResult().getAccessToken());
-					CTBMod.cache.save();
+
+			try {
+				checkCancel();
+
+				if (getUser() == null) {
+					loginReq = new LoginRequest(new Login(tfEmail.getText(), tfActualPassword.getText()));
+					loginReq.run();
 				}
 
-				if (!thread.isInterrupted() && getCreator() == null) {
-					CreatorsRequest creatorsReq = new CreatorsRequest(Integer.toString(getUser().getId()));
-					creatorsReq.run();
-					CTBMod.cache.setCreators(creatorsReq.getSuccessfulResult().getCreators());
-				}
+				checkCancel();
 
-				Creation[] creations = creationList.getCreations();
-				if (!thread.isInterrupted() && creations == null) {
-					for (Creator c : CTBMod.cache.getCreators()) {
-						CreationsRequest creationsReq = new CreationsRequest(c.getId());
-						creationsReq.run();
-						creations = ArrayUtils.addAll(creations, creationsReq.getSuccessfulResult());
+				if (loginReq != null && loginReq.failed()) {
+					if (loginReq.getException() != null) {
+						header = loginReq.getException().getLocalizedMessage();
+					} else {
+						header = loginReq.getFailedResult().getMessage();
 					}
-					creationList.setCreations(creations);
-					CTBMod.cache.setCreationCache(creations);
-				}
+					header = EnumChatFormatting.YELLOW.toString().concat(header);
+					loginReq = null;
+				} else {
+					if (getUser() == null) {
+						userReq = new UserRequest(loginReq.getSuccessfulResult().getAccessToken());
+						userReq.run();
+						// Run here so that the cancel is processed before telling the GUI that the user has logged in
+						checkCancel();
+						CTBMod.cache.activateUser(userReq.getSuccessfulResult());
+						CTBMod.cache.getActiveUser().setAccessToken(loginReq.getSuccessfulResult().getAccessToken());
+						CTBMod.cache.save();
+					}
 
-				if (thread.isInterrupted()) {
-					return;
-				}
+					if (getCreator() == null) {
+						CreatorsRequest creatorsReq = new CreatorsRequest(Integer.toString(getUser().getId()));
+						creatorsReq.run();
+						CTBMod.cache.setCreators(creatorsReq.getSuccessfulResult().getCreators());
+					}
 
-				for (Creation c : creations) {
-					c.getImage().download(ImageType.LIST_VIEW);
+					checkCancel();
+
+					Creation[] creations = creationList.getCreations();
+					if (creations == null) {
+						for (Creator c : CTBMod.cache.getCreators()) {
+							CreationsRequest creationsReq = new CreationsRequest(c.getId());
+							creationsReq.run();
+							creations = ArrayUtils.addAll(creations, creationsReq.getSuccessfulResult());
+						}
+						creationList.setCreations(creations);
+						CTBMod.cache.setCreationCache(creations);
+					}
+
+					checkCancel();
+
+					for (Creation c : creations) {
+						c.getImage().download(ImageType.LIST_VIEW);
+						checkCancel();
+					}
 				}
+			} catch (InterruptedException e) {
+				CTBMod.logger.info("Logging in canceled!");
+				// Clear the cache
+				logout();
+			} finally {
+				// Thread cleanup, erase all evidence we were here
+				// This assures a fresh start if a new login is attempted
+				loginReq = null;
+				userReq = null;
+				thread = null;
+			}
+		}
+
+		private void checkCancel() throws InterruptedException {
+			if (thread.isInterrupted()) {
+				throw new InterruptedException();
 			}
 		}
 	}
@@ -144,6 +170,7 @@ public class GuiCreator extends GuiContainerBase {
 	private static final int XSIZE_DEFAULT = 176, XSIZE_SIDEBAR = 270;
 	private static final int ID_LOGIN = 0, ID_USER = 1, ID_CANCEL = 2, ID_LOGOUT = 3;
 	private static final ResourceLocation BG_TEX = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/creator.png");
+	private static final String DEFAULT_HEADER = "Please log in to Creatubbles:";
 	
 	static final ResourceLocation OVERLAY_TEX = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/creator_overlays.png");
 	static final User DUMMY_USER = new User(0, "No Users", "", "", "", false, false);
@@ -159,11 +186,11 @@ public class GuiCreator extends GuiContainerBase {
 	private OverlayUserSelection userSelection;
 	
 	private Thread thread;
+	
 	private LoginRequest loginReq;
 	private UserRequest userReq;
-	
 
-	private String header = "Plesae log in to Creatubbles:";
+	private String header = DEFAULT_HEADER;
 
 	public GuiCreator(InventoryPlayer inv) {
 		super(new ContainerCreator(inv));
@@ -252,7 +279,7 @@ public class GuiCreator extends GuiContainerBase {
 			loginReq = null;
 			userReq = null;
 		}
-		if (CTBMod.cache.isDirty()) {
+		if (CTBMod.cache.isDirty() && thread == null) {
 			actionPerformed(loginButton);
 			CTBMod.cache.dirty(false);
 		}
@@ -324,7 +351,8 @@ public class GuiCreator extends GuiContainerBase {
 		case LOGGING_IN:
 			x += xSize / 2;
 			y += 25;
-			drawCenteredString(getFontRenderer(), "Logging in...", x, y, 0xFFFFFF);
+			String s = thread.isInterrupted() ? "Canceling..." : "Logging in...";
+			drawCenteredString(getFontRenderer(), s, x, y, 0xFFFFFF);
 			break;
 		}
 		super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
@@ -359,6 +387,8 @@ public class GuiCreator extends GuiContainerBase {
 	protected void actionPerformed(GuiButton button) throws IOException {
 		switch (button.id) {
 		case ID_LOGIN:
+			cancelButton.enabled = true;
+			header = DEFAULT_HEADER;
 			thread = new Thread(new LoginRunnable());
 			thread.start();
 			break;
@@ -369,22 +399,27 @@ public class GuiCreator extends GuiContainerBase {
 			}
 			break;
 		case ID_CANCEL:
-			if (getState() == State.USER_SELECT) {
-				userSelection.clear();
-				break;
-			} else {
+			if (getState() == State.LOGGING_IN) {
 				thread.interrupt();
-				// I'm naughty, but let's see if it works
-				// TODO PROBABLY NOT USE THIS
-				// TODO SERIOUSLY THIS IS HORRIBLE
-				thread.stop();
-				// Intentional fall-through
+				cancelButton.enabled = false;
+			} else {
+				userSelection.clear();
 			}
+			break;
 		case ID_LOGOUT:
-			CTBMod.cache.activateUser(null);
-			CTBMod.cache.setCreators(null);
-			CTBMod.cache.setCreationCache(null);
-			creationList.setCreations(null);
+			if (thread != null) {
+				// Creation/Image data may still be processing, this will potentially save bandwidth
+				thread.interrupt();
+			}
+			logout();
+			break;
 		}
+	}
+
+	private void logout() {
+		CTBMod.cache.activateUser(null);
+		CTBMod.cache.setCreators(null);
+		CTBMod.cache.setCreationCache(null);
+		creationList.setCreations(null);
 	}
 }

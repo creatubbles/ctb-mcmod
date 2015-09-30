@@ -86,10 +86,9 @@ public class GuiCreator extends GuiContainerBase {
 
 			try {
 				checkCancel();
-
-				setState(State.LOGGING_IN);
 				
 				if (getUser() == null) {
+					setState(State.LOGGING_IN);
 					loginReq = new LoginRequest(new Login(tfEmail.getText(), tfActualPassword.getText()));
 					loginReq.run();
 				}
@@ -154,6 +153,7 @@ public class GuiCreator extends GuiContainerBase {
 				loginReq = null;
 				userReq = null;
 				thread = null;
+				cancelButton.enabled = true;
 			}
 		}
 
@@ -386,7 +386,6 @@ public class GuiCreator extends GuiContainerBase {
 	protected void actionPerformed(GuiButton button) {
 		switch (button.id) {
 		case ID_LOGIN:
-			cancelButton.enabled = true;
 			header = DEFAULT_HEADER;
 			thread = new Thread(new LoginRunnable());
 			thread.start();

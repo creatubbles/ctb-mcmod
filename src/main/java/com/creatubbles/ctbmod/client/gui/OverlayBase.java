@@ -62,7 +62,14 @@ public abstract class OverlayBase extends Gui implements IGuiOverlay {
 	public boolean isMouseInBounds(int mouseX, int mouseY) {
 		return getBounds().contains(mouseX, mouseY);
 	}
-	
+
+	/**
+	 * This automatically converts the mouse x/y to relative coordinates
+	 */
+	protected boolean isMouseIn(int x, int y, Rectangle rect) {
+		return rect.contains(x - getGui().getGuiLeft(), y - getGui().getGuiTop());
+	}
+
 	@Override
 	public void setIsVisible(boolean visible) {
 		this.visible = visible;

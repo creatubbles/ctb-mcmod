@@ -1,6 +1,7 @@
 package com.creatubbles.ctbmod.client.gui;
 
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.util.Collection;
 import java.util.List;
 
@@ -9,7 +10,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 
 import org.lwjgl.util.Dimension;
-import org.lwjgl.util.Rectangle;
 
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.http.User;
@@ -127,8 +127,5 @@ public class OverlayUserSelection extends OverlayBase {
 		}
 		return found != null;
 	}
-	
-	private boolean isMouseIn(int x, int y, Rectangle rect) {
-		return rect.contains(x - getGui().getGuiLeft(), y - getGui().getGuiTop());
-	}
+
 }

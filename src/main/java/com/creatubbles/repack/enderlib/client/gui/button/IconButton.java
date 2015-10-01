@@ -3,16 +3,16 @@ package com.creatubbles.repack.enderlib.client.gui.button;
 import java.awt.Rectangle;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
 
 import org.lwjgl.opengl.GL11;
 
+import com.creatubbles.ctbmod.client.gui.GuiButtonHideable;
 import com.creatubbles.repack.endercore.client.render.EnderWidget;
 import com.creatubbles.repack.endercore.client.render.IWidgetIcon;
 import com.creatubbles.repack.enderlib.api.client.gui.IGuiScreen;
 import com.creatubbles.repack.enderlib.client.gui.widget.GuiToolTip;
 
-public class IconButton extends GuiButton {
+public class IconButton extends GuiButtonHideable {
 
 	public static final int DEFAULT_WIDTH = 16;
 	public static final int DEFAULT_HEIGHT = 16;
@@ -149,9 +149,9 @@ public class IconButton extends GuiButton {
 	@Override
 	public void drawButton(Minecraft mc, int mouseX, int mouseY) {
 		if (toolTip != null) {
-			toolTip.setVisible(visible);
+			toolTip.setVisible(isVisible());
 		}
-		if (visible) {
+		if (isVisible()) {
 
 			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 			this.hovered = mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + width && mouseY < this.yPosition + height;

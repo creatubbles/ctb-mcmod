@@ -15,6 +15,7 @@ import net.minecraft.util.ResourceLocation;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.lwjgl.util.Rectangle;
 
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.creator.ContainerCreator;
@@ -22,12 +23,15 @@ import com.creatubbles.ctbmod.common.http.Creation;
 import com.creatubbles.ctbmod.common.http.CreationsRequest;
 import com.creatubbles.ctbmod.common.http.Creator;
 import com.creatubbles.ctbmod.common.http.CreatorsRequest;
+import com.creatubbles.ctbmod.common.http.Image;
 import com.creatubbles.ctbmod.common.http.Image.ImageType;
 import com.creatubbles.ctbmod.common.http.Login;
 import com.creatubbles.ctbmod.common.http.LoginRequest;
 import com.creatubbles.ctbmod.common.http.User;
 import com.creatubbles.ctbmod.common.http.UserRequest;
+import com.creatubbles.repack.endercore.client.render.EnderWidget;
 import com.creatubbles.repack.enderlib.client.gui.GuiContainerBase;
+import com.creatubbles.repack.enderlib.client.gui.button.IconButton;
 import com.creatubbles.repack.enderlib.client.gui.widget.TextFieldEnder;
 import com.creatubbles.repack.enderlib.client.gui.widget.VScrollbar;
 import com.google.common.collect.Lists;
@@ -117,6 +121,7 @@ public class GuiCreator extends GuiContainerBase {
 					checkCancel();
 
 					if (getCreator() == null) {
+						setState(State.LOGGING_IN);
 						CreatorsRequest creatorsReq = new CreatorsRequest(Integer.toString(getUser().getId()));
 						creatorsReq.run();
 						CTBMod.cache.setCreators(creatorsReq.getSuccessfulResult().getCreators());
@@ -126,6 +131,7 @@ public class GuiCreator extends GuiContainerBase {
 
 					Creation[] creations = creationList.getCreations();
 					if (creations == null) {
+						setState(State.LOGGING_IN);
 						for (Creator c : CTBMod.cache.getCreators()) {
 							CreationsRequest creationsReq = new CreationsRequest(c.getId());
 							creationsReq.run();
@@ -173,7 +179,7 @@ public class GuiCreator extends GuiContainerBase {
 	}
 
 	private static final int XSIZE_DEFAULT = 176, XSIZE_SIDEBAR = 270;
-	private static final int ID_LOGIN = 0, ID_USER = 1, ID_CANCEL = 2, ID_LOGOUT = 3;
+	private static final int ID_LOGIN = 0, ID_USER = 1, ID_CANCEL = 2, ID_LOGOUT = 3, ID_CREATE = 4;
 	private static final ResourceLocation BG_TEX = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/creator.png");
 	private static final String DEFAULT_HEADER = "Please log in to Creatubbles:";
 	
@@ -185,11 +191,12 @@ public class GuiCreator extends GuiContainerBase {
 	private TextFieldEnder tfEmail, tfActualPassword;
 	private VScrollbar scrollbar;
 	private PasswordTextField tfVisualPassword;
-	private GuiButtonHideable loginButton, userButton, cancelButton, logoutButton;
+	private GuiButtonHideable loginButton, userButton, cancelButton;
+	private IconButton logoutButton, createButton;
 	private OverlayCreationList creationList;
 	private OverlayUserSelection userSelection;
 	
-	private State state = State.LOGGED_OUT;
+	private State state;
 	
 	private Thread thread;
 	
@@ -201,6 +208,7 @@ public class GuiCreator extends GuiContainerBase {
 	public GuiCreator(InventoryPlayer inv) {
 		super(new ContainerCreator(inv));
 		this.mc = Minecraft.getMinecraft();
+		this.state = getUser() == null ? State.LOGGED_OUT : State.LOGGED_IN;
 
 		// Must be done before getState() is called
 		userSelection = new OverlayUserSelection(10, 10);
@@ -239,6 +247,14 @@ public class GuiCreator extends GuiContainerBase {
 		creationList = new OverlayCreationList(XSIZE_DEFAULT, 0);
 		visibleMap.put(creationList, State.LOGGED_IN);
 		addOverlay(creationList);
+		
+		logoutButton = new IconButton(this, ID_LOGOUT, 7, 106, EnderWidget.CROSS);
+		logoutButton.setToolTip("Log Out");
+		addButton(logoutButton);
+		
+		createButton = new IconButton(this, ID_CREATE, 139, 43, EnderWidget.TICK);
+		createButton.setToolTip("Create!");
+		addButton(createButton);
 	}
 
 	@Override
@@ -246,22 +262,24 @@ public class GuiCreator extends GuiContainerBase {
 	public void initGui() {
 //		 CTBMod.cache.activateUser(null);
 //		 CTBMod.cache.setCreators(null);
-
+		
 		super.initGui();
 		buttonList.clear();
-
-		addScrollbar(scrollbar);
-		visibleMap.put(scrollbar, State.LOGGED_IN);
 
 		addButton(loginButton = new GuiButtonHideable(ID_LOGIN, guiLeft + xSize / 2 - 75, guiTop + 90, 75, 20, "Log in"));
 		addButton(userButton = new GuiButtonHideable(ID_USER, guiLeft + xSize / 2, guiTop + 90, 75, 20, "Saved Users"));
 		addButton(cancelButton = new GuiButtonHideable(ID_CANCEL, guiLeft + xSize / 2 - 50, guiTop + 90, 100, 20, "Cancel"));
-		addButton(logoutButton = new GuiButtonHideable(ID_LOGOUT, guiLeft + 10, guiTop + 100, 50, 20, "Log out"));
-
+		logoutButton.onGuiInit();
+		createButton.onGuiInit();
+		
 		visibleMap.put(loginButton, State.LOGGED_OUT);
 		visibleMap.put(userButton, State.LOGGED_OUT);
 		visibleMap.putAll(cancelButton, Lists.newArrayList(State.USER_SELECT, State.LOGGING_IN));
 		visibleMap.put(logoutButton, State.LOGGED_IN);
+		visibleMap.put(createButton, State.LOGGED_IN);
+		
+		addScrollbar(scrollbar);
+		visibleMap.put(scrollbar, State.LOGGED_IN);		
 
 		// TODO this needs to go
 		if (thread == null && getUser() != null) {
@@ -284,6 +302,11 @@ public class GuiCreator extends GuiContainerBase {
 			thread = null;
 			loginReq = null;
 			userReq = null;
+		}
+		if (CTBMod.cache.isDirty()) {
+			if (thread != null) {
+				System.out.println("!");
+			}
 		}
 		if (CTBMod.cache.isDirty() && thread == null) {
 			actionPerformed(loginButton);
@@ -325,6 +348,57 @@ public class GuiCreator extends GuiContainerBase {
 				drawCenteredString(getFontRenderer(), getUser().getCountry(), x, y, 0xFFFFFF);
 				y += 15;
 				drawCenteredString(getFontRenderer(), creator.getAge(), x, y, 0xFFFFFF);
+			}
+			
+			x = guiLeft + 105;
+			y = guiTop + 9;
+			
+			mc.getTextureManager().bindTexture(OVERLAY_TEX);
+			drawTexturedModalRect(x - 3, y - 3, 94, 0, 54, 54);
+			
+			Creation selected = creationList.getSelected();
+			if (selected != null) {
+				createButton.setIsVisible(true);
+				Image img = selected.getImage();
+				ResourceLocation res;
+				int imgWidth = 16, imgHeight = 16;
+				if (img.hasSize(ImageType.FULL_VIEW)) {
+					res = img.getResource(ImageType.FULL_VIEW);
+					imgWidth = img.getWidth(ImageType.FULL_VIEW);
+					imgHeight = img.getHeight(ImageType.FULL_VIEW);
+				} else {
+					res = OverlayCreationList.LOADING_TEX;
+					img.download(ImageType.FULL_VIEW);
+				}
+				
+				mc.getTextureManager().bindTexture(res);
+
+				Rectangle bounds = new Rectangle(x, y, 48, 48);
+				if (imgWidth > imgHeight) {
+					bounds.setHeight((int) (bounds.getHeight() * ((double) imgHeight / (double) imgWidth)));
+					bounds.translate(0, (48 - bounds.getHeight()) / 2);
+				} else {
+					bounds.setWidth((int) (bounds.getWidth() * ((double) imgWidth / (double) imgHeight)));
+					bounds.translate((48 - bounds.getWidth()) / 2, 0);
+				}
+				drawScaledCustomSizeModalRect(bounds.getX(), bounds.getY(), 0, 0, imgWidth, imgHeight, bounds.getWidth(), bounds.getHeight(), imgWidth, imgHeight);
+
+				x += 24;
+				y += 56;
+				drawCenteredString(getFontRenderer(), EnumChatFormatting.ITALIC + selected.getName(), x, y, 0xFFFFFF);
+				y += 12;
+				drawCenteredString(getFontRenderer(), "by:", x, y, 0xFFFFFF);
+				Creator[] creators = selected.getCreators();
+				Creator dummy = new Creator(0, 0, "test", "", "");
+				creators = ArrayUtils.addAll(creators, dummy, dummy, dummy);
+				for (int i = 0; i < creators.length && i < 4; i++) {
+					Creator c = creators[i % creators.length];
+					y += 10;
+					String s = i == 3 && creators.length > 4 ? (creators.length - 3) + " more..." : c.getName();
+					drawCenteredString(getFontRenderer(), s, x, y, 0xFFFFFF);
+				}
+			} else {
+				createButton.setIsVisible(false);
 			}
 			
 			x = guiLeft + 90;

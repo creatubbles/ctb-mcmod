@@ -135,34 +135,36 @@ public class Image {
 	 */
 	@SneakyThrows
 	public void download(ImageType type) {
-		TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
+		if (locations.get(type) != MISSING_TEXTURE) {
+			TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
 
-		String url = urlBase.concat(type.toString()).concat("/").concat(fileName);
-		String filepath = "creations/" + owner.getUserId() + "/" + type + "/" + owner.getId() + ".jpg";
-		File cache = new File(DataCache.cacheFolder, filepath);
-		ResourceLocation res = new ResourceLocation(CTBMod.DOMAIN, filepath);
-		ITextureObject texture = texturemanager.getTexture(res);
-		ThreadDownloadImageData dl = null;
+			String url = urlBase.concat(type.toString()).concat("/").concat(fileName);
+			String filepath = "creations/" + owner.getUserId() + "/" + type + "/" + owner.getId() + ".jpg";
+			File cache = new File(DataCache.cacheFolder, filepath);
+			ResourceLocation res = new ResourceLocation(CTBMod.DOMAIN, filepath);
+			ITextureObject texture = texturemanager.getTexture(res);
+			ThreadDownloadImageData dl = null;
 
-		if (texture == null) {
-			texture = dl = new ThreadDownloadImageData(cache, url, null, new IImageBuffer() {
+			if (texture == null) {
+				texture = dl = new ThreadDownloadImageData(cache, url, null, new IImageBuffer() {
 
-				@Override
-				public BufferedImage parseUserSkin(BufferedImage p_78432_1_) {
-					return p_78432_1_;
-				}
+					@Override
+					public BufferedImage parseUserSkin(BufferedImage p_78432_1_) {
+						return p_78432_1_;
+					}
 
-				@Override
-				public void skinAvailable() {
-				}
-			});
-			texturemanager.loadTexture(res, texture);
-		} else if (texture instanceof ThreadDownloadImageData) {
-			dl = (ThreadDownloadImageData) texture;
+					@Override
+					public void skinAvailable() {
+					}
+				});
+				texturemanager.loadTexture(res, texture);
+			} else if (texture instanceof ThreadDownloadImageData) {
+				dl = (ThreadDownloadImageData) texture;
+			}
+
+			locations.put(type, res);
+			watchdogExecutor.execute(new DownloadWatchdog(type, dl));
 		}
-
-		locations.put(type, res);
-		watchdogExecutor.execute(new DownloadWatchdog(type, dl));
 	}
 
 	/**

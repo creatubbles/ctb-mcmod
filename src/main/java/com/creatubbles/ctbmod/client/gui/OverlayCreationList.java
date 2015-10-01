@@ -31,11 +31,21 @@ public class OverlayCreationList extends OverlayBase {
 		private Creation creation;
 		private Point location;
 		private Rectangle bounds;
+		private GuiToolTip tooltip;
 
 		private CreationAndLocation(Creation c, Point p) {
 			this.creation = c;
 			this.location = p;
 			this.bounds = new Rectangle(p.x, p.y, thumbnailSize, thumbnailSize);
+
+			// TODO more localization here
+			List<String> tt = Lists.newArrayList();
+			tt.add(c.getName());
+			tt.add(c.getCreators().length == 1 ? "Creator:" : "Creators:");
+			for (Creator creator : c.getCreators()) {
+				tt.add("    " + creator.getName() + " at " + creator.getAge());
+			}
+			this.tooltip = new GuiToolTip(bounds, tt);
 		}
 	}
 
@@ -54,6 +64,9 @@ public class OverlayCreationList extends OverlayBase {
 
 	@Getter
 	private int thumbnailSize = 16;
+	
+	@Getter
+	private Creation selected;
 
 	private List<CreationAndLocation> list = Lists.newArrayList();
 	private List<CreationAndLocation> listAbsolute = Lists.newArrayList();
@@ -77,10 +90,7 @@ public class OverlayCreationList extends OverlayBase {
 
 	@Synchronized("list")
 	private void rebuildList() {
-		list.clear();
-		listAbsolute.clear();
-
-		getGui().clearToolTips();
+		clear();
 
 		Creation[] creations = this.creations == null ? CTBMod.cache.getCreationCache() : this.creations;
 
@@ -127,7 +137,7 @@ public class OverlayCreationList extends OverlayBase {
 
 			CreationAndLocation data = new CreationAndLocation(c, new Point(x, y));
 			CreationAndLocation absoluteData = new CreationAndLocation(c, new Point(x, y + scroll));
-
+			
 			// Anything below the border is a waste to draw
 			if (y > yRel + getHeight()) {
 				listAbsolute.add(absoluteData);
@@ -136,18 +146,8 @@ public class OverlayCreationList extends OverlayBase {
 
 			// Anything completely above the border is a waste to draw
 			if (y + thumbnailSize > yRel) {
-
 				list.add(data);
-
-				// TODO more localization here
-				List<String> tt = Lists.newArrayList();
-				tt.add(c.getName());
-				tt.add(c.getCreators().length == 1 ? "Creator:" : "Creators:");
-				for (Creator creator : c.getCreators()) {
-					tt.add("    " + creator.getName() + " at " + creator.getAge());
-				}
-
-				getGui().addToolTip(new GuiToolTip(data.getBounds(), tt));
+				getGui().addToolTip(data.tooltip);
 			}
 
 			listAbsolute.add(absoluteData);
@@ -158,6 +158,14 @@ public class OverlayCreationList extends OverlayBase {
 				col = 0;
 			}
 		}
+	}
+
+	private void clear() {
+		for (CreationAndLocation c : list) {
+			getGui().removeToolTip(c.tooltip);
+		}
+		list.clear();
+		listAbsolute.clear();
 	}
 
 	@Override
@@ -224,6 +232,24 @@ public class OverlayCreationList extends OverlayBase {
 				GlStateManager.popMatrix();
 			}
 		}
+	}
+
+	@Override
+	public boolean handleMouseInput(int x, int y, int b) {
+		if (b == 0) {
+			if (!isMouseInBounds(x, y)) {
+				return false;
+			}
+			for (CreationAndLocation c : list) {
+				if (isMouseIn(x, y, c.getBounds())) {
+					selected = c.getCreation();
+					return true;
+				}
+			}
+			selected = null;
+			return true;
+		}
+		return super.handleMouseInput(x, y, b);
 	}
 
 	public void setX(int x) {

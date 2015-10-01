@@ -389,10 +389,8 @@ public class GuiCreator extends GuiContainerBase {
 				y += 12;
 				drawCenteredString(getFontRenderer(), "by:", x, y, 0xFFFFFF);
 				Creator[] creators = selected.getCreators();
-				Creator dummy = new Creator(0, 0, "test", "", "");
-				creators = ArrayUtils.addAll(creators, dummy, dummy, dummy);
 				for (int i = 0; i < creators.length && i < 4; i++) {
-					Creator c = creators[i % creators.length];
+					Creator c = creators[i];
 					y += 10;
 					String s = i == 3 && creators.length > 4 ? (creators.length - 3) + " more..." : c.getName();
 					drawCenteredString(getFontRenderer(), s, x, y, 0xFFFFFF);

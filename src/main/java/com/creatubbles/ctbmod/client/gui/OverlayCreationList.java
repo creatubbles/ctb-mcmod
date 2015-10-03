@@ -45,7 +45,7 @@ public class OverlayCreationList extends OverlayBase {
 			tt.add(c.getName());
 			tt.add(c.getCreators().length == 1 ? "Creator:" : "Creators:");
 			for (Creator creator : c.getCreators()) {
-				tt.add("    " + creator.getName() + " at " + creator.getAge());
+				tt.add("    " + creator.getName());
 			}
 			this.tooltip = new GuiToolTip(bounds, tt);
 		}

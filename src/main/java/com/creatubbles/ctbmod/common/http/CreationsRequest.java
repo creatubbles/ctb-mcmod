@@ -2,6 +2,9 @@ package com.creatubbles.ctbmod.common.http;
 
 import java.lang.reflect.Type;
 
+import lombok.Value;
+
+import com.creatubbles.ctbmod.common.http.CreationsRequest.CreationsResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -9,8 +12,9 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.annotations.SerializedName;
 
-public class CreationsRequest extends HttpGetBase<Creation[], Void> {
+public class CreationsRequest extends HttpGetBase<CreationsResponse, Void> {
 
 	private static class ImageDeserializer implements JsonDeserializer<Image> {
 
@@ -19,21 +23,36 @@ public class CreationsRequest extends HttpGetBase<Creation[], Void> {
 			return new Image(json.getAsJsonObject().get("url").getAsString());
 		}
 	}
+	
+	@Value
+	public static class CreationsResponse {
 
-	private static String createApiPath(int creatorId, String accessToken) {
-		String ret = "creators/" + creatorId + "/creations.json";
+		@SerializedName("total_entries")
+		private int totalEntries;
+		@SerializedName("total_pages")
+		private int totalPages;
+		private int page;
+		private Creation[] creations;
+	}
+
+	private static String createApiPath(int creatorId, int page, String accessToken) {
+		String ret = "creators/" + creatorId + "/creations.json?page=" + page;
 		if (accessToken != null) {
-			ret += "?access_token=" + accessToken;
+			ret += "&access_token=" + accessToken;
 		}
 		return ret;
 	}
 
 	public CreationsRequest(int creatorId) {
-		this(creatorId, null);
+		this(creatorId, 1, null);
+	}
+	
+	public CreationsRequest(int creatorId, int page) {
+		this(creatorId, page, null);
 	}
 
-	public CreationsRequest(int creatorId, String accessToken) {
-		super(createApiPath(creatorId, accessToken));
+	public CreationsRequest(int creatorId, int page, String accessToken) {
+		super(createApiPath(creatorId, page, accessToken));
 	}
 
 	@Override
@@ -42,9 +61,9 @@ public class CreationsRequest extends HttpGetBase<Creation[], Void> {
 	}
 
 	@Override
-	protected Creation[] getSuccessfulResult(JsonObject response) {
-		Creation[] ret = gson.fromJson(response.get("creations"), Creation[].class);
-		for (Creation c : ret) {
+	protected CreationsResponse getSuccessfulResult(JsonObject response) {
+		CreationsResponse ret = gson.fromJson(response, CreationsResponse.class);
+		for (Creation c : ret.getCreations()) {
 			c.getImage().setOwner(c);
 		}
 		return ret;

@@ -2,6 +2,7 @@ package com.creatubbles.ctbmod.client.gui;
 
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.Arrays;
 import java.util.List;
 
 import lombok.Getter;
@@ -12,6 +13,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.util.Dimension;
 
 import com.creatubbles.ctbmod.CTBMod;
@@ -78,7 +80,7 @@ public class OverlayCreationList extends OverlayBase {
 	}
 
 	public void setCreations(Creation[] creations) {
-		this.creations = creations;
+		this.creations = ArrayUtils.clone(creations);
 		rebuildList();
 	}
 
@@ -97,6 +99,8 @@ public class OverlayCreationList extends OverlayBase {
 		if (creations == null || creations.length == 0) {
 			return;
 		}
+		
+		Arrays.sort(creations);
 
 		int row = 0;
 		int col = 0;

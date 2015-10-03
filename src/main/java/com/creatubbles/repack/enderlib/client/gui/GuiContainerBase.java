@@ -284,7 +284,9 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 	}
 
 	public void addScrollbar(VScrollbar vs) {
-		scrollbars.add(vs);
+		if (!scrollbars.contains(vs)) {
+			scrollbars.add(vs);
+		}
 		vs.adjustPosition();
 	}
 

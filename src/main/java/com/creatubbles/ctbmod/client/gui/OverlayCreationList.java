@@ -72,11 +72,17 @@ public class OverlayCreationList extends OverlayBase {
 
 	private List<CreationAndLocation> list = Lists.newArrayList();
 	private List<CreationAndLocation> listAbsolute = Lists.newArrayList();
+	private List<ISelectionCallback> callbacks = Lists.newArrayList();
 
 	private int scroll = 0;
 
 	public OverlayCreationList(int x, int y) {
 		super(x, y, new Dimension(83, 210));
+	}
+	
+	public void addCallback(ISelectionCallback callback) {
+		this.callbacks.add(callback);
+		callback.callback(getSelected());
 	}
 
 	public void setCreations(Creation[] creations) {
@@ -177,7 +183,7 @@ public class OverlayCreationList extends OverlayBase {
 	public void doDraw(int mouseX, int mouseY, float partialTick) {
 		Minecraft.getMinecraft().getTextureManager().bindTexture(GuiCreator.OVERLAY_TEX);
 		drawTexturedModalRect(xRel, yRel, 0, 0, getWidth() + 10, getHeight());
-
+		
 		Minecraft mc = Minecraft.getMinecraft();
 		FontRenderer fr = mc.fontRendererObj;
 		if (list.size() == 0) {
@@ -185,6 +191,10 @@ public class OverlayCreationList extends OverlayBase {
 		} else {
 			for (CreationAndLocation c : list) {
 				GlStateManager.pushMatrix();
+				
+				if (c.getCreation() == selected) {
+					drawBoundingBox(c, 0xFF48C43D);
+				}
 
 				int x = c.getLocation().x;
 				int y = c.getLocation().y;
@@ -206,12 +216,8 @@ public class OverlayCreationList extends OverlayBase {
 				if (res != null) {
 					if (res != LOADING_TEX) {
 						// Draw selection box
-						Rectangle bounds = c.getBounds();
 						if (isMouseInBounds(mouseX, mouseY) && c.getBounds().contains(mouseX - getGui().getGuiLeft(), mouseY - getGui().getGuiTop())) {
-							drawRect((int) bounds.getMinX() - 1, (int) Math.max(bounds.getMinY() - 1, yRel + 1), (int) bounds.getMaxX() + 1, (int) Math.min(bounds.getMaxY() + 1, yRel + getHeight()),
-									0xFFFFFFFF);
-							GlStateManager.enableBlend();
-							GlStateManager.color(1, 1, 1, 1);
+							drawBoundingBox(c, 0xFFFFFFFF);
 						}
 					}
 					mc.getTextureManager().bindTexture(res);
@@ -238,6 +244,13 @@ public class OverlayCreationList extends OverlayBase {
 		}
 	}
 
+	private void drawBoundingBox(CreationAndLocation loc, int color) {
+		Rectangle bounds = loc.getBounds();
+		drawRect((int) bounds.getMinX() - 1, (int) Math.max(bounds.getMinY() - 1, yRel + 1), (int) bounds.getMaxX() + 1, (int) Math.min(bounds.getMaxY() + 1, yRel + getHeight()), color);
+		GlStateManager.enableBlend();
+		GlStateManager.color(1, 1, 1, 1);
+	}
+
 	@Override
 	public boolean handleMouseInput(int x, int y, int b) {
 		if (b == 0) {
@@ -246,14 +259,23 @@ public class OverlayCreationList extends OverlayBase {
 			}
 			for (CreationAndLocation c : list) {
 				if (isMouseIn(x, y, c.getBounds())) {
-					selected = c.getCreation();
+					setSelected(c.getCreation());
 					return true;
 				}
 			}
-			selected = null;
+			setSelected(null);
 			return true;
 		}
 		return super.handleMouseInput(x, y, b);
+	}
+
+	private void setSelected(Creation creation) {
+		if (creation != getSelected()) {
+			selected = creation;
+			for (ISelectionCallback callback : callbacks) {
+				callback.callback(getSelected());
+			}
+		}
 	}
 
 	public void setX(int x) {

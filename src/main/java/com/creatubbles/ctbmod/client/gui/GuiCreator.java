@@ -14,15 +14,14 @@ import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.Rectangle;
 
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.creator.ContainerCreator;
 import com.creatubbles.ctbmod.common.http.Creation;
 import com.creatubbles.ctbmod.common.http.CreationsRequest;
+import com.creatubbles.ctbmod.common.http.CreationsRequest.CreationsResponse;
 import com.creatubbles.ctbmod.common.http.Creator;
 import com.creatubbles.ctbmod.common.http.CreatorsRequest;
-import com.creatubbles.ctbmod.common.http.Image;
 import com.creatubbles.ctbmod.common.http.Image.ImageType;
 import com.creatubbles.ctbmod.common.http.Login;
 import com.creatubbles.ctbmod.common.http.LoginRequest;
@@ -31,6 +30,8 @@ import com.creatubbles.ctbmod.common.http.UserRequest;
 import com.creatubbles.repack.endercore.client.render.EnderWidget;
 import com.creatubbles.repack.enderlib.client.gui.GuiContainerBase;
 import com.creatubbles.repack.enderlib.client.gui.button.IconButton;
+import com.creatubbles.repack.enderlib.client.gui.button.MultiIconButton;
+import com.creatubbles.repack.enderlib.client.gui.widget.GuiToolTip;
 import com.creatubbles.repack.enderlib.client.gui.widget.TextFieldEnder;
 import com.creatubbles.repack.enderlib.client.gui.widget.VScrollbar;
 import com.google.common.collect.Lists;
@@ -92,7 +93,7 @@ public class GuiCreator extends GuiContainerBase {
 				checkCancel();
 				
 				if (getUser() == null) {
-					setState(State.LOGGING_IN);
+					setState(State.LOGGING_IN, true);
 					loginReq = new LoginRequest(new Login(tfEmail.getText(), tfActualPassword.getText()));
 					loginReq.run();
 				}
@@ -120,7 +121,7 @@ public class GuiCreator extends GuiContainerBase {
 					checkCancel();
 
 					if (getCreator() == null) {
-						setState(State.LOGGING_IN);
+						setState(State.LOGGING_IN, true);
 						CreatorsRequest creatorsReq = new CreatorsRequest(Integer.toString(getUser().getId()));
 						creatorsReq.run();
 						CTBMod.cache.setCreators(creatorsReq.getSuccessfulResult().getCreators());
@@ -130,11 +131,19 @@ public class GuiCreator extends GuiContainerBase {
 
 					Creation[] creations = creationList.getCreations();
 					if (creations == null) {
-						setState(State.LOGGING_IN);
+						setState(State.LOGGING_IN, true);
 						for (Creator c : CTBMod.cache.getCreators()) {
+							int page = 1;
 							CreationsRequest creationsReq = new CreationsRequest(c.getId());
 							creationsReq.run();
-							creations = ArrayUtils.addAll(creations, creationsReq.getSuccessfulResult());
+							CreationsResponse resp = creationsReq.getSuccessfulResult();
+							creations = ArrayUtils.addAll(creations, resp.getCreations());
+							while (resp.getPage() < resp.getTotalPages()) {
+								creationsReq = new CreationsRequest(c.getId(), ++page);
+								creationsReq.run();
+								resp = creationsReq.getSuccessfulResult();
+								creations = ArrayUtils.addAll(creations, resp.getCreations());
+							}
 						}
 						creationList.setCreations(creations);
 						CTBMod.cache.setCreationCache(creations);
@@ -142,7 +151,7 @@ public class GuiCreator extends GuiContainerBase {
 
 					checkCancel();
 					// Once we have all creation data, we can say we are "logged in" while the images download
-					setState(State.LOGGED_IN);
+					setState(State.LOGGED_IN, true);
 					
 					for (Creation c : creations) {
 						c.getImage().download(ImageType.LIST_VIEW);
@@ -152,6 +161,9 @@ public class GuiCreator extends GuiContainerBase {
 			} catch (InterruptedException e) {
 				CTBMod.logger.info("Logging in canceled!");
 				// Clear the cache
+				logout();
+			} catch (Exception e) {
+				CTBMod.logger.error("Logging in uncountered an unknown error.", e);
 				logout();
 			} finally {
 				// Thread cleanup, erase all evidence we were here
@@ -179,6 +191,7 @@ public class GuiCreator extends GuiContainerBase {
 
 	private static final int XSIZE_DEFAULT = 176, XSIZE_SIDEBAR = 270;
 	private static final int ID_LOGIN = 0, ID_USER = 1, ID_CANCEL = 2, ID_LOGOUT = 3, ID_CREATE = 4;
+	private static final int ID_H_PLUS = 5, ID_H_MINUS = 6, ID_W_PLUS = 7, ID_W_MINUS = 8;
 	private static final ResourceLocation BG_TEX = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/creator.png");
 	private static final String DEFAULT_HEADER = "Please log in to Creatubbles:";
 	
@@ -192,8 +205,11 @@ public class GuiCreator extends GuiContainerBase {
 	private PasswordTextField tfVisualPassword;
 	private GuiButtonHideable loginButton, userButton, cancelButton;
 	private IconButton logoutButton, createButton;
+	private MultiIconButton heightUpButton, heightDownButton, widthUpButton, widthDownButton;
+	private GuiToolTip userInfo;
 	private OverlayCreationList creationList;
 	private OverlayUserSelection userSelection;
+	private OverlaySelectedCreation selectedCreation;
 	
 	private State state;
 	
@@ -207,7 +223,7 @@ public class GuiCreator extends GuiContainerBase {
 	public GuiCreator(InventoryPlayer inv) {
 		super(new ContainerCreator(inv));
 		this.mc = Minecraft.getMinecraft();
-		this.state = getUser() == null ? State.LOGGED_OUT : State.LOGGED_IN;
+		setState(getUser() == null ? State.LOGGED_OUT : State.LOGGED_IN, false);
 
 		// Must be done before getState() is called
 		userSelection = new OverlayUserSelection(10, 10);
@@ -216,7 +232,7 @@ public class GuiCreator extends GuiContainerBase {
 
 		ySize += 44;
 		xSize = getState() == State.LOGGED_IN ? XSIZE_SIDEBAR : XSIZE_DEFAULT;
-		tfEmail = new TextFieldEnder(getFontRenderer(), (xSize / 2) - 75, 35, 150, 12);
+		tfEmail = new TextFieldEnder(getFontRenderer(), (XSIZE_DEFAULT / 2) - 75, 35, 150, 12);
 		visibleMap.put(tfEmail, State.LOGGED_OUT);
 		tfEmail.setFocused(true);
 		textFields.add(tfEmail);
@@ -224,7 +240,7 @@ public class GuiCreator extends GuiContainerBase {
 		// This is a dummy to store the uncensored PW
 		tfActualPassword = new TextFieldEnder(getFontRenderer(), 0, 0, 0, 0);
 
-		tfVisualPassword = new PasswordTextField(getFontRenderer(), (xSize / 2) - 75, 65, 150, 12);
+		tfVisualPassword = new PasswordTextField(getFontRenderer(), (XSIZE_DEFAULT / 2) - 75, 65, 150, 12);
 		visibleMap.put(tfVisualPassword, State.LOGGED_OUT);
 		textFields.add(tfVisualPassword);
 
@@ -246,14 +262,44 @@ public class GuiCreator extends GuiContainerBase {
 		creationList = new OverlayCreationList(XSIZE_DEFAULT, 0);
 		visibleMap.put(creationList, State.LOGGED_IN);
 		addOverlay(creationList);
-		
+
 		logoutButton = new IconButton(this, ID_LOGOUT, 7, 106, EnderWidget.CROSS);
 		logoutButton.setToolTip("Log Out");
-		addButton(logoutButton);
-		
-		createButton = new IconButton(this, ID_CREATE, 139, 43, EnderWidget.TICK);
+
+		createButton = new IconButton(this, ID_CREATE, 110, 29, EnderWidget.TICK);
 		createButton.setToolTip("Create!");
-		addButton(createButton);
+
+		selectedCreation = new OverlaySelectedCreation(10, 10, creationList, createButton);
+		visibleMap.put(selectedCreation, State.LOGGED_IN);
+		addOverlay(selectedCreation);
+
+		userInfo = new GuiToolTip(new java.awt.Rectangle(), Lists.<String> newArrayList()) {
+
+			@Override
+			public java.awt.Rectangle getBounds() {
+				if (getUser() == null) {
+					System.out.println("!");
+				}
+				FontRenderer fr = getFontRenderer();
+				return new java.awt.Rectangle(25, 110, fr.getStringWidth(getUser().getUsername()), 8);
+			}
+
+			@Override
+			protected void updateText() {
+				User u = getUser();
+				setToolTipText(StringUtils.capitalize(u.getRole()), getCreator().getAge(), u.getCountry());
+			}
+		};
+		addToolTip(userInfo);
+		visibleMap.put(userInfo, State.LOGGED_IN);
+		
+		int y = 61;
+		int x = 97;
+	    heightUpButton = MultiIconButton.createAddButton(this, ID_H_PLUS, x, y);
+	    heightDownButton = MultiIconButton.createMinusButton(this, ID_H_MINUS, x, y + 8);
+	    x += 50;
+	    widthUpButton = MultiIconButton.createAddButton(this, ID_W_PLUS, x, y);
+	    widthDownButton = MultiIconButton.createMinusButton(this, ID_W_MINUS, x, y + 8);
 	}
 
 	@Override
@@ -270,20 +316,32 @@ public class GuiCreator extends GuiContainerBase {
 		addButton(cancelButton = new GuiButtonHideable(ID_CANCEL, guiLeft + xSize / 2 - 50, guiTop + 90, 100, 20, "Cancel"));
 		logoutButton.onGuiInit();
 		createButton.onGuiInit();
-		
+		heightUpButton.onGuiInit();
+		heightDownButton.onGuiInit();
+		widthUpButton.onGuiInit();
+		widthDownButton.onGuiInit();
+
 		visibleMap.put(loginButton, State.LOGGED_OUT);
 		visibleMap.put(userButton, State.LOGGED_OUT);
 		visibleMap.putAll(cancelButton, Lists.newArrayList(State.USER_SELECT, State.LOGGING_IN));
 		visibleMap.put(logoutButton, State.LOGGED_IN);
 		visibleMap.put(createButton, State.LOGGED_IN);
-		
+		visibleMap.put(heightUpButton, State.LOGGED_IN);
+		visibleMap.put(heightDownButton, State.LOGGED_IN);
+		visibleMap.put(widthUpButton, State.LOGGED_IN);
+		visibleMap.put(widthDownButton, State.LOGGED_IN);
+
 		addScrollbar(scrollbar);
 		visibleMap.put(scrollbar, State.LOGGED_IN);		
+		
+		creationList.setCreations(CTBMod.cache.getCreationCache());
 
 		// TODO this needs to go
 		if (thread == null && getUser() != null) {
 			actionPerformed(loginButton);
 		}
+		
+		updateVisibility();
 	}
 	
 	@Override
@@ -297,11 +355,6 @@ public class GuiCreator extends GuiContainerBase {
 	@Override
 	@SneakyThrows
 	public void updateScreen() {
-		if (thread != null && !thread.isAlive()) {
-			thread = null;
-			loginReq = null;
-			userReq = null;
-		}
 		if (CTBMod.cache.isDirty()) {
 			if (thread != null) {
 				System.out.println("!");
@@ -312,6 +365,14 @@ public class GuiCreator extends GuiContainerBase {
 			CTBMod.cache.dirty(false);
 		}
 	}
+	
+	@Override
+	public void onGuiClosed() {
+		super.onGuiClosed();
+		if (thread != null) {
+			thread.interrupt();
+		}
+	}
 
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
@@ -319,12 +380,7 @@ public class GuiCreator extends GuiContainerBase {
 		GL11.glDisable(GL11.GL_LIGHTING);
 
 		State state = getState();
-
-		for (Entry<IHideable, Collection<State>> e : visibleMap.asMap().entrySet()) {
-			boolean visible = e.getValue().contains(state);
-			e.getKey().setIsVisible(visible);
-		}
-
+		
 		mc.getTextureManager().bindTexture(BG_TEX);
 		int x = guiLeft;
 		int y = guiTop;
@@ -336,74 +392,43 @@ public class GuiCreator extends GuiContainerBase {
 		case LOGGED_IN:
 			creationList.setScroll(scrollbar.getScrollPos());
 			
-			x += 40;
-			y += 5;
-			drawCenteredString(getFontRenderer(), EnumChatFormatting.UNDERLINE + getUser().getUsername(), x, y, 0xFFFFFF);
-			Creator creator = getCreator();
-			if (creator != null) {
-				y += 15;
-				drawCenteredString(getFontRenderer(), StringUtils.capitalize(getUser().getRole()), x, y, 0xFFFFFF);
-				y += 15;
-				drawCenteredString(getFontRenderer(), getUser().getCountry(), x, y, 0xFFFFFF);
-				y += 15;
-				drawCenteredString(getFontRenderer(), creator.getAge(), x, y, 0xFFFFFF);
-			}
-			
-			x = guiLeft + 105;
-			y = guiTop + 9;
-			
-			mc.getTextureManager().bindTexture(OVERLAY_TEX);
-			drawTexturedModalRect(x - 3, y - 3, 94, 0, 54, 54);
-			
-			Creation selected = creationList.getSelected();
-			if (selected != null) {
-				createButton.setIsVisible(true);
-				Image img = selected.getImage();
-				ResourceLocation res;
-				int imgWidth = 16, imgHeight = 16;
-				if (img.hasSize(ImageType.FULL_VIEW)) {
-					res = img.getResource(ImageType.FULL_VIEW);
-					imgWidth = img.getWidth(ImageType.FULL_VIEW);
-					imgHeight = img.getHeight(ImageType.FULL_VIEW);
-				} else {
-					res = OverlayCreationList.LOADING_TEX;
-					img.download(ImageType.FULL_VIEW);
-				}
-				
-				mc.getTextureManager().bindTexture(res);
-
-				Rectangle bounds = new Rectangle(x, y, 48, 48);
-				if (imgWidth > imgHeight) {
-					bounds.setHeight((int) (bounds.getHeight() * ((double) imgHeight / (double) imgWidth)));
-					bounds.translate(0, (48 - bounds.getHeight()) / 2);
-				} else {
-					bounds.setWidth((int) (bounds.getWidth() * ((double) imgWidth / (double) imgHeight)));
-					bounds.translate((48 - bounds.getWidth()) / 2, 0);
-				}
-				func_152125_a(bounds.getX(), bounds.getY(), 0, 0, imgWidth, imgHeight, bounds.getWidth(), bounds.getHeight(), imgWidth, imgHeight);
-
-				x += 24;
-				y += 56;
-				drawCenteredString(getFontRenderer(), EnumChatFormatting.ITALIC + selected.getName(), x, y, 0xFFFFFF);
-				y += 12;
-				drawCenteredString(getFontRenderer(), "by:", x, y, 0xFFFFFF);
-				Creator[] creators = selected.getCreators();
-				for (int i = 0; i < creators.length && i < 4; i++) {
-					Creator c = creators[i];
-					y += 10;
-					String s = i == 3 && creators.length > 4 ? (creators.length - 3) + " more..." : c.getName();
-					drawCenteredString(getFontRenderer(), s, x, y, 0xFFFFFF);
-				}
-			} else {
-				createButton.setIsVisible(false);
-			}
+			x += 25;
+			y += 110;
+			drawString(getFontRenderer(), getUser().getUsername(), x, y, 0xFFFFFF);
 			
 			x = guiLeft + 90;
 			y = guiTop + 12;
 			
 			mc.getTextureManager().bindTexture(OVERLAY_TEX);
 			drawTexturedModalRect(scrollbar.getX(), scrollbar.getY() + 8, creationList.getWidth() * 2, 8, 11, scrollbar.getWholeArea().height - 16);
+			
+			x = guiLeft + 70;
+			y = guiTop + 19;
+			drawTexturedModalRect(x, y, 94, 54, 36, 36);
 
+			x += 74;
+			y += 9;
+			drawTexturedModalRect(x, y, 94, 90, 18, 18);
+
+			x -= 28;
+			y -= 6;
+			if (createButton.enabled) {
+				// Mojang didn't add an integer color method...
+				GL11.glColor3f(88f / 255f, 196f / 255f, 61f / 255f);
+			} else {
+				GL11.glColor3f(0.5f, 0.5f, 0.5f);
+			}
+			EnderWidget.map.render(EnderWidget.ARROW_RIGHT, x, y, 32, 32, 1, true);
+
+			x = guiLeft + 70;
+			y = guiTop + 65;
+			drawString(getFontRenderer(), "H: 10", x, y, 0xFFFFFF);
+			drawString(getFontRenderer(), "W: 10", x + 50, y, 0xFFFFFF);
+			
+			y += 15;
+			drawString(getFontRenderer(), "Paper: 100", x, y, 0xFFFFFF);
+			y += 10;
+			drawString(getFontRenderer(), "Dye: 100", x, y, 0xFFFFFF);
 			break;
 		case LOGGED_OUT:
 			x += xSize / 2;
@@ -441,9 +466,19 @@ public class GuiCreator extends GuiContainerBase {
 		return state;
 	}
 	
-	private void setState(State state) {
+	private void setState(State state, boolean update) {
 		this.state = state;
-		updateSize();
+		if (update) {
+			updateSize();
+			updateVisibility();
+		}
+	}
+	
+	private void updateVisibility() {
+		for (Entry<IHideable, Collection<State>> e : visibleMap.asMap().entrySet()) {
+			boolean visible = e.getValue().contains(getState());
+			e.getKey().setIsVisible(visible);
+		}
 	}
 
 	private User getUser() {
@@ -452,6 +487,14 @@ public class GuiCreator extends GuiContainerBase {
 	
 	private Creator getCreator() {
 		return CTBMod.cache.getActiveCreator();
+	}
+	
+	@Override
+	protected void mouseClicked(int x, int y, int button) {
+		super.mouseClicked(x, y, button);
+		// This works around the fact that changing the visibility in actionPerformed
+		// will cause buttons that didn't exist when the user clicked to be valid targets
+		updateVisibility();
 	}
 
 	@Override
@@ -468,7 +511,7 @@ public class GuiCreator extends GuiContainerBase {
 			if (userSelection.isEmpty()) {
 				userSelection.add(DUMMY_USER);
 			}
-			setState(State.USER_SELECT);
+			setState(State.USER_SELECT, false);
 			break;
 		case ID_CANCEL:
 			if (getState() == State.LOGGING_IN) {
@@ -489,10 +532,10 @@ public class GuiCreator extends GuiContainerBase {
 	}
 
 	private void logout() {
+		setState(State.LOGGED_OUT, true);
 		CTBMod.cache.activateUser(null);
 		CTBMod.cache.setCreators(null);
 		CTBMod.cache.setCreationCache(null);
 		creationList.setCreations(null);
-		setState(State.LOGGED_OUT);
 	}
 }

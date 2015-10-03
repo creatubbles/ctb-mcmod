@@ -4,7 +4,9 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GuiToolTip {
+import com.creatubbles.ctbmod.client.gui.IHideable;
+
+public class GuiToolTip implements IHideable {
 
 	private static final long DELAY = 0;
 
@@ -41,11 +43,13 @@ public class GuiToolTip {
 		}
 	}
 
+	@Override
 	public boolean isVisible() {
 		return visible;
 	}
 
-	public void setVisible(boolean visible) {
+	@Override
+	public void setIsVisible(boolean visible) {
 		this.visible = visible;
 	}
 
@@ -62,7 +66,7 @@ public class GuiToolTip {
 			mouseOverStart = 0;
 		}
 
-		if (bounds.contains(mouseX, mouseY)) {
+		if (isVisible() && getBounds().contains(mouseX, mouseY)) {
 
 			if (mouseOverStart == 0) {
 				mouseOverStart = System.currentTimeMillis();
@@ -76,7 +80,7 @@ public class GuiToolTip {
 	}
 
 	public boolean shouldDraw() {
-		if (!visible) {
+		if (!isVisible()) {
 			return false;
 		}
 		updateText();

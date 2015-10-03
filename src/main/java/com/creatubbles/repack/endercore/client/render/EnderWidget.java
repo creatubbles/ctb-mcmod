@@ -20,6 +20,8 @@ public enum EnderWidget implements IWidgetIcon {
 	DOWN_ARROW_HOVER_OFF(234, 72, 11, 8),
 	DOWN_ARROW_HOVER_ON(245, 72, 11, 8),
 	
+	ARROW_RIGHT(32, 176),
+	
 	TICK(0, 192),
 	MINUS(16, 192),
 	CROSS(64, 192),

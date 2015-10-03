@@ -149,7 +149,7 @@ public class IconButton extends GuiButtonHideable {
 	@Override
 	public void drawButton(Minecraft mc, int mouseX, int mouseY) {
 		if (toolTip != null) {
-			toolTip.setVisible(isVisible());
+			toolTip.setIsVisible(isVisible());
 		}
 		if (isVisible()) {
 

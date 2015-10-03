@@ -14,14 +14,14 @@ import com.creatubbles.ctbmod.common.http.Image;
 import com.creatubbles.ctbmod.common.http.Image.ImageType;
 import com.creatubbles.repack.enderlib.client.gui.button.IconButton;
 
-public class OverlaySelectedCreation extends OverlayBase {
+public class OverlaySelectedCreation extends OverlayBase implements ISelectionCallback {
 
-	private final OverlayCreationList creationList;
 	private final IconButton createButton;
+
+	private Creation selected;
 
 	protected OverlaySelectedCreation(int x, int y, OverlayCreationList creationList, IconButton createButton) {
 		super(x, y, new Dimension());
-		this.creationList = creationList;
 		this.createButton = createButton;
 	}
 
@@ -37,9 +37,7 @@ public class OverlaySelectedCreation extends OverlayBase {
 		int x = xRel + 3;
 		int y = yRel + 3;
 
-		Creation selected = creationList.getSelected();
 		if (selected != null) {
-			createButton.enabled = true;
 			Image img = selected.getImage();
 			ResourceLocation res;
 			int imgWidth = 16, imgHeight = 16;
@@ -81,7 +79,6 @@ public class OverlaySelectedCreation extends OverlayBase {
 //				drawCenteredString(fr, s, x, y, 0xFFFFFF);
 //			}
 		} else {
-			createButton.enabled = false;
 			Minecraft.getMinecraft().getTextureManager().bindTexture(OverlayCreationList.LOADING_TEX);
 			func_152125_a(x, y, 0, 0, 16, 16, 48, 48, 16, 16);
 			x += 24;
@@ -90,4 +87,9 @@ public class OverlaySelectedCreation extends OverlayBase {
 		}
 	}
 
+	@Override
+	public void callback(Creation selected) {
+		this.selected = selected;
+		this.createButton.enabled = selected != null;
+	}
 }

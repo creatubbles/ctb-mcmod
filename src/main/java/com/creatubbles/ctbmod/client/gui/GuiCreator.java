@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map.Entry;
 
 import lombok.SneakyThrows;
+import lombok.Synchronized;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
@@ -227,13 +228,11 @@ public class GuiCreator extends GuiContainerBase {
 
 		// Must be done before getState() is called
 		userSelection = new OverlayUserSelection(10, 10);
-		visibleMap.put(userSelection, State.USER_SELECT);
 		addOverlay(userSelection);
 
 		ySize += 44;
 		xSize = getState() == State.LOGGED_IN ? XSIZE_SIDEBAR : XSIZE_DEFAULT;
 		tfEmail = new TextFieldEnder(getFontRenderer(), (XSIZE_DEFAULT / 2) - 75, 35, 150, 12);
-		visibleMap.put(tfEmail, State.LOGGED_OUT);
 		tfEmail.setFocused(true);
 		textFields.add(tfEmail);
 		
@@ -241,7 +240,6 @@ public class GuiCreator extends GuiContainerBase {
 		tfActualPassword = new TextFieldEnder(getFontRenderer(), 0, 0, 0, 0);
 
 		tfVisualPassword = new PasswordTextField(getFontRenderer(), (XSIZE_DEFAULT / 2) - 75, 65, 150, 12);
-		visibleMap.put(tfVisualPassword, State.LOGGED_OUT);
 		textFields.add(tfVisualPassword);
 
 		scrollbar = new VScrollbar(this, XSIZE_SIDEBAR - 11, 0, ySize + 1) {
@@ -260,7 +258,6 @@ public class GuiCreator extends GuiContainerBase {
 		};
 
 		creationList = new OverlayCreationList(XSIZE_DEFAULT, 0);
-		visibleMap.put(creationList, State.LOGGED_IN);
 		addOverlay(creationList);
 
 		logoutButton = new IconButton(this, ID_LOGOUT, 7, 106, EnderWidget.CROSS);
@@ -270,7 +267,7 @@ public class GuiCreator extends GuiContainerBase {
 		createButton.setToolTip("Create!");
 
 		selectedCreation = new OverlaySelectedCreation(10, 10, creationList, createButton);
-		visibleMap.put(selectedCreation, State.LOGGED_IN);
+		creationList.addCallback(selectedCreation);
 		addOverlay(selectedCreation);
 
 		userInfo = new GuiToolTip(new java.awt.Rectangle(), Lists.<String> newArrayList()) {
@@ -291,7 +288,6 @@ public class GuiCreator extends GuiContainerBase {
 			}
 		};
 		addToolTip(userInfo);
-		visibleMap.put(userInfo, State.LOGGED_IN);
 		
 		int y = 61;
 		int x = 97;
@@ -321,19 +317,28 @@ public class GuiCreator extends GuiContainerBase {
 		widthUpButton.onGuiInit();
 		widthDownButton.onGuiInit();
 
-		visibleMap.put(loginButton, State.LOGGED_OUT);
-		visibleMap.put(userButton, State.LOGGED_OUT);
-		visibleMap.putAll(cancelButton, Lists.newArrayList(State.USER_SELECT, State.LOGGING_IN));
-		visibleMap.put(logoutButton, State.LOGGED_IN);
-		visibleMap.put(createButton, State.LOGGED_IN);
-		visibleMap.put(heightUpButton, State.LOGGED_IN);
-		visibleMap.put(heightDownButton, State.LOGGED_IN);
-		visibleMap.put(widthUpButton, State.LOGGED_IN);
-		visibleMap.put(widthDownButton, State.LOGGED_IN);
-
 		addScrollbar(scrollbar);
-		visibleMap.put(scrollbar, State.LOGGED_IN);		
-		
+
+		// Avoids CME when state is set during this method
+		synchronized (visibleMap) {
+			visibleMap.put(tfEmail, State.LOGGED_OUT);
+			visibleMap.put(tfVisualPassword, State.LOGGED_OUT);
+			visibleMap.put(userSelection, State.USER_SELECT);
+			visibleMap.put(creationList, State.LOGGED_IN);
+			visibleMap.put(selectedCreation, State.LOGGED_IN);
+			visibleMap.put(userInfo, State.LOGGED_IN);
+			visibleMap.put(loginButton, State.LOGGED_OUT);
+			visibleMap.put(userButton, State.LOGGED_OUT);
+			visibleMap.putAll(cancelButton, Lists.newArrayList(State.USER_SELECT, State.LOGGING_IN));
+			visibleMap.put(logoutButton, State.LOGGED_IN);
+			visibleMap.put(createButton, State.LOGGED_IN);
+			visibleMap.put(heightUpButton, State.LOGGED_IN);
+			visibleMap.put(heightDownButton, State.LOGGED_IN);
+			visibleMap.put(widthUpButton, State.LOGGED_IN);
+			visibleMap.put(widthDownButton, State.LOGGED_IN);
+			visibleMap.put(scrollbar, State.LOGGED_IN);
+		}
+
 		creationList.setCreations(CTBMod.cache.getCreationCache());
 
 		// TODO this needs to go
@@ -390,6 +395,9 @@ public class GuiCreator extends GuiContainerBase {
 
 		switch(state) {
 		case LOGGED_IN:
+			if (getUser() == null) {
+				System.out.println("!");
+			}
 			creationList.setScroll(scrollbar.getScrollPos());
 			
 			x += 25;
@@ -473,7 +481,8 @@ public class GuiCreator extends GuiContainerBase {
 			updateVisibility();
 		}
 	}
-	
+
+	@Synchronized("visibleMap")
 	private void updateVisibility() {
 		for (Entry<IHideable, Collection<State>> e : visibleMap.asMap().entrySet()) {
 			boolean visible = e.getValue().contains(getState());

@@ -12,6 +12,7 @@ import com.creatubbles.ctbmod.common.config.Configs;
 import com.creatubbles.ctbmod.common.config.DataCache;
 import com.creatubbles.ctbmod.common.creator.BlockCreator;
 import com.creatubbles.ctbmod.common.network.PacketHandler;
+import com.creatubbles.ctbmod.common.painting.BlockPainting;
 import com.creatubbles.repack.endercore.common.config.ConfigProcessor;
 
 import cpw.mods.fml.common.Mod;
@@ -40,6 +41,7 @@ public class CTBMod {
 	public static Logger logger = LogManager.getLogger(MODID);
 
 	public static BlockCreator creator;
+	public static BlockPainting painting;
 	
 	public static DataCache cache;
 
@@ -48,6 +50,7 @@ public class CTBMod {
 		new ConfigProcessor(Configs.class, event.getSuggestedConfigurationFile(), MODID).process(true);
 
 		creator = BlockCreator.create();
+		painting = BlockPainting.create();
 	}
 
 	@EventHandler

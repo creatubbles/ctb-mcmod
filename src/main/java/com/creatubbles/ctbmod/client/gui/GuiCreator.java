@@ -18,6 +18,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.creator.ContainerCreator;
+import com.creatubbles.ctbmod.common.creator.TileCreator;
 import com.creatubbles.ctbmod.common.http.Creation;
 import com.creatubbles.ctbmod.common.http.CreationsRequest;
 import com.creatubbles.ctbmod.common.http.CreationsRequest.CreationsResponse;
@@ -28,13 +29,13 @@ import com.creatubbles.ctbmod.common.http.Login;
 import com.creatubbles.ctbmod.common.http.LoginRequest;
 import com.creatubbles.ctbmod.common.http.User;
 import com.creatubbles.ctbmod.common.http.UserRequest;
+import com.creatubbles.repack.endercore.client.gui.GuiContainerBase;
+import com.creatubbles.repack.endercore.client.gui.button.IconButton;
+import com.creatubbles.repack.endercore.client.gui.button.MultiIconButton;
+import com.creatubbles.repack.endercore.client.gui.widget.GuiToolTip;
+import com.creatubbles.repack.endercore.client.gui.widget.TextFieldEnder;
+import com.creatubbles.repack.endercore.client.gui.widget.VScrollbar;
 import com.creatubbles.repack.endercore.client.render.EnderWidget;
-import com.creatubbles.repack.enderlib.client.gui.GuiContainerBase;
-import com.creatubbles.repack.enderlib.client.gui.button.IconButton;
-import com.creatubbles.repack.enderlib.client.gui.button.MultiIconButton;
-import com.creatubbles.repack.enderlib.client.gui.widget.GuiToolTip;
-import com.creatubbles.repack.enderlib.client.gui.widget.TextFieldEnder;
-import com.creatubbles.repack.enderlib.client.gui.widget.VScrollbar;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
@@ -220,9 +221,12 @@ public class GuiCreator extends GuiContainerBase {
 	private UserRequest userReq;
 
 	private String header = DEFAULT_HEADER;
+	
+	private TileCreator te;
 
-	public GuiCreator(InventoryPlayer inv) {
-		super(new ContainerCreator(inv));
+	public GuiCreator(InventoryPlayer inv, TileCreator creator) {
+		super(new ContainerCreator(inv, creator));
+		this.te = creator;
 		this.mc = Minecraft.getMinecraft();
 		setState(getUser() == null ? State.LOGGED_OUT : State.LOGGED_IN, false);
 
@@ -301,9 +305,8 @@ public class GuiCreator extends GuiContainerBase {
 	@Override
 	@SneakyThrows
 	public void initGui() {
-//		 CTBMod.cache.activateUser(null);
-//		 CTBMod.cache.setCreators(null);
-		
+//		logout();
+
 		super.initGui();
 		buttonList.clear();
 
@@ -430,8 +433,8 @@ public class GuiCreator extends GuiContainerBase {
 
 			x = guiLeft + 70;
 			y = guiTop + 65;
-			drawString(getFontRenderer(), "H: 10", x, y, 0xFFFFFF);
-			drawString(getFontRenderer(), "W: 10", x + 50, y, 0xFFFFFF);
+			drawString(getFontRenderer(), "H: " + te.getHeight(), x, y, 0xFFFFFF);
+			drawString(getFontRenderer(), "W: " + te.getWidth(), x + 50, y, 0xFFFFFF);
 			
 			y += 15;
 			drawString(getFontRenderer(), "Paper: 100", x, y, 0xFFFFFF);
@@ -537,7 +540,23 @@ public class GuiCreator extends GuiContainerBase {
 			}
 			logout();
 			break;
+		case ID_W_MINUS:
+			te.setWidth(te.getWidth() - 1);
+			break;
+		case ID_W_PLUS:
+			te.setWidth(te.getWidth() + 1);
+			break;
+		case ID_H_MINUS:
+			te.setHeight(te.getHeight() - 1);
+			break;
+		case ID_H_PLUS:
+			te.setHeight(te.getHeight() + 1);
+			break;
 		}
+		widthDownButton.enabled = te.getWidth() > te.getMinSize();
+		widthUpButton.enabled = te.getWidth() < te.getMaxSize();
+		heightDownButton.enabled = te.getHeight() > te.getMinSize();
+		heightUpButton.enabled = te.getHeight() < te.getMaxSize();
 	}
 
 	private void logout() {

@@ -2,19 +2,21 @@ package com.creatubbles.ctbmod.common.http;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.net.URL;
 import java.util.EnumMap;
 import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import javax.imageio.ImageIO;
+
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.ToString;
+import lombok.Value;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IImageBuffer;
-import net.minecraft.client.renderer.ThreadDownloadImageData;
+import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.texture.TextureUtil;
@@ -39,25 +41,43 @@ public class Image {
 		}
 	}
 
-	@RequiredArgsConstructor
-	private class DownloadWatchdog implements Runnable {
+	@Value
+	private static class Size {
 
-		private final ImageType type;
-		private final ThreadDownloadImageData thread;
+		private int width, height, scaled;
 
-		@Override
-		@SneakyThrows
-		public void run() {
-			while (thread.bufferedImage == null) {
-				Thread.sleep(100);
-			}
-			Image.this.updateSize(thread.bufferedImage, type);
+		private Dimension dimension;
+
+		private Size() {
+			this(0, 0, 0);
+		}
+
+		public Size(int width, int height, int scaled) {
+			this.width = width;
+			this.height = height;
+			this.scaled = scaled;
+			this.dimension = new Dimension(width, height);
+		}
+		
+		public static Size create(BufferedImage actual, BufferedImage rescale) {
+			return new Size(actual.getWidth(), actual.getHeight(), rescale.getWidth());
+		}
+	}
+	
+	private static class RescaledTexture extends DynamicTexture {
+		
+		@Getter
+		private Size size;
+		
+		public RescaledTexture(BufferedImage actual, BufferedImage rescale) {
+			super(rescale);
+			this.size = Size.create(actual, rescale);
 		}
 	}
 
 	public static final ResourceLocation MISSING_TEXTURE = new ResourceLocation("missingno");
 
-	private static Executor watchdogExecutor = Executors.newSingleThreadExecutor();
+	private static Executor downloadExecutor = Executors.newFixedThreadPool(3);
 
 	static {
 		Minecraft.getMinecraft().getTextureManager().loadTexture(MISSING_TEXTURE, TextureUtil.missingTexture);
@@ -71,14 +91,14 @@ public class Image {
 	private Creation owner;
 
 	private final EnumMap<ImageType, ResourceLocation> locations = Maps.newEnumMap(ImageType.class);
-	private EnumMap<ImageType, Dimension> sizes = Maps.newEnumMap(ImageType.class);
+	private EnumMap<ImageType, Size> sizes = Maps.newEnumMap(ImageType.class);
 
 	public Image(String url) {
 		fileName = url.substring(url.lastIndexOf("/") + 1, url.length());
 		urlBase = url.substring(0, url.indexOf("original"));
 		for (ImageType type : ImageType.values()) {
 			locations.put(type, new ResourceLocation("missingno"));
-			sizes.put(type, new Dimension());
+			sizes.put(type, new Size());
 		}
 	}
 
@@ -93,6 +113,10 @@ public class Image {
 		return locations.get(type);
 	}
 
+	private Size getSize(ImageType type) {
+		return sizes.get(type);
+	}
+
 	/**
 	 * The dimensions for this image.
 	 * 
@@ -100,8 +124,8 @@ public class Image {
 	 *            The {@link ImageType} to get the dimensions for.
 	 * @return An {@link Dimension} representing the size of this image. May be zero if the image is not downloaded.
 	 */
-	public Dimension getSize(ImageType type) {
-		return sizes.get(type);
+	public Dimension getDimensions(ImageType type) {
+		return getSize(type).getDimension();
 	}
 
 	/**
@@ -127,6 +151,17 @@ public class Image {
 	}
 
 	/**
+	 * To avoid issues with certain GPUs, the in-memory image is scaled up to the nearest power of two square dimension. This method returns that value for use in rendering.
+	 * 
+	 * @param type
+	 *            The {@link ImageType} to get the size for.
+	 * @return The scaled size of this image.
+	 */
+	public int getScaledSize(ImageType type) {
+		return getSize(type).getScaled();
+	}
+
+	/**
 	 * This method is not blocking, but note that {@link #getSize(ImageType)} will return a 0-size rectangle before the image finishes downloading. Check for this with {@link #hasSize(ImageType)}.
 	 * 
 	 * @param type
@@ -134,36 +169,67 @@ public class Image {
 	 * @see #updateSize(ImageType)
 	 */
 	@SneakyThrows
-	public void download(ImageType type) {
+	public void download(final ImageType type) {
 		if (locations.get(type) != MISSING_TEXTURE) {
 			TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
-
-			String url = urlBase.concat(type.toString()).concat("/").concat(fileName);
-			String filepath = "creations/" + owner.getUserId() + "/" + type + "/" + owner.getId() + ".jpg";
-			File cache = new File(DataCache.cacheFolder, filepath);
-			ResourceLocation res = new ResourceLocation(CTBMod.DOMAIN, filepath);
+			final String filepath = "creations/" + owner.getUserId() + "/" + type + "/" + owner.getId() + ".jpg";
+			final ResourceLocation res = new ResourceLocation(CTBMod.DOMAIN, filepath);
 			ITextureObject texture = texturemanager.getTexture(res);
-			ThreadDownloadImageData dl = null;
 
 			if (texture == null) {
-				texture = dl = new ThreadDownloadImageData(cache, url, null, new IImageBuffer() {
 
-					@Override
-					public BufferedImage parseUserSkin(BufferedImage p_78432_1_) {
-						return p_78432_1_;
-					}
+				downloadExecutor.execute(new Runnable() {
 
-					@Override
-					public void func_152634_a() {
+					@SneakyThrows
+					public void run() {
+						String url = urlBase.concat(type.toString()).concat("/").concat(fileName);
+						File cache = new File(DataCache.cacheFolder, filepath);
+						BufferedImage image = null;
+						if (cache.exists()) {
+							image = ImageIO.read(cache);
+						} else {
+							image = ImageIO.read(new URL(url));
+							cache.getParentFile().mkdirs();
+							// Cache the original, not the resize, this way we do not lose original size data
+							ImageIO.write(image, "jpg", cache);
+						}
+						
+						final BufferedImage original = image;
+
+						// Find the biggest dimension of the image
+						int maxDim = Math.max(image.getWidth(), image.getHeight());
+
+						// Find nearest PoT which can contain the downloaded/read image
+						int targetDim = 2;
+						while (targetDim < maxDim) {
+							targetDim *= 2;
+						}
+
+						// Create a blank image with PoT size
+						final BufferedImage resized = new BufferedImage(targetDim, targetDim, image.getType());
+						// Write the downloaded image into the top left of the blank image
+						resized.createGraphics().drawImage(image, 0, 0, null);
+
+						// Do this on the main thread with GL context
+						Minecraft.getMinecraft().func_152344_a(new Runnable() {
+
+							@Override
+							public void run() {
+								RescaledTexture texture = new RescaledTexture(original, resized);
+								Minecraft.getMinecraft().getTextureManager().loadTexture(res, texture);
+
+								// Don't populate size and location data until after the texture is loaded
+								sizes.put(type, Size.create(original, resized));
+								locations.put(type, res);
+							}
+						});
 					}
 				});
-				texturemanager.loadTexture(res, texture);
-			} else if (texture instanceof ThreadDownloadImageData) {
-				dl = (ThreadDownloadImageData) texture;
+			} else if (texture instanceof RescaledTexture) {
+				// Grab cached size data
+				sizes.put(type, ((RescaledTexture) texture).getSize());
+				locations.put(type, res);
 			}
-
-			locations.put(type, res);
-			watchdogExecutor.execute(new DownloadWatchdog(type, dl));
 		}
 	}
 
@@ -176,11 +242,5 @@ public class Image {
 	 */
 	public boolean hasSize(ImageType type) {
 		return sizes.get(type).getHeight() != 0;
-	}
-
-	private void updateSize(BufferedImage img, ImageType type) {
-		if (img != null) {
-			sizes.put(type, new Dimension(img.getWidth(), img.getHeight()));
-		}
 	}
 }

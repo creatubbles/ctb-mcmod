@@ -12,7 +12,7 @@ import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
 
 import com.creatubbles.ctbmod.common.network.PacketHandler;
-import com.creatubbles.repack.enderlib.common.Lang;
+import com.creatubbles.repack.endercore.common.Lang;
 
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;

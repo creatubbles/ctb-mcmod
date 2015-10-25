@@ -21,8 +21,8 @@ import com.creatubbles.ctbmod.common.http.Creation;
 import com.creatubbles.ctbmod.common.http.Creator;
 import com.creatubbles.ctbmod.common.http.Image;
 import com.creatubbles.ctbmod.common.http.Image.ImageType;
-import com.creatubbles.repack.enderlib.api.client.gui.IGuiScreen;
-import com.creatubbles.repack.enderlib.client.gui.widget.GuiToolTip;
+import com.creatubbles.repack.endercore.api.client.gui.IGuiScreen;
+import com.creatubbles.repack.endercore.client.gui.widget.GuiToolTip;
 import com.google.common.collect.Lists;
 
 public class OverlayCreationList extends OverlayBase {
@@ -238,7 +238,8 @@ public class OverlayCreationList extends OverlayBase {
 				if (clipV) {
 					v = h - ((float) heightRatio * h);
 				}
-				func_152125_a(x, y + Math.max(0, pastTop), 0, v, w, (int) (h * heightRatio), thumbnailSize, height, w, h);
+				int scaledSize = img.getScaledSize(type);
+				func_152125_a(x, y + Math.max(0, pastTop), 0, v, w, (int) (h * heightRatio), thumbnailSize, height, scaledSize, scaledSize);
 				GL11.glPopMatrix();
 			}
 		}

@@ -16,7 +16,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import com.creatubbles.ctbmod.common.network.PacketHandler;
-import com.creatubbles.repack.enderlib.common.Lang;
+import com.creatubbles.repack.endercore.common.Lang;
 
 @UtilityClass
 public class ChatUtil {

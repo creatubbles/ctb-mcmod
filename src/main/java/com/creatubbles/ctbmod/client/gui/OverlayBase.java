@@ -7,8 +7,8 @@ import net.minecraft.client.gui.Gui;
 
 import org.lwjgl.util.Dimension;
 
-import com.creatubbles.repack.enderlib.api.client.gui.IGuiOverlay;
-import com.creatubbles.repack.enderlib.api.client.gui.IGuiScreen;
+import com.creatubbles.repack.endercore.api.client.gui.IGuiOverlay;
+import com.creatubbles.repack.endercore.api.client.gui.IGuiScreen;
 
 public abstract class OverlayBase extends Gui implements IGuiOverlay {
 

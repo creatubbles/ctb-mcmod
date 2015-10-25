@@ -13,7 +13,7 @@ import org.lwjgl.util.Dimension;
 
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.http.User;
-import com.creatubbles.repack.enderlib.api.client.gui.IGuiScreen;
+import com.creatubbles.repack.endercore.api.client.gui.IGuiScreen;
 import com.google.common.collect.Lists;
 
 public class OverlayUserSelection extends OverlayBase {

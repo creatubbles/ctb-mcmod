@@ -12,7 +12,7 @@ import org.lwjgl.util.Rectangle;
 import com.creatubbles.ctbmod.common.http.Creation;
 import com.creatubbles.ctbmod.common.http.Image;
 import com.creatubbles.ctbmod.common.http.Image.ImageType;
-import com.creatubbles.repack.enderlib.client.gui.button.IconButton;
+import com.creatubbles.repack.endercore.client.gui.button.IconButton;
 
 public class OverlaySelectedCreation extends OverlayBase implements ISelectionCallback {
 
@@ -60,30 +60,19 @@ public class OverlaySelectedCreation extends OverlayBase implements ISelectionCa
 				bounds.setWidth((int) (bounds.getWidth() * ((double) imgWidth / (double) imgHeight)));
 				bounds.translate((48 - bounds.getWidth()) / 2, 0);
 			}
-			
-			drawScaledCustomSizeModalRect(bounds.getX(), bounds.getY(), 0, 0, imgWidth, imgHeight, bounds.getWidth(), bounds.getHeight(), imgWidth, imgHeight);
+			int scaledSize = img.getScaledSize(ImageType.FULL_VIEW);
+
+			drawScaledCustomSizeModalRect(bounds.getX(), bounds.getY(), 0, 0, imgWidth, imgHeight, bounds.getWidth(), bounds.getHeight(), scaledSize, scaledSize);
 
 			x += 24;
 			y += 56;
-			drawCenteredString(fr, EnumChatFormatting.ITALIC + selected.getName(), x, y, 0xFFFFFF);
-//			y += 12;
-//			drawCenteredString(fr, "by:", x, y, 0xFFFFFF);
-//			Creator[] creators = selected.getCreators();
-//			creators = ArrayUtils.add(creators, new Creator(0, 0, "test", "", ""));
-//			creators = ArrayUtils.add(creators, new Creator(0, 0, "test", "", ""));
-//			creators = ArrayUtils.add(creators, new Creator(0, 0, "test", "", ""));
-//			for (int i = 0; i < creators.length && i < 3; i++) {
-//				Creator c = creators[i];
-//				y += 10;
-//				String s = i == 2 && creators.length > 3 ? "- " + (creators.length - 2) + " more -" : c.getName();
-//				drawCenteredString(fr, s, x, y, 0xFFFFFF);
-//			}
+			TextUtil.drawCenteredSplitString(fr, EnumChatFormatting.ITALIC + selected.getName(), x, y, 54, 0xFFFFFF);
 		} else {
 			Minecraft.getMinecraft().getTextureManager().bindTexture(OverlayCreationList.LOADING_TEX);
 			drawScaledCustomSizeModalRect(x, y, 0, 0, 16, 16, 48, 48, 16, 16);
 			x += 24;
 			y += 56;
-			drawCenteredString(fr, "No Selection", x, y, 0xFFFFFF);
+			TextUtil.drawCenteredSplitString(fr, "No Selection", x, y, 54, 0xFFFFFF);
 		}
 	}
 

@@ -26,6 +26,7 @@ public class PacketHandler {
 	public static void init() {
 		INSTANCE.registerMessage(PacketNoSpamChat.Handler.class, PacketNoSpamChat.class, nextID(), Side.CLIENT);
 		INSTANCE.registerMessage(PacketConfigSync.Handler.class, PacketConfigSync.class, nextID(), Side.CLIENT);
+		INSTANCE.registerMessage(MessageDimensionChange.Handler.class, MessageDimensionChange.class, nextID(), Side.SERVER);
 	}
 
 	public static void sendToAllAround(IMessage message, TileEntity te, int range) {

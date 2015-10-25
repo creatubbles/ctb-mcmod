@@ -24,13 +24,13 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.network.PacketHandler;
+import com.creatubbles.repack.endercore.common.Lang;
 import com.creatubbles.repack.endercore.common.config.annot.Comment;
 import com.creatubbles.repack.endercore.common.config.annot.Config;
 import com.creatubbles.repack.endercore.common.config.annot.NoSync;
 import com.creatubbles.repack.endercore.common.config.annot.Range;
 import com.creatubbles.repack.endercore.common.config.annot.RestartReq;
-import com.creatubbles.repack.enderlib.common.Lang;
-import com.creatubbles.repack.enderlib.common.util.Bound;
+import com.creatubbles.repack.endercore.common.util.Bound;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;

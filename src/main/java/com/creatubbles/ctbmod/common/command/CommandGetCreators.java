@@ -1,12 +1,13 @@
 package com.creatubbles.ctbmod.common.command;
 
+import javax.ws.rs.core.Response;
+
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
-import scala.actors.threadpool.Arrays;
 
-import com.creatubbles.ctbmod.common.http.CreatorsRequest;
-import com.creatubbles.ctbmod.common.http.CreatorsRequest.CreatorsResponse;
-import com.creatubbles.ctbmod.common.http.HttpRequestException;
+import com.creatubbles.api.CreatubblesAPI;
+import com.creatubbles.api.request.creator.UsersCreatorsRequest;
+import com.creatubbles.api.response.creator.UserCreatorsResponse;
 import com.creatubbles.repack.endercore.common.util.ChatUtil;
 
 public class CommandGetCreators extends CommandBase {
@@ -23,18 +24,13 @@ public class CommandGetCreators extends CommandBase {
 
 	@Override
 	public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_) {
-		CreatorsRequest req = new CreatorsRequest();
-		try {
-			req.post();
-			if (!req.failed()) {
-				CreatorsResponse resp = req.getSuccessfulResult();
-				p_71515_1_.addChatMessage(ChatUtil.wrap("Found creators: " + Arrays.toString(resp.getCreators())));
-			} else {
-				ChatUtil.sendNoSpamClient("Error: " + req.getFailedResult());
-			}
-		} catch (HttpRequestException e) {
-			e.printStackTrace();
+		UsersCreatorsRequest req = new UsersCreatorsRequest("me", CommandLogin.accessToken);
+		Response resp = req.execute();
+		if (resp.hasEntity()) {
+			UserCreatorsResponse creators = CreatubblesAPI.GSON.fromJson(resp.readEntity(String.class), UserCreatorsResponse.class);
+			p_71515_1_.addChatMessage(ChatUtil.wrap("Found creators: " + creators.creators));
+		} else {
+			ChatUtil.sendNoSpamClient("Error: " + resp.getStatusInfo().getReasonPhrase());
 		}
 	}
-
 }

@@ -9,9 +9,9 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.util.Dimension;
 import org.lwjgl.util.Rectangle;
 
-import com.creatubbles.ctbmod.common.http.Creation;
-import com.creatubbles.ctbmod.common.http.Image;
-import com.creatubbles.ctbmod.common.http.Image.ImageType;
+import com.creatubbles.api.core.Creation;
+import com.creatubbles.ctbmod.common.http.DownloadableImage;
+import com.creatubbles.ctbmod.common.http.DownloadableImage.ImageType;
 import com.creatubbles.repack.endercore.client.gui.button.IconButton;
 
 public class OverlaySelectedCreation extends OverlayBase implements ISelectionCallback {
@@ -38,7 +38,7 @@ public class OverlaySelectedCreation extends OverlayBase implements ISelectionCa
 		int y = yRel + 3;
 
 		if (selected != null) {
-			Image img = selected.getImage();
+            DownloadableImage img = getGui().images.get(selected);
 			ResourceLocation res;
 			int imgWidth = 16, imgHeight = 16;
 			if (img.hasSize(ImageType.FULL_VIEW)) {
@@ -66,7 +66,7 @@ public class OverlaySelectedCreation extends OverlayBase implements ISelectionCa
 
 			x += 24;
 			y += 56;
-			TextUtil.drawCenteredSplitString(fr, EnumChatFormatting.ITALIC + selected.getName(), x, y, 54, 0xFFFFFF);
+			TextUtil.drawCenteredSplitString(fr, EnumChatFormatting.ITALIC + selected.name, x, y, 54, 0xFFFFFF);
 		} else {
 			Minecraft.getMinecraft().getTextureManager().bindTexture(OverlayCreationList.LOADING_TEX);
 			drawScaledCustomSizeModalRect(x, y, 0, 0, 16, 16, 48, 48, 16, 16);

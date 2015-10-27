@@ -2,6 +2,7 @@ package com.creatubbles.ctbmod.client.gui;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import lombok.SneakyThrows;
@@ -17,19 +18,19 @@ import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.creatubbles.api.core.Creation;
+import com.creatubbles.api.core.Creator;
+import com.creatubbles.api.core.User;
+import com.creatubbles.api.request.auth.SignInRequest;
+import com.creatubbles.api.request.creation.GetCreationsRequest;
+import com.creatubbles.api.request.creator.UsersCreatorsRequest;
+import com.creatubbles.api.request.user.UserProfileRequest;
+import com.creatubbles.api.response.creation.GetCreationsResponse;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.creator.ContainerCreator;
 import com.creatubbles.ctbmod.common.creator.TileCreator;
-import com.creatubbles.ctbmod.common.http.Creation;
-import com.creatubbles.ctbmod.common.http.CreationsRequest;
-import com.creatubbles.ctbmod.common.http.CreationsRequest.CreationsResponse;
-import com.creatubbles.ctbmod.common.http.Creator;
-import com.creatubbles.ctbmod.common.http.CreatorsRequest;
-import com.creatubbles.ctbmod.common.http.Image.ImageType;
-import com.creatubbles.ctbmod.common.http.Login;
-import com.creatubbles.ctbmod.common.http.LoginRequest;
-import com.creatubbles.ctbmod.common.http.User;
-import com.creatubbles.ctbmod.common.http.UserRequest;
+import com.creatubbles.ctbmod.common.http.DownloadableImage;
+import com.creatubbles.ctbmod.common.http.DownloadableImage.ImageType;
 import com.creatubbles.repack.endercore.client.gui.GuiContainerBase;
 import com.creatubbles.repack.endercore.client.gui.button.IconButton;
 import com.creatubbles.repack.endercore.client.gui.button.MultiIconButton;
@@ -38,6 +39,7 @@ import com.creatubbles.repack.endercore.client.gui.widget.TextFieldEnder;
 import com.creatubbles.repack.endercore.client.gui.widget.VScrollbar;
 import com.creatubbles.repack.endercore.client.render.EnderWidget;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 
@@ -97,38 +99,33 @@ public class GuiCreator extends GuiContainerBase {
 				
 				if (getUser() == null) {
 					setState(State.LOGGING_IN, true);
-					loginReq = new LoginRequest(new Login(tfEmail.getText(), tfActualPassword.getText()));
-					loginReq.run();
+					loginReq = new SignInRequest(tfEmail.getText(), tfActualPassword.getText());
+					loginReq.execute();
 				}
 
 				checkCancel();
 
-				if (loginReq != null && loginReq.failed()) {
-					if (loginReq.getException() != null) {
-						header = loginReq.getException().getLocalizedMessage();
-					} else {
-						header = loginReq.getFailedResult().getMessage();
-					}
-					header = EnumChatFormatting.YELLOW.toString().concat(header);
+				if (loginReq != null && !loginReq.wasSuccessful()) {
+					header = EnumChatFormatting.YELLOW.toString().concat(loginReq.getResponse().message);
 					loginReq = null;
 					logout();
-				} else {
-					if (getUser() == null) {
-						userReq = new UserRequest(loginReq.getSuccessfulResult().getAccessToken());
-						userReq.run();
-						CTBMod.cache.activateUser(userReq.getSuccessfulResult());
-						CTBMod.cache.getActiveUser().setAccessToken(loginReq.getSuccessfulResult().getAccessToken());
-						CTBMod.cache.save();
-					}
+                } else {
+                    if (getUser() == null) {
+                        userReq = new UserProfileRequest(loginReq.getResponse().access_token);
+                        userReq.execute();
+                        CTBMod.cache.activateUser(userReq.getResponse().user);
+                        CTBMod.cache.getActiveUser().access_token = loginReq.getResponse().access_token;
+                        CTBMod.cache.save();
+                    }
 
-					checkCancel();
+                    checkCancel();
 
-					if (getCreator() == null) {
-						setState(State.LOGGING_IN, true);
-						CreatorsRequest creatorsReq = new CreatorsRequest(Integer.toString(getUser().getId()));
-						creatorsReq.run();
-						CTBMod.cache.setCreators(creatorsReq.getSuccessfulResult().getCreators());
-					}
+                    if (getCreator() == null) {
+                        setState(State.LOGGING_IN, true);
+                        UsersCreatorsRequest creatorsReq = new UsersCreatorsRequest(Integer.toString(getUser().id));
+                        creatorsReq.execute();
+                        CTBMod.cache.setCreators(creatorsReq.getResponse().creators.toArray(new Creator[0]));
+                    }
 
 					checkCancel();
 
@@ -137,31 +134,34 @@ public class GuiCreator extends GuiContainerBase {
 						setState(State.LOGGING_IN, true);
 						for (Creator c : CTBMod.cache.getCreators()) {
 							int page = 1;
-							CreationsRequest creationsReq = new CreationsRequest(c.getId());
-							creationsReq.run();
-							CreationsResponse resp = creationsReq.getSuccessfulResult();
-							creations = ArrayUtils.addAll(creations, resp.getCreations());
-							while (resp.getPage() < resp.getTotalPages()) {
-								creationsReq = new CreationsRequest(c.getId(), ++page);
-								creationsReq.run();
-								resp = creationsReq.getSuccessfulResult();
-								creations = ArrayUtils.addAll(creations, resp.getCreations());
+							GetCreationsRequest creationsReq = new GetCreationsRequest(c.id);
+							creationsReq.execute();
+							GetCreationsResponse resp = creationsReq.getResponse();
+							creations = ArrayUtils.addAll(creations, resp.creations);
+							while (resp.page < resp.total_pages) {
+								creationsReq = new GetCreationsRequest(c.id, ++page);
+								creationsReq.execute();
+								resp = creationsReq.getResponse();
+								creations = ArrayUtils.addAll(creations, resp.creations);
 							}
 						}
 						creationList.setCreations(creations);
-						CTBMod.cache.setCreationCache(creations);
-					}
+                        CTBMod.cache.setCreationCache(creations);
+                    }
 
-					checkCancel();
-					// Once we have all creation data, we can say we are "logged in" while the images download
-					setState(State.LOGGED_IN, true);
-					
-					for (Creation c : creations) {
-						c.getImage().download(ImageType.LIST_VIEW);
-						checkCancel();
-					}
-				}
-			} catch (InterruptedException e) {
+                    checkCancel();
+                    // Once we have all creation data, we can say we are "logged in" while the images download
+                    setState(State.LOGGED_IN, true);
+
+                    for (Creation c : creations) {
+                        DownloadableImage img = new DownloadableImage(c.image);
+                        images.put(c, img);
+                        img.setOwner(c);
+                        img.download(ImageType.LIST_VIEW);
+                        checkCancel();
+                    }
+                }
+            } catch (InterruptedException e) {
 				CTBMod.logger.info("Logging in canceled!");
 				// Clear the cache
 				logout();
@@ -199,9 +199,14 @@ public class GuiCreator extends GuiContainerBase {
 	private static final String DEFAULT_HEADER = "Please log in to Creatubbles:";
 	
 	static final ResourceLocation OVERLAY_TEX = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/creator_overlays.png");
-	static final User DUMMY_USER = new User(0, "No Users", "", "", "", false, false);
+	static final User DUMMY_USER = new User();
+	static {
+	    DUMMY_USER.username = "No Users";
+	}
 
 	private Multimap<IHideable, State> visibleMap = MultimapBuilder.hashKeys().enumSetValues(State.class).build();
+	
+	Map<Creation, DownloadableImage> images = Maps.newHashMap();
 	
 	private TextFieldEnder tfEmail, tfActualPassword;
 	private VScrollbar scrollbar;
@@ -218,8 +223,8 @@ public class GuiCreator extends GuiContainerBase {
 	
 	private Thread thread;
 	
-	private LoginRequest loginReq;
-	private UserRequest userReq;
+	private SignInRequest loginReq;
+	private UserProfileRequest userReq;
 
 	private String header = DEFAULT_HEADER;
 	
@@ -283,13 +288,13 @@ public class GuiCreator extends GuiContainerBase {
 					System.out.println("!");
 				}
 				FontRenderer fr = getFontRenderer();
-				return new java.awt.Rectangle(25, 110, fr.getStringWidth(getUser().getUsername()), 8);
+				return new java.awt.Rectangle(25, 110, fr.getStringWidth(getUser().username), 8);
 			}
 
 			@Override
 			protected void updateText() {
 				User u = getUser();
-				setToolTipText(StringUtils.capitalize(u.getRole()), getCreator().getAge(), u.getCountry());
+				setToolTipText(StringUtils.capitalize(u.role), getCreator().age, u.country);
 			}
 		};
 		addToolTip(userInfo);
@@ -406,7 +411,7 @@ public class GuiCreator extends GuiContainerBase {
 			
 			x += 25;
 			y += 110;
-			drawString(getFontRenderer(), getUser().getUsername(), x, y, 0xFFFFFF);
+			drawString(getFontRenderer(), getUser().username, x, y, 0xFFFFFF);
 			
 			x = guiLeft + 90;
 			y = guiTop + 12;

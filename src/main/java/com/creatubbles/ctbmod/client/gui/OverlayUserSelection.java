@@ -11,8 +11,8 @@ import net.minecraft.client.gui.FontRenderer;
 
 import org.lwjgl.util.Dimension;
 
+import com.creatubbles.api.core.User;
 import com.creatubbles.ctbmod.CTBMod;
-import com.creatubbles.ctbmod.common.http.User;
 import com.creatubbles.repack.endercore.api.client.gui.IGuiScreen;
 import com.google.common.collect.Lists;
 
@@ -28,7 +28,7 @@ public class OverlayUserSelection extends OverlayBase {
 		private UserAndLocation(User user, Point p) {
 			this.user = user;
 			this.location = p;
-			this.bounds = createBounds(user.getUsername());
+			this.bounds = createBounds(user.username);
 		}
 
 		private Rectangle createBounds(String username) {
@@ -101,7 +101,7 @@ public class OverlayUserSelection extends OverlayBase {
 		for (UserAndLocation u : list) {
 			Point p = u.getLocation();
 			boolean hover = isMouseIn(mouseX, mouseY, u.getBounds());
-			drawCenteredString(Minecraft.getMinecraft().fontRendererObj, u.getUser().getUsername(), p.x, p.y, hover ? 0xFFFF00 : 0xFFFFFF);
+			drawCenteredString(Minecraft.getMinecraft().fontRendererObj, u.getUser().username, p.x, p.y, hover ? 0xFFFF00 : 0xFFFFFF);
 		}
 	}
 

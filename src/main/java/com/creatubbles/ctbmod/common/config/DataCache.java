@@ -11,9 +11,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 
-import com.creatubbles.ctbmod.common.http.Creation;
-import com.creatubbles.ctbmod.common.http.Creator;
-import com.creatubbles.ctbmod.common.http.User;
+import com.creatubbles.api.core.Creation;
+import com.creatubbles.api.core.Creator;
+import com.creatubbles.api.core.User;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
@@ -79,9 +79,9 @@ public class DataCache {
 		}
 		this.creators = Arrays.copyOf(creators, creators.length);
 		if (getActiveUser() != null) {
-			int userId = getActiveUser().getId();
+			int userId = getActiveUser().id;
 			for (Creator c : creators) {
-				if (c.getUserId() == userId) {
+				if (c.creator_user_id == userId) {
 					activeCreator = c;
 				}
 			}

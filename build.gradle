@@ -57,8 +57,6 @@ repositories {
 dependencies {
     compile "org.projectlombok:lombok:1.16.6"
     shade 'com.creatubbles.api:creatubbles-wsapi:1.0.0-4'
-    shade 'org.apache.httpcomponents:httpcore:4.3.2'
-    shade "org.apache.httpcomponents:httpclient:4.3.3"
 }
 
 jar {

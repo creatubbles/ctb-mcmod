@@ -2,6 +2,7 @@ package com.creatubbles.ctbmod.common.painting;
 
 import lombok.Getter;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -39,6 +40,11 @@ public class TilePainting extends TileEntityBase {
     private void createImage() {
         image = new DownloadableImage(creation.image, creation);
         image.download(ImageType.FULL_VIEW);
+    }
+
+    @Override
+    public AxisAlignedBB getRenderBoundingBox() {
+        return BlockPainting.getCompleteBoundingBox(getWorld(), getPos());
     }
 
     @Override

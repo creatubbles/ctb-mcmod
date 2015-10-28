@@ -44,6 +44,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         setHardness(0.25f);
         setStepSound(soundTypeCloth);
         setDefaultState(blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(DUMMY, false));
+        setItemBlockClass(ItemBlockPainting.class);
     }
 
     @Override
@@ -147,16 +148,22 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
 
     @Override
     public AxisAlignedBB getSelectedBoundingBox(World worldIn, BlockPos pos) {
+        return getCompleteBoundingBox(worldIn, pos);
+    }
+
+    public static AxisAlignedBB getCompleteBoundingBox(World worldIn, BlockPos pos) {
         EnumFacing facing = ((EnumFacing) getState(worldIn, pos).getValue(FACING));
         EnumFacing ext = facing.rotateYCCW();
         TilePainting te = getDataPainting(worldIn, pos);
         pos = te.getPos();
-        AxisAlignedBB bb = super.getSelectedBoundingBox(worldIn, pos);
+        BlockPainting painting = CTBMod.painting;
+        AxisAlignedBB bb = new AxisAlignedBB(pos.getX() + painting.minX, pos.getY() + painting.minY, pos.getZ() + painting.minZ, pos.getX() + painting.maxX, pos.getY() + painting.maxY, pos.getZ()
+                + painting.maxZ);
         AxisAlignedBB corner = bb.offset(ext.getFrontOffsetX() * (te.getWidth() - 1), te.getHeight() - 1, ext.getFrontOffsetZ() * (te.getWidth() - 1));
         return bb.union(corner);
     }
-    
-    private TilePainting getDataPainting(IBlockAccess world, BlockPos pos) {
+
+    private static TilePainting getDataPainting(IBlockAccess world, BlockPos pos) {
         TileEntity te = world.getTileEntity(pos);
         if (te instanceof TilePainting) {
             return (TilePainting) te;
@@ -166,10 +173,10 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         return null;
     }
 
-    private IBlockState getState(IBlockAccess world, BlockPos pos) {
+    private static IBlockState getState(IBlockAccess world, BlockPos pos) {
         IBlockState state = world.getBlockState(pos);
-        if (state.getBlock() == this) {
-            if (state.getValue(DUMMY).equals(this)) {
+        if (state.getBlock() == CTBMod.painting) {
+            if (state.getValue(DUMMY).equals(CTBMod.painting)) {
                 return getState(world, getDataPainting(world, pos).getPos());
             }
             return state;
@@ -192,11 +199,6 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
 
     protected BlockState createBlockState() {
         return new BlockState(this, FACING, DUMMY);
-    }
-
-    @Override
-    public int getRenderType() {
-        return -1;
     }
 
     @Override

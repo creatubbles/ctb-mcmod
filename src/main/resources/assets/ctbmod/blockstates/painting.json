@@ -1,0 +1,12 @@
+{
+    "variants": {
+        "dummy=false,facing=east": { "model": "ctbmod:painting", "x": 90, "y": 90 },
+		"dummy=true,facing=east": { "model": "ctbmod:painting", "x": 90, "y": 90 },
+        "dummy=false,facing=west": { "model": "ctbmod:painting", "x": 90, "y": 270 },
+        "dummy=true,facing=west": { "model": "ctbmod:painting", "x": 90, "y": 270 },
+        "dummy=false,facing=south" : { "model": "ctbmod:painting", "x": 90, "y": 180 },
+        "dummy=true,facing=south" : { "model": "ctbmod:painting", "x": 90, "y": 180 },
+        "dummy=false,facing=north" : { "model": "ctbmod:painting", "x": 90 },
+		"dummy=true,facing=north" : { "model": "ctbmod:painting", "x": 90 }
+    }
+}

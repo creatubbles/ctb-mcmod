@@ -1,5 +1,7 @@
 package com.creatubbles.repack.endercore.common;
 
+import java.util.List;
+
 import javax.annotation.Nullable;
 
 import net.minecraft.block.Block;
@@ -12,10 +14,12 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import com.creatubbles.ctbmod.CTBMod;
+import com.google.common.collect.Lists;
 
 public abstract class BlockEnder<T extends TileEntityBase> extends Block {
 
@@ -68,22 +72,53 @@ public abstract class BlockEnder<T extends TileEntityBase> extends Block {
 	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ) {
 		if (playerIn.isSneaking()) {
 			return false;
-		}
-		if (!worldIn.isRemote) {
-			return openGui(worldIn, pos, playerIn, side);
-		}
-		return false;
-	}
+        }
+        return openGui(worldIn, pos, playerIn, side);
+    }
 
-	protected boolean openGui(World world, BlockPos pos, EntityPlayer entityPlayer, EnumFacing side) {
-		return false;
-	}
+    protected boolean openGui(World world, BlockPos pos, EntityPlayer entityPlayer, EnumFacing side) {
+        return false;
+    }
 
-	protected void processDrop(World world, int x, int y, int z, @Nullable T te, ItemStack drop) {
-	}
+    public boolean doNormalDrops(IBlockAccess world, BlockPos pos) {
+        return true;
+    }
 
-	@SuppressWarnings("unchecked")
-	protected T getTileEntity(World world, BlockPos pos) {
+    @Override
+    public boolean removedByPlayer(World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
+        if (willHarvest) {
+            return true;
+        }
+        return super.removedByPlayer(world, pos, player, willHarvest);
+    }
+
+    @Override
+    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te) {
+        super.harvestBlock(worldIn, player, pos, state, te);
+        worldIn.setBlockToAir(pos);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<ItemStack> getDrops(IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
+        if (doNormalDrops(world, pos)) {
+            return super.getDrops(world, pos, state, fortune);
+        }
+        return Lists.newArrayList(getNBTDrop(world, pos, (T) world.getTileEntity(pos)));
+    }
+
+    public ItemStack getNBTDrop(IBlockAccess world, BlockPos pos, T te) {
+        int meta = damageDropped(world.getBlockState(pos));
+        ItemStack itemStack = new ItemStack(this, 1, meta);
+        processDrop(world, pos, te, itemStack);
+        return itemStack;
+    }
+
+    protected void processDrop(IBlockAccess world, BlockPos pos, @Nullable T te, ItemStack drop) {
+    }
+
+    @SuppressWarnings("unchecked")
+    protected T getTileEntity(World world, BlockPos pos) {
 		TileEntity te = world.getTileEntity(pos);
 		if (teClass.isInstance(te)) {
 			return (T) te;

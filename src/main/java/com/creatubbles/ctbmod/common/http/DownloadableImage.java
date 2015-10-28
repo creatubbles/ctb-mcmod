@@ -11,7 +11,6 @@ import java.util.concurrent.Executors;
 import javax.imageio.ImageIO;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.ToString;
 import lombok.Value;
@@ -28,7 +27,10 @@ import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.Image;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.config.DataCache;
+import com.creatubbles.ctbmod.common.util.JsonUtil;
 import com.google.common.collect.Maps;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 @ToString
 public class DownloadableImage {
@@ -38,7 +40,7 @@ public class DownloadableImage {
 		FULL_VIEW,
 		LIST_VIEW;
 
-		public String toString() {
+		public String urlString() {
 			return name().toLowerCase(Locale.US);
 		}
 	}
@@ -89,28 +91,38 @@ public class DownloadableImage {
 	private final String fileName, urlBase;
 
 	@Getter
-	@Setter
 	private Creation owner;
 
-	private final EnumMap<ImageType, ResourceLocation> locations = Maps.newEnumMap(ImageType.class);
-	private EnumMap<ImageType, Size> sizes = Maps.newEnumMap(ImageType.class);
+	private transient final EnumMap<ImageType, ResourceLocation> locations = Maps.newEnumMap(ImageType.class);
+	private transient EnumMap<ImageType, Size> sizes = Maps.newEnumMap(ImageType.class);
 
-	public DownloadableImage(Image image) {
+    public DownloadableImage() {
+        fileName = "";
+        urlBase = "";
+        initDefaults();
+    }
+    
+	public DownloadableImage(Image image, Creation owner) {
 		fileName = image.url.substring(image.url.lastIndexOf("/") + 1, image.url.length());
-		urlBase = image.url.substring(0, image.url.indexOf("original"));
-		for (ImageType type : ImageType.values()) {
-			locations.put(type, new ResourceLocation("missingno"));
-			sizes.put(type, new Size());
-		}
-	}
+        urlBase = image.url.substring(0, image.url.indexOf("original"));
+        this.owner = owner;
+        initDefaults();
+    }
 
-	/**
-	 * Gets the bindable {@link ResourceLocation} for the given {@link ImageType type}.
-	 * 
-	 * @param type
-	 *            The {@link ImageType} to get the resource for.
-	 * @return A {@link ResourceLocation}, which may be a dummy if this Image has not been downloaded, or is in the process of being downloaded.
-	 */
+    private void initDefaults() {
+        for (ImageType type : ImageType.values()) {
+            locations.put(type, new ResourceLocation("missingno"));
+            sizes.put(type, new Size());
+        }
+    }
+
+    /**
+     * Gets the bindable {@link ResourceLocation} for the given {@link ImageType type}.
+     * 
+     * @param type
+     *            The {@link ImageType} to get the resource for.
+     * @return A {@link ResourceLocation}, which may be a dummy if this Image has not been downloaded, or is in the process of being downloaded.
+     */
 	public ResourceLocation getResource(ImageType type) {
 		return locations.get(type);
 	}
@@ -174,7 +186,7 @@ public class DownloadableImage {
 	public void download(final ImageType type) {
 		if (locations.get(type) != MISSING_TEXTURE) {
 			TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
-			final String filepath = "creations/" + owner.user_id + "/" + type + "/" + owner.id + ".jpg";
+			final String filepath = "creations/" + owner.user_id + "/" + type.urlString() + "/" + owner.id + ".jpg";
 			final ResourceLocation res = new ResourceLocation(CTBMod.DOMAIN, filepath);
 			ITextureObject texture = texturemanager.getTexture(res);
 
@@ -185,7 +197,7 @@ public class DownloadableImage {
 					@Override
 					@SneakyThrows
 					public void run() {
-						String url = urlBase.concat(type.toString()).concat("/").concat(fileName);
+						String url = urlBase.concat(type.urlString()).concat("/").concat(fileName);
 						File cache = new File(DataCache.cacheFolder, filepath);
 						BufferedImage image = null;
 						if (cache.exists()) {
@@ -245,5 +257,11 @@ public class DownloadableImage {
 	 */
 	public boolean hasSize(ImageType type) {
 		return sizes.get(type).getHeight() != 0;
+	}
+	
+	public static GsonBuilder registerGsonAdapters(GsonBuilder builder) {
+	    builder.registerTypeAdapter(new TypeToken<EnumMap<ImageType, ResourceLocation>>(){}.getType(), new JsonUtil.EnumMapInstanceCreator<ImageType, ResourceLocation>(ImageType.class));
+	    builder.registerTypeAdapter(new TypeToken<EnumMap<ImageType, Size>>(){}.getType(), new JsonUtil.EnumMapInstanceCreator<ImageType, Size>(ImageType.class));
+	    return builder;
 	}
 }

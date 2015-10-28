@@ -154,9 +154,8 @@ public class GuiCreator extends GuiContainerBase {
                     setState(State.LOGGED_IN, true);
 
                     for (Creation c : creations) {
-                        DownloadableImage img = new DownloadableImage(c.image);
+                        DownloadableImage img = new DownloadableImage(c.image, c);
                         images.put(c, img);
-                        img.setOwner(c);
                         img.download(ImageType.LIST_VIEW);
                         checkCancel();
                     }

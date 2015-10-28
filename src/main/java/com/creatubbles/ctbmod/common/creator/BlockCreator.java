@@ -34,12 +34,14 @@ public class BlockCreator extends BlockEnder<TileCreator> implements IGuiHandler
 	}
 
 	@Override
-	protected boolean openGui(World world, BlockPos pos, EntityPlayer entityPlayer, EnumFacing side) {
-		entityPlayer.openGui(CTBMod.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
-		return true;
-	}
+    protected boolean openGui(World world, BlockPos pos, EntityPlayer entityPlayer, EnumFacing side) {
+        if (!world.isRemote) {
+            entityPlayer.openGui(CTBMod.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
+        }
+        return true;
+    }
 
-	@Override
+    @Override
 	public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
 		TileCreator te = getTileEntity(world, new BlockPos(x, y, z));
 		return te == null ? null : new ContainerCreator(player.inventory, te);

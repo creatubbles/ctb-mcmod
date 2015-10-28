@@ -83,26 +83,28 @@ public class RenderPainting extends TileEntitySpecialRenderer {
 
             renderer.startDrawingQuads();
             
-            renderer.addVertexWithUV(bounds.getX(), bounds.getY() + bounds.getHeight(), 0.01, 0, 0);
-            renderer.addVertexWithUV(bounds.getX(), bounds.getY(), 0.01, 0, maxV);
-            renderer.addVertexWithUV(bounds.getX() + bounds.getWidth(), bounds.getY(), 0.01, maxU, maxV);
-            renderer.addVertexWithUV(bounds.getX() + bounds.getWidth(), bounds.getY() + bounds.getHeight(), 0.01, maxU, 0);
+            double depth = 1/16d + 0.005;
+            
+            renderer.addVertexWithUV(bounds.getX(), bounds.getY() + bounds.getHeight(), depth, 0, 0);
+            renderer.addVertexWithUV(bounds.getX(), bounds.getY(), depth, 0, maxV);
+            renderer.addVertexWithUV(bounds.getX() + bounds.getWidth(), bounds.getY(), depth, maxU, maxV);
+            renderer.addVertexWithUV(bounds.getX() + bounds.getWidth(), bounds.getY() + bounds.getHeight(), depth, maxU, 0);
             
             renderer.draw();
-            
-            GL11.glDisable(GL11.GL_CULL_FACE);
-            Minecraft.getMinecraft().renderEngine.bindTexture(BACKGROUND);
-            
-            renderer.startDrawingQuads();
-            
-            renderer.addVertexWithUV(painting.getWidth(), painting.getHeight(), 0.005, 1, 0);
-            renderer.addVertexWithUV(0, painting.getHeight(), 0.005, 0, 0);
-            renderer.addVertexWithUV(0, 0, 0.005, 0, 1);
-            renderer.addVertexWithUV(painting.getWidth(), 0, 0.005, 1, 1);
-            
-            renderer.draw();
-            GL11.glEnable(GL11.GL_LIGHTING);
-            GL11.glEnable(GL11.GL_CULL_FACE);
+//            
+//            GL11.glDisable(GL11.GL_CULL_FACE);
+//            Minecraft.getMinecraft().renderEngine.bindTexture(BACKGROUND);
+//            
+//            renderer.startDrawingQuads();
+//            
+//            renderer.addVertexWithUV(painting.getWidth(), painting.getHeight(), 0.005, 1, 0);
+//            renderer.addVertexWithUV(0, painting.getHeight(), 0.005, 0, 0);
+//            renderer.addVertexWithUV(0, 0, 0.005, 0, 1);
+//            renderer.addVertexWithUV(painting.getWidth(), 0, 0.005, 1, 1);
+//            
+//            Tessellator.getInstance().draw();
+//            GL11.glEnable(GL11.GL_LIGHTING);
+//            GL11.glEnable(GL11.GL_CULL_FACE);
             renderer.setTranslation(0, 0, 0);
             
             GL11.glPopMatrix();

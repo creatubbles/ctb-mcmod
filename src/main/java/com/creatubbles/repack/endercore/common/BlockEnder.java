@@ -4,10 +4,12 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
+import lombok.Setter;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
@@ -25,6 +27,9 @@ public abstract class BlockEnder<T extends TileEntityBase> extends Block {
 
 	protected final Class<? extends T> teClass;
 	protected final String name;
+	
+	@Setter
+	private Class<? extends ItemBlock> itemBlockClass;
 
 	protected BlockEnder(String name, Class<? extends T> teClass) {
 		this(name, teClass, new Material(MapColor.ironColor));
@@ -32,19 +37,23 @@ public abstract class BlockEnder<T extends TileEntityBase> extends Block {
 
 	protected BlockEnder(String name, Class<? extends T> teClass, Material mat) {
 		super(mat);
-		this.teClass = teClass;
-		this.name = name;
-		setHardness(0.5F);
-		setBlockName(name);
-		setStepSound(Block.soundTypeMetal);
-		setHarvestLevel("pickaxe", 0);
-	}
+        this.teClass = teClass;
+        this.name = name;
+        setHardness(0.5F);
+        setBlockName(name);
+        setStepSound(Block.soundTypeMetal);
+        setHarvestLevel("pickaxe", 0);
+    }
 
-	protected void init() {
-		GameRegistry.registerBlock(this, name);
-		if (teClass != null) {
-			GameRegistry.registerTileEntity(teClass, name + "TileEntity");
-		}
+    protected void init() {
+        if (itemBlockClass != null) {
+            GameRegistry.registerBlock(this, itemBlockClass, name);
+        } else {
+            GameRegistry.registerBlock(this, name);
+        }
+        if (teClass != null) {
+            GameRegistry.registerTileEntity(teClass, name + "TileEntity");
+        }
 	}
 
 	@Override

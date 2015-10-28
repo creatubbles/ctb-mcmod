@@ -36,6 +36,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         super("painting", TilePainting.class, Material.cloth);
         setHardness(0.25f);
         setStepSound(soundTypeCloth);
+        setItemBlockClass(ItemBlockPainting.class);
     }
 
     @Override
@@ -57,11 +58,11 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         }
     }
 
-    public ForgeDirection getFacing(IBlockAccess world, int x, int y, int z) {
+    public static ForgeDirection getFacing(IBlockAccess world, int x, int y, int z) {
     	return getFacing(world.getBlockMetadata(x, y, z));
     }
     
-    public ForgeDirection getFacing(int meta) {
+    public static ForgeDirection getFacing(int meta) {
     	return ForgeDirection.getOrientation((meta & 3) + 2);
     }
     
@@ -148,19 +149,23 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         }
     }
 
-    @Override
-    public AxisAlignedBB getSelectedBoundingBoxFromPool(World world, int x, int y, int z) {
-    	BlockCoord pos = new BlockCoord(x, y, z);
-        ForgeDirection facing = getFacing(world, pos.x, pos.y, pos.z);
-        ForgeDirection ext = facing.getRotation(ForgeDirection.DOWN);
-        TilePainting te = getDataPainting(world, pos);
-        pos = new BlockCoord(te);
-        AxisAlignedBB bb = super.getSelectedBoundingBoxFromPool(world, pos.x, pos.y, pos.z);
-        AxisAlignedBB corner = bb.offset(ext.offsetX * (te.getWidth() - 1), te.getHeight() - 1, ext.offsetZ * (te.getWidth() - 1));
-        return bb.func_111270_a(corner); // union
-    }
-    
-    private TilePainting getDataPainting(IBlockAccess world, BlockCoord pos) {
+	public AxisAlignedBB getSelectedBoundingBoxFromPool(World world, int x, int y, int z) {
+		return getCompleteBoundingBox(world, x, y, z);
+	}
+
+	public static AxisAlignedBB getCompleteBoundingBox(World world, int x, int y, int z) {
+		ForgeDirection facing = getFacing(world, x, y, z);
+		ForgeDirection ext = facing.getRotation(ForgeDirection.DOWN);
+		BlockCoord pos = new BlockCoord(x, y, z);
+		TilePainting te = getDataPainting(world, pos);
+		pos = new BlockCoord(te);
+		BlockPainting painting = CTBMod.painting;
+		AxisAlignedBB bb = AxisAlignedBB.getBoundingBox(pos.x + painting.minX, pos.y + painting.minY, pos.z + painting.minZ, pos.x + painting.maxX, pos.y + painting.maxY, pos.z + painting.maxZ);
+		AxisAlignedBB corner = bb.offset(ext.offsetX * (te.getWidth() - 1), te.getHeight() - 1, ext.offsetZ * (te.getWidth() - 1));
+		return bb.func_111270_a(corner); // union
+	}
+
+    private static TilePainting getDataPainting(IBlockAccess world, BlockCoord pos) {
         TileEntity te = pos.getTileEntity(world);
         if (te instanceof TilePainting) {
             return (TilePainting) te;
@@ -173,11 +178,6 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
     @Override
     public int onBlockPlaced(World worldIn, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int meta) {
         return side - 2;
-    }
-
-    @Override
-    public int getRenderType() {
-        return -1;
     }
 
     @Override

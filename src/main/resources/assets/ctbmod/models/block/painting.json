@@ -1,7 +1,8 @@
 {
 	"ambientocclusion": false,	
 	"textures": {
-        "base": "ctbmod:blocks/painting_bg"
+        "base": "ctbmod:blocks/painting_bg",
+        "particle": "ctbmod:blocks/painting_bg"
     },
     "elements": [
         {   "from": [ 0, 0, 0 ],

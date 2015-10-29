@@ -4,12 +4,12 @@ package com.creatubbles.ctbmod.client.render;
 import java.awt.geom.Rectangle2D;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
 
@@ -21,8 +21,6 @@ import com.creatubbles.ctbmod.common.painting.TilePainting;
 
 public class RenderPainting extends TileEntitySpecialRenderer {
     
-    private static final ResourceLocation BACKGROUND = new ResourceLocation("ctbmod", "textures/blocks/painting_bg.png");
-
     @Override
     public void renderTileEntityAt(TileEntity te, double x, double y, double z, float partialTicks, int destroyStage) {
         if (te instanceof TilePainting && ((TilePainting)te).getImage() != null) {
@@ -80,12 +78,12 @@ public class RenderPainting extends TileEntitySpecialRenderer {
                 break;
             }
             
-            
             GL11.glDisable(GL11.GL_LIGHTING);
-
+            GlStateManager.doPolygonOffset(-3.0F, -1.5F);
+            GlStateManager.enablePolygonOffset();
             renderer.startDrawingQuads();
             
-            double depth = 1/16d + 0.005;
+            double depth = 1/16d;
             
             renderer.addVertexWithUV(bounds.getX(), bounds.getY() + bounds.getHeight(), depth, 0, 0);
             renderer.addVertexWithUV(bounds.getX(), bounds.getY(), depth, 0, maxV);
@@ -93,22 +91,11 @@ public class RenderPainting extends TileEntitySpecialRenderer {
             renderer.addVertexWithUV(bounds.getX() + bounds.getWidth(), bounds.getY() + bounds.getHeight(), depth, maxU, 0);
             
             Tessellator.getInstance().draw();
-//            
-//            GL11.glDisable(GL11.GL_CULL_FACE);
-//            Minecraft.getMinecraft().renderEngine.bindTexture(BACKGROUND);
-//            
-//            renderer.startDrawingQuads();
-//            
-//            renderer.addVertexWithUV(painting.getWidth(), painting.getHeight(), 0.005, 1, 0);
-//            renderer.addVertexWithUV(0, painting.getHeight(), 0.005, 0, 0);
-//            renderer.addVertexWithUV(0, 0, 0.005, 0, 1);
-//            renderer.addVertexWithUV(painting.getWidth(), 0, 0.005, 1, 1);
-//            
-//            Tessellator.getInstance().draw();
-//            GL11.glEnable(GL11.GL_LIGHTING);
-//            GL11.glEnable(GL11.GL_CULL_FACE);
             renderer.setTranslation(0, 0, 0);
             
+            GlStateManager.doPolygonOffset(0.0F, 0.0F);
+            GlStateManager.disablePolygonOffset();
+            GL11.glEnable(GL11.GL_LIGHTING);
             GL11.glPopMatrix();
             GL11.glPopMatrix();
         }

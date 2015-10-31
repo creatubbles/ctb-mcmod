@@ -64,6 +64,8 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
                 ItemStack stack = new ItemStack(itemIn);
                 stack.setTagCompound(new NBTTagCompound());
                 NBTUtil.writeJsonToNBT(c, stack.getTagCompound());
+                stack.getTagCompound().setInteger("pWidth", 2);
+                stack.getTagCompound().setInteger("pHeight", 2);
                 list.add(stack);
             }
         }
@@ -94,6 +96,8 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
         if (painting != null) {
             painting.setCreation(c);
         }
+        painting.setWidth(placed.getTagCompound().getInteger("pWidth"));
+        painting.setHeight(placed.getTagCompound().getInteger("pHeight"));
         
         ForgeDirection facing = getFacing(world, x, y, z);
         ForgeDirection ext = facing.getRotation(ForgeDirection.DOWN);

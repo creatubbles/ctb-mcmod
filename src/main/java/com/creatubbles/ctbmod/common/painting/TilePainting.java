@@ -1,6 +1,7 @@
 package com.creatubbles.ctbmod.common.painting;
 
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 
@@ -17,6 +18,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class TilePainting extends TileEntityBase {
         
     @Getter
+    @Setter
     private int width, height;
 
     @Getter
@@ -25,11 +27,6 @@ public class TilePainting extends TileEntityBase {
     @SideOnly(Side.CLIENT)
     @Getter(onMethod = @__({ @SideOnly(Side.CLIENT) }))
     private transient DownloadableImage image;
-
-    public TilePainting() {
-        width = 2;
-        height = 2;
-    }
 
     public void setCreation(Creation image) {
         this.creation = image;
@@ -40,7 +37,7 @@ public class TilePainting extends TileEntityBase {
 
     private void createImage() {
         image = new DownloadableImage(creation.image, creation);
-        image.download(ImageType.FULL_VIEW);
+        image.download(ImageType.ORIGINAL);
     }
 
     @Override

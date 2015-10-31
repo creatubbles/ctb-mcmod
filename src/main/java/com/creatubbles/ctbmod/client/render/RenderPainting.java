@@ -28,11 +28,11 @@ public class RenderPainting extends TileEntitySpecialRenderer {
 
             ForgeDirection facing = ForgeDirection.getOrientation(te.getBlockMetadata() & 3 + 2);
 
-            int width = image.getWidth(ImageType.FULL_VIEW);
-            int height = image.getHeight(ImageType.FULL_VIEW);
-            double scaledSize = image.getScaledSize(ImageType.FULL_VIEW);
+            int width = image.getWidth(ImageType.ORIGINAL);
+            int height = image.getHeight(ImageType.ORIGINAL);
+            double scaledSize = image.getScaledSize(ImageType.ORIGINAL);
 
-            ResourceLocation res = image.getResource(ImageType.FULL_VIEW);
+            ResourceLocation res = image.getResource(ImageType.ORIGINAL);
             if (res == DownloadableImage.MISSING_TEXTURE) {
                 res = OverlayCreationList.LOADING_TEX;
                 width = 16;
@@ -46,7 +46,7 @@ public class RenderPainting extends TileEntitySpecialRenderer {
 
             int pSize = Math.min(painting.getWidth(), painting.getHeight());
 
-            // TODO this code is duped between here and OverlaySelectedCreation
+            // TODO this code is duped between here and OverlaySelectedCreation (kinda)
             
             Rectangle2D.Double bounds = new Rectangle2D.Double(2 / 16f + (Math.max(0, painting.getWidth() - pSize) / 2D), 2 / 16f + (Math.max(0, painting.getHeight() - pSize) / 2D), painting.getWidth() - 4 / 16f - (painting.getWidth() - pSize), painting.getHeight() - 4 / 16f - (painting.getHeight() - pSize));
             if (width / painting.getWidth() > height / painting.getHeight()) {
@@ -90,22 +90,39 @@ public class RenderPainting extends TileEntitySpecialRenderer {
             GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
             renderer.startDrawingQuads();
             
+            int c = (int) (0xFF * getColorMultiplierForFace(facing));
+            renderer.setColorOpaque(c, c, c);
+            
             double depth = 1/16d;
             
             renderer.addVertexWithUV(bounds.getX(), bounds.getY() + bounds.getHeight(), depth, 0, 0);
             renderer.addVertexWithUV(bounds.getX(), bounds.getY(), depth, 0, maxV);
             renderer.addVertexWithUV(bounds.getX() + bounds.getWidth(), bounds.getY(), depth, maxU, maxV);
-			renderer.addVertexWithUV(bounds.getX() + bounds.getWidth(), bounds.getY() + bounds.getHeight(), depth, maxU, 0);
+            renderer.addVertexWithUV(bounds.getX() + bounds.getWidth(), bounds.getY() + bounds.getHeight(), depth, maxU, 0);
+            
+            renderer.draw();
+            renderer.setTranslation(0, 0, 0);
 
-			renderer.draw();
-			renderer.setTranslation(0, 0, 0);
-
-			GL11.glPolygonOffset(0, 0);
-			GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
+            GL11.glPolygonOffset(0, 0);
+            GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
             GL11.glEnable(GL11.GL_LIGHTING);
             GL11.glDisable(GL11.GL_BLEND);
             GL11.glPopMatrix();
             GL11.glPopMatrix();
         }
     }
+
+    private static float getColorMultiplierForFace(ForgeDirection face) {
+        if (face == ForgeDirection.UP) {
+            return 1;
+        }
+        if (face == ForgeDirection.DOWN) {
+            return 0.5f;
+        }
+        if (face.offsetX != 0) {
+            return 0.6f;
+        }
+        return 0.8f; // z
+    }
+
 }

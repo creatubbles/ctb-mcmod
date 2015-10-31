@@ -51,10 +51,12 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
     @Override
     public void getSubBlocks(Item itemIn, CreativeTabs tab, List list) {
         if (CTBMod.cache.getCreationCache() != null && CTBMod.cache.getCreationCache().length > 0) {
-            ItemStack stack = new ItemStack(itemIn);
-            stack.setTagCompound(new NBTTagCompound());
-            NBTUtil.writeJsonToNBT(CTBMod.cache.getCreationCache()[3], stack.getTagCompound());
-            list.add(stack);
+            for (Creation c : CTBMod.cache.getCreationCache()) {
+                ItemStack stack = new ItemStack(itemIn);
+                stack.setTagCompound(new NBTTagCompound());
+                NBTUtil.writeJsonToNBT(c, stack.getTagCompound());
+                list.add(stack);
+            }
         }
     }
 
@@ -160,6 +162,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
 		TilePainting te = getDataPainting(world, pos);
 		pos = new BlockCoord(te);
 		BlockPainting painting = CTBMod.painting;
+        painting.setBlockBoundsBasedOnState(world, x, y, z);
 		AxisAlignedBB bb = AxisAlignedBB.getBoundingBox(pos.x + painting.minX, pos.y + painting.minY, pos.z + painting.minZ, pos.x + painting.maxX, pos.y + painting.maxY, pos.z + painting.maxZ);
 		AxisAlignedBB corner = bb.offset(ext.offsetX * (te.getWidth() - 1), te.getHeight() - 1, ext.offsetZ * (te.getWidth() - 1));
 		return bb.func_111270_a(corner); // union

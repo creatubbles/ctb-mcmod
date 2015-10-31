@@ -43,19 +43,20 @@ public class CTBMod {
 	public static BlockCreator creator;
 	public static BlockPainting painting;
 	
-	public static DataCache cache;
+    public static DataCache cache;
 
-	@EventHandler
-	public void preInit(FMLPreInitializationEvent event) {
-		new ConfigProcessor(Configs.class, event.getSuggestedConfigurationFile(), MODID).process(true);
+    @EventHandler
+    public void preInit(FMLPreInitializationEvent event) {
+        new ConfigProcessor(Configs.class, event.getSuggestedConfigurationFile(), MODID).process(true);
 
-		creator = BlockCreator.create();
-		painting = BlockPainting.create();
-	}
+        creator = BlockCreator.create();
+        painting = BlockPainting.create();
 
-	@EventHandler
+        proxy.registerRenderers();
+    }
+
+    @EventHandler
 	public void init(FMLInitializationEvent event) {
-		proxy.registerRenderers();
 		PacketHandler.init();
 		cache = DataCache.loadCache();
 	}

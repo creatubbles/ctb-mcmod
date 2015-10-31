@@ -1,0 +1,6 @@
+{
+    "parent" : "ctbmod:block/painting",
+	"textures": {
+        "base": "ctbmod:blocks/painting_up_down"
+    }
+}

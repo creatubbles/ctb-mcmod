@@ -1,10 +1,13 @@
 package com.creatubbles.ctbmod.common.painting;
 
 import java.util.List;
+import java.util.Set;
 
+import jersey.repackaged.com.google.common.collect.Sets;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyDirection;
+import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
@@ -32,7 +35,8 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
 
     public static final PropertyDirection FACING = PropertyDirection.create("facing", EnumFacing.Plane.HORIZONTAL);
     public static final PropertyBool DUMMY = PropertyBool.create("dummy");
-    
+    public static final PropertyEnum CONNECTION = PropertyEnum.create("connection", ConnectionType.class);
+
     public static BlockPainting create() {
         BlockPainting res = new BlockPainting();
         res.init();
@@ -43,7 +47,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         super("painting", TilePainting.class, Material.cloth);
         setHardness(0.25f);
         setStepSound(soundTypeCloth);
-        setDefaultState(blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(DUMMY, false));
+        setDefaultState(blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(DUMMY, false).withProperty(CONNECTION, ConnectionType.NONE));
         setItemBlockClass(ItemBlockPainting.class);
     }
 
@@ -59,10 +63,12 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
     @Override
     public void getSubBlocks(Item itemIn, CreativeTabs tab, List list) {
         if (CTBMod.cache.getCreationCache() != null && CTBMod.cache.getCreationCache().length > 0) {
-            ItemStack stack = new ItemStack(itemIn);
-            stack.setTagCompound(new NBTTagCompound());
-            NBTUtil.writeJsonToNBT(CTBMod.cache.getCreationCache()[3], stack.getTagCompound());
-            list.add(stack);
+            for (Creation c : CTBMod.cache.getCreationCache()) {
+                ItemStack stack = new ItemStack(itemIn);
+                stack.setTagCompound(new NBTTagCompound());
+                NBTUtil.writeJsonToNBT(c, stack.getTagCompound());
+                list.add(stack);
+            }
         }
     }
 
@@ -157,6 +163,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         TilePainting te = getDataPainting(worldIn, pos);
         pos = te.getPos();
         BlockPainting painting = CTBMod.painting;
+        painting.setBlockBoundsBasedOnState(worldIn, pos);
         AxisAlignedBB bb = new AxisAlignedBB(pos.getX() + painting.minX, pos.getY() + painting.minY, pos.getZ() + painting.minZ, pos.getX() + painting.maxX, pos.getY() + painting.maxY, pos.getZ()
                 + painting.maxZ);
         AxisAlignedBB corner = bb.offset(ext.getFrontOffsetX() * (te.getWidth() - 1), te.getHeight() - 1, ext.getFrontOffsetZ() * (te.getWidth() - 1));
@@ -189,16 +196,44 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         return getDefaultState().withProperty(FACING, facing);
     }
 
+    @Override
     public IBlockState getStateFromMeta(int meta) {
-        return this.getDefaultState().withProperty(FACING, EnumFacing.getHorizontal(meta)).withProperty(DUMMY, (meta & 8) == 1);
+        return this.getDefaultState().withProperty(FACING, EnumFacing.getHorizontal(meta)).withProperty(DUMMY, (meta & 8) != 0);
     }
 
+    @Override
     public int getMetaFromState(IBlockState state) {
         return ((EnumFacing) state.getValue(FACING)).getHorizontalIndex() | (BooleanUtils.toInteger((Boolean) state.getValue(DUMMY)) << 3);
     }
 
+    @Override
     protected BlockState createBlockState() {
-        return new BlockState(this, FACING, DUMMY);
+        return new BlockState(this, FACING, DUMMY, CONNECTION);
+    }
+
+    @Override
+    public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
+        EnumFacing facing = ((EnumFacing) state.getValue(FACING));
+        EnumFacing ext = facing.rotateYCCW();
+        Set<Connections> set = Sets.newHashSet();
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
+                if ((x != 0 || y != 0) && !(x != 0 && y != 0)) {
+                    BlockPos pos2 = pos.add(x * ext.getFrontOffsetX(), y, x * ext.getFrontOffsetZ());
+                    Connections c = Connections.forOffset(x, y);
+                    if (world.getBlockState(pos2).getBlock() == this) {
+                        if (getDataPainting(world, pos) == getDataPainting(world, pos2)) {
+                            set.add(c);
+                        }
+                    }
+                }
+            }
+        }
+        ConnectionType type = ConnectionType.forConnections(set);
+        if (type == null) {
+            type = ConnectionType.NONE;
+        }
+        return state.withProperty(CONNECTION, type);
     }
 
     @Override

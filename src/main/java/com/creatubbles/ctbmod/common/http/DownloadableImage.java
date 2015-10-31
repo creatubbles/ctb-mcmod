@@ -111,7 +111,7 @@ public class DownloadableImage {
 
     private void initDefaults() {
         for (ImageType type : ImageType.values()) {
-            locations.put(type, new ResourceLocation("missingno"));
+            locations.put(type, MISSING_TEXTURE);
             sizes.put(type, new Size());
         }
     }
@@ -184,7 +184,7 @@ public class DownloadableImage {
 	 */
 	@SneakyThrows
 	public void download(final ImageType type) {
-		if (locations.get(type) != MISSING_TEXTURE) {
+		if (locations.get(type) == MISSING_TEXTURE) {
 			TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
 			final String filepath = "creations/" + owner.user_id + "/" + type.urlString() + "/" + owner.id + ".jpg";
 			final ResourceLocation res = new ResourceLocation(CTBMod.DOMAIN, filepath);

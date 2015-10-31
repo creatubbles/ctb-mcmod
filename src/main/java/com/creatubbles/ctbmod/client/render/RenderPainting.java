@@ -10,9 +10,11 @@ import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
 
+import com.creatubbles.ctbmod.client.gui.OverlayCreationList;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
 import com.creatubbles.ctbmod.common.http.DownloadableImage.ImageType;
 import com.creatubbles.ctbmod.common.painting.BlockPainting;
@@ -26,22 +28,31 @@ public class RenderPainting extends TileEntitySpecialRenderer {
         if (te instanceof TilePainting && ((TilePainting)te).getImage() != null) {
             TilePainting painting = (TilePainting) te;
             DownloadableImage image = painting.getImage();
-            if (!image.hasSize(ImageType.FULL_VIEW)) {
-                image.download(ImageType.FULL_VIEW);
-            }
-            
-            EnumFacing facing = (EnumFacing) te.getWorld().getBlockState(te.getPos()).getValue(BlockPainting.FACING);
 
-            Minecraft.getMinecraft().renderEngine.bindTexture(image.getResource(ImageType.FULL_VIEW));
-            
-            WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
+            EnumFacing facing = (EnumFacing) te.getWorld().getBlockState(te.getPos()).getValue(BlockPainting.FACING);
 
             int width = image.getWidth(ImageType.FULL_VIEW);
             int height = image.getHeight(ImageType.FULL_VIEW);
+            double scaledSize = image.getScaledSize(ImageType.FULL_VIEW);
+
+            ResourceLocation res = image.getResource(ImageType.FULL_VIEW);
+            if (res == DownloadableImage.MISSING_TEXTURE) {
+                res = OverlayCreationList.LOADING_TEX;
+                width = 16;
+                height = 16;
+                scaledSize = 16;
+            }
+            
+            Minecraft.getMinecraft().renderEngine.bindTexture(res);
+            
+            WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
+
+            int pSize = Math.min(painting.getWidth(), painting.getHeight());
 
             // TODO this code is duped between here and OverlaySelectedCreation
-            Rectangle2D.Double bounds = new Rectangle2D.Double(2 / 16f, 2 / 16f, painting.getWidth() - 4 / 16f, painting.getHeight() - 4 / 16f);
-            if (width > height) {
+            
+            Rectangle2D.Double bounds = new Rectangle2D.Double(2 / 16f + (Math.max(0, painting.getWidth() - pSize) / 2D), 2 / 16f + (Math.max(0, painting.getHeight() - pSize) / 2D), painting.getWidth() - 4 / 16f - (painting.getWidth() - pSize), painting.getHeight() - 4 / 16f - (painting.getHeight() - pSize));
+            if (width / painting.getWidth() > height / painting.getHeight()) {
                 double h = bounds.height;
                 bounds.height = bounds.getHeight() * ((double) height / width);
                 bounds.y += (h - bounds.getHeight()) / 2;
@@ -51,11 +62,9 @@ public class RenderPainting extends TileEntitySpecialRenderer {
                 bounds.x += (w - bounds.getWidth()) / 2;
             }
 
-            double scaledSize = image.getScaledSize(ImageType.FULL_VIEW);
-
             double maxU = width / scaledSize;
             double maxV = height / scaledSize;
-
+            
             GL11.glPushMatrix();
             GL11.glTranslated(x, y, z);
 
@@ -79,6 +88,7 @@ public class RenderPainting extends TileEntitySpecialRenderer {
             }
             
             GL11.glDisable(GL11.GL_LIGHTING);
+            GL11.glEnable(GL11.GL_BLEND);
             GlStateManager.doPolygonOffset(-3.0F, -1.5F);
             GlStateManager.enablePolygonOffset();
             renderer.startDrawingQuads();
@@ -96,6 +106,7 @@ public class RenderPainting extends TileEntitySpecialRenderer {
             GlStateManager.doPolygonOffset(0.0F, 0.0F);
             GlStateManager.disablePolygonOffset();
             GL11.glEnable(GL11.GL_LIGHTING);
+            GL11.glDisable(GL11.GL_BLEND);
             GL11.glPopMatrix();
             GL11.glPopMatrix();
         }

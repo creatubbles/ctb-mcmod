@@ -211,13 +211,14 @@ public class OverlayCreationList extends OverlayBase {
 
 				ResourceLocation res = img.getResource(type);
 
-				int w = 16, h = 16;
+				int w = 16, h = 16, scaledSize = 16;
 				if (!img.hasSize(type)) {
 					GlStateManager.enableBlend();
 					res = LOADING_TEX;
 				} else {
 					w = img.getWidth(type);
 					h = img.getHeight(type);
+					scaledSize = img.getScaledSize(type);
 				}
 
 				if (res != null) {
@@ -245,7 +246,6 @@ public class OverlayCreationList extends OverlayBase {
 				if (clipV) {
 					v = h - ((float) heightRatio * h);
 				}
-				int scaledSize = img.getScaledSize(type);
 				drawScaledCustomSizeModalRect(x, y + Math.max(0, pastTop), 0, v, w, (int) (h * heightRatio), thumbnailSize, height, scaledSize, scaledSize);
 				GlStateManager.popMatrix();
 			}

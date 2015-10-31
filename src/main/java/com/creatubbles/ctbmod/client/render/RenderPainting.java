@@ -31,11 +31,11 @@ public class RenderPainting extends TileEntitySpecialRenderer {
 
             EnumFacing facing = (EnumFacing) te.getWorld().getBlockState(te.getPos()).getValue(BlockPainting.FACING);
 
-            int width = image.getWidth(ImageType.FULL_VIEW);
-            int height = image.getHeight(ImageType.FULL_VIEW);
-            double scaledSize = image.getScaledSize(ImageType.FULL_VIEW);
+            int width = image.getWidth(ImageType.ORIGINAL);
+            int height = image.getHeight(ImageType.ORIGINAL);
+            double scaledSize = image.getScaledSize(ImageType.ORIGINAL);
 
-            ResourceLocation res = image.getResource(ImageType.FULL_VIEW);
+            ResourceLocation res = image.getResource(ImageType.ORIGINAL);
             if (res == DownloadableImage.MISSING_TEXTURE) {
                 res = OverlayCreationList.LOADING_TEX;
                 width = 16;
@@ -49,7 +49,7 @@ public class RenderPainting extends TileEntitySpecialRenderer {
 
             int pSize = Math.min(painting.getWidth(), painting.getHeight());
 
-            // TODO this code is duped between here and OverlaySelectedCreation
+            // TODO this code is duped between here and OverlaySelectedCreation (kinda)
             
             Rectangle2D.Double bounds = new Rectangle2D.Double(2 / 16f + (Math.max(0, painting.getWidth() - pSize) / 2D), 2 / 16f + (Math.max(0, painting.getHeight() - pSize) / 2D), painting.getWidth() - 4 / 16f - (painting.getWidth() - pSize), painting.getHeight() - 4 / 16f - (painting.getHeight() - pSize));
             if (width / painting.getWidth() > height / painting.getHeight()) {
@@ -93,6 +93,9 @@ public class RenderPainting extends TileEntitySpecialRenderer {
             GlStateManager.enablePolygonOffset();
             renderer.startDrawingQuads();
             
+            int c = (int) (0xFF * getColorMultiplierForFace(facing));
+            renderer.setColorOpaque(c, c, c);
+            
             double depth = 1/16d;
             
             renderer.addVertexWithUV(bounds.getX(), bounds.getY() + bounds.getHeight(), depth, 0, 0);
@@ -102,7 +105,7 @@ public class RenderPainting extends TileEntitySpecialRenderer {
             
             Tessellator.getInstance().draw();
             renderer.setTranslation(0, 0, 0);
-            
+
             GlStateManager.doPolygonOffset(0.0F, 0.0F);
             GlStateManager.disablePolygonOffset();
             GL11.glEnable(GL11.GL_LIGHTING);
@@ -111,4 +114,18 @@ public class RenderPainting extends TileEntitySpecialRenderer {
             GL11.glPopMatrix();
         }
     }
+
+    private static float getColorMultiplierForFace(EnumFacing face) {
+        if (face == EnumFacing.UP) {
+            return 1;
+        }
+        if (face == EnumFacing.DOWN) {
+            return 0.5f;
+        }
+        if (face.getFrontOffsetX() != 0) {
+            return 0.6f;
+        }
+        return 0.8f; // z
+    }
+
 }

@@ -67,6 +67,8 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
                 ItemStack stack = new ItemStack(itemIn);
                 stack.setTagCompound(new NBTTagCompound());
                 NBTUtil.writeJsonToNBT(c, stack.getTagCompound());
+                stack.getTagCompound().setInteger("pWidth", 2);
+                stack.getTagCompound().setInteger("pHeight", 2);
                 list.add(stack);
             }
         }
@@ -80,6 +82,8 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         if (painting != null) {
             painting.setCreation(c);
         }
+        painting.setWidth(placed.getTagCompound().getInteger("pWidth"));
+        painting.setHeight(placed.getTagCompound().getInteger("pHeight"));
         
         EnumFacing facing = ((EnumFacing) getState(worldIn, pos).getValue(FACING));
         EnumFacing ext = facing.rotateYCCW();

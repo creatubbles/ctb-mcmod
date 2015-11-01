@@ -197,10 +197,15 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
 		ForgeDirection ext = facing.getRotation(ForgeDirection.DOWN);
 		BlockCoord pos = new BlockCoord(x, y, z);
 		TilePainting te = getDataPainting(world, pos);
-		pos = new BlockCoord(te);
+		if (te != null) {
+			pos = new BlockCoord(te);
+		}
 		BlockPainting painting = CTBMod.painting;
         painting.setBlockBoundsBasedOnState(world, x, y, z);
 		AxisAlignedBB bb = AxisAlignedBB.getBoundingBox(pos.x + painting.minX, pos.y + painting.minY, pos.z + painting.minZ, pos.x + painting.maxX, pos.y + painting.maxY, pos.z + painting.maxZ);
+		if (te == null) {
+			return bb;
+		}
 		AxisAlignedBB corner = bb.copy().offset(ext.offsetX * (te.getWidth() - 1), te.getHeight() - 1, ext.offsetZ * (te.getWidth() - 1));
 		return bb.func_111270_a(corner); // union
 	}

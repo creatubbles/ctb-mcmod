@@ -112,7 +112,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 					logout();
                 } else {
                     if (getUser() == null) {
-                        userReq = new UserProfileRequest(loginReq.getResponse().access_token);
+                        userReq = new UserProfileRequest("me", loginReq.getResponse().access_token);
                         userReq.execute();
                         CTBMod.cache.activateUser(userReq.getResponse().user);
                         CTBMod.cache.getActiveUser().access_token = loginReq.getResponse().access_token;

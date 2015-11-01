@@ -182,11 +182,16 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         EnumFacing facing = ((EnumFacing) getState(worldIn, pos).getValue(FACING));
         EnumFacing ext = facing.rotateYCCW();
         TilePainting te = getDataPainting(worldIn, pos);
-        pos = te.getPos();
+        if (te != null) {
+            pos = te.getPos();
+        }
         BlockPainting painting = CTBMod.painting;
         painting.setBlockBoundsBasedOnState(worldIn, pos);
         AxisAlignedBB bb = new AxisAlignedBB(pos.getX() + painting.minX, pos.getY() + painting.minY, pos.getZ() + painting.minZ, pos.getX() + painting.maxX, pos.getY() + painting.maxY, pos.getZ()
                 + painting.maxZ);
+        if (te == null) {
+            return bb;
+        }
         AxisAlignedBB corner = bb.offset(ext.getFrontOffsetX() * (te.getWidth() - 1), te.getHeight() - 1, ext.getFrontOffsetZ() * (te.getWidth() - 1));
         return bb.union(corner);
     }

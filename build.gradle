@@ -63,8 +63,8 @@ dependencies {
 jar {
     from { configurations.exportedCompile.collect { it.isDirectory() ? it : zipTree(it) } }
     configurations.shade.each { dep ->
-        from(project.zipTree(dep)){
-            exclude 'META-INF', 'META-INF/**'
+        from(project.zipTree(dep)) {
+            exclude 'META-INF/*', 'META-INF/maven/**'
         }
     }
     manifest {

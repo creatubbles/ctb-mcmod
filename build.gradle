@@ -56,7 +56,7 @@ repositories {
 
 dependencies {
     compile "org.projectlombok:lombok:1.16.6"
-    shade 'com.creatubbles.api:creatubbles-wsapi:1.0.0-5'
+    shade 'com.creatubbles.api:creatubbles-wsapi:1.0.0-6'
 	shade "team.chisel.ctmlib:CTMLib:${ctmlib_version}"
 }
 

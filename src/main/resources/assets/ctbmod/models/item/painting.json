@@ -1,7 +1,7 @@
 {
     "parent": "builtin/generated",
     "textures": {
-        "layer0": "ctbmod:items/painting"
+        "layer0": "ctbmod:blocks/painting_none"
     },
     "display": {
         "thirdperson": {

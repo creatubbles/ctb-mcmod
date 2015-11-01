@@ -19,15 +19,16 @@ public class PacketHandler {
 
 	private static int ID = 0;
 
-	public static int nextID() {
-		return ID++;
-	}
+    public static int nextID() {
+        return ID++;
+    }
 
-	public static void init() {
-		INSTANCE.registerMessage(PacketNoSpamChat.Handler.class, PacketNoSpamChat.class, nextID(), Side.CLIENT);
-		INSTANCE.registerMessage(PacketConfigSync.Handler.class, PacketConfigSync.class, nextID(), Side.CLIENT);
-		INSTANCE.registerMessage(MessageDimensionChange.Handler.class, MessageDimensionChange.class, nextID(), Side.SERVER);
-	}
+    public static void init() {
+        INSTANCE.registerMessage(PacketNoSpamChat.Handler.class, PacketNoSpamChat.class, nextID(), Side.CLIENT);
+        INSTANCE.registerMessage(PacketConfigSync.Handler.class, PacketConfigSync.class, nextID(), Side.CLIENT);
+        INSTANCE.registerMessage(MessageDimensionChange.Handler.class, MessageDimensionChange.class, nextID(), Side.SERVER);
+        INSTANCE.registerMessage(MessageCreate.Handler.class, MessageCreate.class, nextID(), Side.SERVER);
+    }
 
 	public static void sendToAllAround(IMessage message, TileEntity te, int range) {
 		INSTANCE.sendToAllAround(message, new TargetPoint(te.getWorldObj().provider.dimensionId, te.xCoord, te.yCoord, te.zCoord, range));

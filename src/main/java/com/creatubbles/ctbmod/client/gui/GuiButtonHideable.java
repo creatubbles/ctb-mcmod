@@ -1,5 +1,6 @@
 package com.creatubbles.ctbmod.client.gui;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 
 
@@ -13,14 +14,35 @@ public class GuiButtonHideable extends GuiButton implements IHideable {
 		super(buttonId, x, y, widthIn, heightIn, buttonText);
 	}
 
-	@Override
-	public void setIsVisible(boolean visible) {
-		this.visible = visible;
-	}
+    @Override
+    public void setIsVisible(boolean visible) {
+        this.visible = visible;
+    }
 
-	@Override
-	public boolean isVisible() {
-		return this.visible;
-	}
+    @Override
+    public boolean isVisible() {
+        return this.visible;
+    }
 
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
+    @Override
+    protected int getHoverState(boolean mouseOver) {
+        int b = super.getHoverState(mouseOver);
+        if (!isEnabled()) {
+            b = 0;
+        }
+        return b;
+    }
+    
+    @Override
+    public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
+        return isEnabled() && super.mousePressed(mc, mouseX, mouseY);
+    }
 }

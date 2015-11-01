@@ -1,6 +1,7 @@
 package com.creatubbles.ctbmod.common.network;
 
 import io.netty.buffer.ByteBuf;
+import lombok.NoArgsConstructor;
 
 import com.creatubbles.ctbmod.common.creator.TileCreator;
 import com.creatubbles.repack.endercore.common.network.MessageTileEntity;
@@ -9,12 +10,10 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
+@NoArgsConstructor
 public class MessageDimensionChange extends MessageTileEntity<TileCreator> {
 
 	private int width, height;
-
-	public MessageDimensionChange() {
-	}
 
 	public MessageDimensionChange(TileCreator te) {
 		super(te);

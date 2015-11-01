@@ -30,6 +30,8 @@ import com.creatubbles.ctbmod.common.creator.ContainerCreator;
 import com.creatubbles.ctbmod.common.creator.TileCreator;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
 import com.creatubbles.ctbmod.common.http.DownloadableImage.ImageType;
+import com.creatubbles.ctbmod.common.network.MessageCreate;
+import com.creatubbles.ctbmod.common.network.PacketHandler;
 import com.creatubbles.repack.endercore.client.gui.GuiContainerBase;
 import com.creatubbles.repack.endercore.client.gui.button.IconButton;
 import com.creatubbles.repack.endercore.client.gui.button.MultiIconButton;
@@ -42,7 +44,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 
-public class GuiCreator extends GuiContainerBase {
+public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
 	private class PasswordTextField extends TextFieldEnder {
 
@@ -216,6 +218,7 @@ public class GuiCreator extends GuiContainerBase {
 	private OverlayCreationList creationList;
 	private OverlayUserSelection userSelection;
 	private OverlaySelectedCreation selectedCreation;
+	private Creation selected;
 	
 	private State state;
 	
@@ -268,14 +271,21 @@ public class GuiCreator extends GuiContainerBase {
 		creationList = new OverlayCreationList(XSIZE_DEFAULT, 0);
 		addOverlay(creationList);
 
-		logoutButton = new IconButton(this, ID_LOGOUT, 7, 106, EnderWidget.CROSS);
-		logoutButton.setToolTip("Log Out");
+        logoutButton = new IconButton(this, ID_LOGOUT, 7, 106, EnderWidget.CROSS);
+        logoutButton.setToolTip("Log Out");
 
-		createButton = new IconButton(this, ID_CREATE, 110, 29, EnderWidget.TICK);
-		createButton.setToolTip("Create!");
+        createButton = new IconButton(this, ID_CREATE, 110, 29, EnderWidget.TICK) {
 
-		selectedCreation = new OverlaySelectedCreation(10, 10, creationList, createButton);
-		creationList.addCallback(selectedCreation);
+            @Override
+            public boolean isEnabled() {
+                return super.isEnabled() && te.getOutput() == null;
+            }
+        };
+        createButton.setToolTip("Create!");
+
+        selectedCreation = new OverlaySelectedCreation(10, 10, creationList, createButton);
+        creationList.addCallback(selectedCreation);
+        creationList.addCallback(this);
 		addOverlay(selectedCreation);
 
 		userInfo = new GuiToolTip(new java.awt.Rectangle(), Lists.<String> newArrayList()) {
@@ -299,11 +309,11 @@ public class GuiCreator extends GuiContainerBase {
 		
 		int y = 61;
 		int x = 97;
-	    heightUpButton = MultiIconButton.createAddButton(this, ID_H_PLUS, x, y);
-	    heightDownButton = MultiIconButton.createMinusButton(this, ID_H_MINUS, x, y + 8);
-	    x += 50;
 	    widthUpButton = MultiIconButton.createAddButton(this, ID_W_PLUS, x, y);
 	    widthDownButton = MultiIconButton.createMinusButton(this, ID_W_MINUS, x, y + 8);
+	    x += 50;
+	    heightUpButton = MultiIconButton.createAddButton(this, ID_H_PLUS, x, y);
+	    heightDownButton = MultiIconButton.createMinusButton(this, ID_H_MINUS, x, y + 8);
 	}
 
 	@Override
@@ -354,6 +364,11 @@ public class GuiCreator extends GuiContainerBase {
 		}
 		
 		updateVisibility();
+	}
+	
+	@Override
+	public void callback(Creation selected) {
+	    this.selected = selected;
 	}
 	
 	@Override
@@ -437,8 +452,8 @@ public class GuiCreator extends GuiContainerBase {
 
 			x = guiLeft + 70;
 			y = guiTop + 65;
-			drawString(getFontRenderer(), "H: " + te.getHeight(), x, y, 0xFFFFFF);
-			drawString(getFontRenderer(), "W: " + te.getWidth(), x + 50, y, 0xFFFFFF);
+			drawString(getFontRenderer(), "W: " + te.getWidth(), x, y, 0xFFFFFF);
+			drawString(getFontRenderer(), "H: " + te.getHeight(), x + 50, y, 0xFFFFFF);
 			
 			y += 15;
 			drawString(getFontRenderer(), "Paper: 100", x, y, 0xFFFFFF);
@@ -532,7 +547,7 @@ public class GuiCreator extends GuiContainerBase {
 		case ID_CANCEL:
 			if (getState() == State.LOGGING_IN) {
 				thread.interrupt();
-				cancelButton.enabled = false;
+				cancelButton.setEnabled(false);
 			} else {
 				logout();
 			}
@@ -544,23 +559,26 @@ public class GuiCreator extends GuiContainerBase {
 			}
 			logout();
 			break;
-		case ID_W_MINUS:
-			te.setWidth(te.getWidth() - 1);
-			break;
-		case ID_W_PLUS:
-			te.setWidth(te.getWidth() + 1);
-			break;
-		case ID_H_MINUS:
-			te.setHeight(te.getHeight() - 1);
-			break;
-		case ID_H_PLUS:
-			te.setHeight(te.getHeight() + 1);
-			break;
-		}
-		widthDownButton.enabled = te.getWidth() > te.getMinSize();
-		widthUpButton.enabled = te.getWidth() < te.getMaxSize();
-		heightDownButton.enabled = te.getHeight() > te.getMinSize();
-		heightUpButton.enabled = te.getHeight() < te.getMaxSize();
+        case ID_W_MINUS:
+            te.setWidth(te.getWidth() - 1);
+            break;
+        case ID_W_PLUS:
+            te.setWidth(te.getWidth() + 1);
+            break;
+        case ID_H_MINUS:
+            te.setHeight(te.getHeight() - 1);
+            break;
+        case ID_H_PLUS:
+            te.setHeight(te.getHeight() + 1);
+            break;
+        case ID_CREATE:
+            PacketHandler.INSTANCE.sendToServer(new MessageCreate(selected, te));
+            break;
+        }
+        widthDownButton.setEnabled(te.getWidth() > te.getMinSize());
+        widthUpButton.setEnabled(te.getWidth() < te.getMaxSize());
+        heightDownButton.setEnabled(te.getHeight() > te.getMinSize());
+        heightUpButton.setEnabled(te.getHeight() < te.getMaxSize());
 	}
 
 	private void logout() {

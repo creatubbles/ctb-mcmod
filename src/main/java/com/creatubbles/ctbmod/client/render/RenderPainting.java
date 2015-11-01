@@ -47,28 +47,24 @@ public class RenderPainting extends TileEntitySpecialRenderer {
             
             WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
 
-            int pSize = Math.min(painting.getWidth(), painting.getHeight());
-
             // TODO this code is duped between here and OverlaySelectedCreation (kinda)
-            
-            Rectangle2D.Double bounds = new Rectangle2D.Double(2 / 16f + (Math.max(0, painting.getWidth() - pSize) / 2D), 2 / 16f + (Math.max(0, painting.getHeight() - pSize) / 2D), painting.getWidth() - 4 / 16f - (painting.getWidth() - pSize), painting.getHeight() - 4 / 16f - (painting.getHeight() - pSize));
+
+            Rectangle2D.Double bounds = new Rectangle2D.Double(2 / 16f, 2 / 16f, painting.getWidth() - 4 / 16f, painting.getHeight() - 4 / 16f);
             if (width / painting.getWidth() > height / painting.getHeight()) {
                 double h = bounds.height;
-                bounds.height = bounds.getHeight() * ((double) height / width);
+                bounds.height = bounds.getHeight() * ((double) height / width) * ((double) painting.getWidth() / painting.getHeight());
                 bounds.y += (h - bounds.getHeight()) / 2;
             } else {
                 double w = bounds.width;
-                bounds.width = bounds.getWidth() * ((double) width / height);
+                bounds.width = bounds.getWidth() * ((double) width / height) * ((double) painting.getHeight() / painting.getWidth());
                 bounds.x += (w - bounds.getWidth()) / 2;
             }
 
             double maxU = width / scaledSize;
             double maxV = height / scaledSize;
             
-            GL11.glPushMatrix();
-            GL11.glTranslated(x, y, z);
-
-            GL11.glPushMatrix();
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(x, y, z);
 
             switch(facing) {
             case EAST:
@@ -87,8 +83,10 @@ public class RenderPainting extends TileEntitySpecialRenderer {
                 break;
             }
             
-            GL11.glDisable(GL11.GL_LIGHTING);
-            GL11.glEnable(GL11.GL_BLEND);
+            GL11.glPushAttrib(GL11.GL_COLOR_BUFFER_BIT);
+            GlStateManager.disableLighting();
+            GlStateManager.enableBlend();
+            GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
             GlStateManager.doPolygonOffset(-3.0F, -1.5F);
             GlStateManager.enablePolygonOffset();
             renderer.startDrawingQuads();
@@ -106,12 +104,12 @@ public class RenderPainting extends TileEntitySpecialRenderer {
             Tessellator.getInstance().draw();
             renderer.setTranslation(0, 0, 0);
 
+            GL11.glPopAttrib();
             GlStateManager.doPolygonOffset(0.0F, 0.0F);
             GlStateManager.disablePolygonOffset();
-            GL11.glEnable(GL11.GL_LIGHTING);
-            GL11.glDisable(GL11.GL_BLEND);
-            GL11.glPopMatrix();
-            GL11.glPopMatrix();
+            GlStateManager.disableBlend();
+            GlStateManager.enableLighting();
+            GlStateManager.popMatrix();
         }
     }
 
@@ -127,5 +125,4 @@ public class RenderPainting extends TileEntitySpecialRenderer {
         }
         return 0.8f; // z
     }
-
 }

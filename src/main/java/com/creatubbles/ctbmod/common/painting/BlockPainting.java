@@ -59,17 +59,33 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         GameRegistry.registerTileEntity(TileDummyPainting.class, "ctbmod.dummyPainting");
     }
 
+    public static ItemStack create(Creation creation, int width, int height) {
+        ItemStack stack = new ItemStack(CTBMod.painting);
+        stack.setTagCompound(new NBTTagCompound());
+        NBTUtil.writeJsonToNBT(creation, stack.getTagCompound());
+        stack.getTagCompound().setInteger("pWidth", width);
+        stack.getTagCompound().setInteger("pHeight", height);
+        return stack;
+    }
+
+    public static Creation getCreation(ItemStack painting) {
+        return NBTUtil.readJsonFromNBT(Creation.class, painting.getTagCompound());
+    }
+    
+    public static int getWidth(ItemStack painting) {
+        return painting.getTagCompound().getInteger("pWidth");
+    }
+    
+    public static int getHeight(ItemStack painting) {
+        return painting.getTagCompound().getInteger("pHeight");
+    }
+    
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public void getSubBlocks(Item itemIn, CreativeTabs tab, List list) {
         if (CTBMod.cache.getCreationCache() != null && CTBMod.cache.getCreationCache().length > 0) {
             for (Creation c : CTBMod.cache.getCreationCache()) {
-                ItemStack stack = new ItemStack(itemIn);
-                stack.setTagCompound(new NBTTagCompound());
-                NBTUtil.writeJsonToNBT(c, stack.getTagCompound());
-                stack.getTagCompound().setInteger("pWidth", 2);
-                stack.getTagCompound().setInteger("pHeight", 2);
-                list.add(stack);
+                list.add(create(c, 2, 2));
             }
         }
     }
@@ -121,7 +137,8 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
     protected void processDrop(IBlockAccess world, BlockPos pos, TileEntityBase te, ItemStack drop) {
         TilePainting painting = getDataPainting(world, pos);
         drop.setTagCompound(new NBTTagCompound());
-        NBTUtil.writeJsonToNBT(painting.getCreation(), drop.getTagCompound());
+        ItemStack data = create(painting.getCreation(), painting.getWidth(), painting.getHeight());
+        drop.setTagCompound(data.getTagCompound());
     }
 
     @Override

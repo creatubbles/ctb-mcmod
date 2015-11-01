@@ -40,18 +40,22 @@ public class TileCreator extends TileEntityBase implements IInventory {
 	}
 
 	public int getMaxSize() {
-		return DIMENSION_BOUND.getMax();
-	}
+        return DIMENSION_BOUND.getMax();
+    }
 
-	private void dimensionsChanged() {
-		if (worldObj != null  && worldObj.isRemote) {
-			PacketHandler.INSTANCE.sendToServer(new MessageDimensionChange(this));
-		}
-	}
+    private void dimensionsChanged() {
+        if (worldObj != null && worldObj.isRemote) {
+            PacketHandler.INSTANCE.sendToServer(new MessageDimensionChange(this));
+        }
+    }
 
-	public ItemStack getOutput() {
-		return inventory[5];
-	}
+    public ItemStack getOutput() {
+        return inventory[4];
+    }
+
+    public void setOutput(ItemStack created) {
+        setInventorySlotContents(4, created);
+    }
 
 	public ItemStack[] getInput() {
 		return ArrayUtils.subarray(inventory, 0, inventory.length - 1);
@@ -96,14 +100,15 @@ public class TileCreator extends TileEntityBase implements IInventory {
 		} else {
 			return null;
 		}
-	}
+    }
 
-	@Override
-	public void setInventorySlotContents(int index, ItemStack stack) {
-		this.inventory[index] = stack;
-	}
+    @Override
+    public void setInventorySlotContents(int index, ItemStack stack) {
+        this.inventory[index] = stack;
+        markDirty();
+    }
 
-	@Override
+    @Override
 	public int getInventoryStackLimit() {
 		return 64;
 	}

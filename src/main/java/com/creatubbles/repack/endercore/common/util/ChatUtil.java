@@ -2,7 +2,6 @@ package com.creatubbles.repack.endercore.common.util;
 
 import io.netty.buffer.ByteBuf;
 import lombok.NoArgsConstructor;
-import lombok.experimental.UtilityClass;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiNewChat;
 import net.minecraft.entity.player.EntityPlayer;

@@ -2,7 +2,6 @@ package com.creatubbles.repack.endercore.common.util;
 
 import io.netty.buffer.ByteBuf;
 import lombok.NoArgsConstructor;
-import lombok.experimental.UtilityClass;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiNewChat;
 import net.minecraft.entity.player.EntityPlayer;
@@ -19,7 +18,6 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
-@UtilityClass
 public class ChatUtil {
 
 	@NoArgsConstructor
@@ -61,7 +59,7 @@ public class ChatUtil {
 	private static final int DELETION_ID = 8675309;
 	private static int lastAdded;
 
-	private void sendNoSpamMessages(IChatComponent[] messages) {
+	private static void sendNoSpamMessages(IChatComponent[] messages) {
 		GuiNewChat chat = Minecraft.getMinecraft().ingameGUI.getChatGUI();
 		for (int i = DELETION_ID + messages.length - 1; i <= lastAdded; i++) {
 			chat.deleteChatLine(i);
@@ -79,14 +77,14 @@ public class ChatUtil {
 	 *            The string to wrap.
 	 * @return An {@link IChatComponent} containing the string.
 	 */
-	public IChatComponent wrap(String s) {
+	public static IChatComponent wrap(String s) {
 		return new ChatComponentText(s);
 	}
 
 	/**
 	 * @see #wrap(String)
 	 */
-	public IChatComponent[] wrap(String... s) {
+	public static IChatComponent[] wrap(String... s) {
 		IChatComponent[] ret = new IChatComponent[s.length];
 		for (int i = 0; i < ret.length; i++) {
 			ret[i] = wrap(s[i]);
@@ -102,7 +100,7 @@ public class ChatUtil {
 	 * @param args
 	 *            The args to apply to the format
 	 */
-	public IChatComponent wrapFormatted(String s, Object... args) {
+	public static IChatComponent wrapFormatted(String s, Object... args) {
 		return new ChatComponentTranslation(s, args);
 	}
 
@@ -114,7 +112,7 @@ public class ChatUtil {
 	 * @param lines
 	 *            The lines to send
 	 */
-	public void sendChat(EntityPlayer player, String... lines) {
+	public static void sendChat(EntityPlayer player, String... lines) {
 		sendChat(player, wrap(lines));
 	}
 
@@ -123,7 +121,7 @@ public class ChatUtil {
 	 * 
 	 * @see #sendChat(EntityPlayer, String...)
 	 */
-	public void sendChatUnloc(EntityPlayer player, Lang lang, String... unlocLines) {
+	public static void sendChatUnloc(EntityPlayer player, Lang lang, String... unlocLines) {
 		sendChat(player, lang.localizeAll(lang, unlocLines));
 	}
 
@@ -135,7 +133,7 @@ public class ChatUtil {
 	 * @param lines
 	 *            The {@link IChatComponent chat components} to send.yes
 	 */
-	public void sendChat(EntityPlayer player, IChatComponent... lines) {
+	public static void sendChat(EntityPlayer player, IChatComponent... lines) {
 		for (IChatComponent c : lines) {
 			player.addChatComponentMessage(c);
 		}
@@ -146,7 +144,7 @@ public class ChatUtil {
 	 * 
 	 * @see #sendNoSpamClient(String...)
 	 */
-	public void sendNoSpamClientUnloc(Lang lang, String... unlocLines) {
+	public static void sendNoSpamClientUnloc(Lang lang, String... unlocLines) {
 		sendNoSpamClient(lang.localizeAll(lang, unlocLines));
 	}
 
@@ -157,7 +155,7 @@ public class ChatUtil {
 	 *            The chat lines to send
 	 * @see #wrap(String)
 	 */
-	public void sendNoSpamClient(String... lines) {
+	public static void sendNoSpamClient(String... lines) {
 		sendNoSpamClient(wrap(lines));
 	}
 
@@ -166,7 +164,7 @@ public class ChatUtil {
 	 * 
 	 * @see #sendNoSpam(EntityPlayerMP, IChatComponent...)
 	 */
-	public void sendNoSpamClient(IChatComponent... lines) {
+	public static void sendNoSpamClient(IChatComponent... lines) {
 		sendNoSpamMessages(lines);
 	}
 
@@ -175,7 +173,7 @@ public class ChatUtil {
 	 * 
 	 * @see #sendNoSpamSafe(String...)
 	 */
-	public void sendNoSpamUnloc(EntityPlayer player, Lang lang, String... unlocLines) {
+	public static void sendNoSpamUnloc(EntityPlayer player, Lang lang, String... unlocLines) {
 		sendNoSpam(player, lang.localizeAll(lang, unlocLines));
 	}
 
@@ -183,7 +181,7 @@ public class ChatUtil {
 	 * @see #wrap(String)
 	 * @see #sendNoSpamSafe(EntityPlayer, IChatComponent...)
 	 */
-	public void sendNoSpam(EntityPlayer player, String... lines) {
+	public static void sendNoSpam(EntityPlayer player, String... lines) {
 		sendNoSpam(player, wrap(lines));
 	}
 
@@ -192,7 +190,7 @@ public class ChatUtil {
 	 * 
 	 * @see #sendNoSpam(EntityPlayerMP, IChatComponent...)
 	 */
-	public void sendNoSpam(EntityPlayer player, IChatComponent... lines) {
+	public static void sendNoSpam(EntityPlayer player, IChatComponent... lines) {
 		if (player instanceof EntityPlayerMP) {
 			sendNoSpam((EntityPlayerMP) player, lines);
 		}
@@ -203,7 +201,7 @@ public class ChatUtil {
 	 * 
 	 * @see #sendNoSpam(String...)
 	 */
-	public void sendNoSpamUnloc(EntityPlayerMP player, Lang lang, String... unlocLines) {
+	public static void sendNoSpamUnloc(EntityPlayerMP player, Lang lang, String... unlocLines) {
 		sendNoSpam(player, lang.localizeAll(lang, unlocLines));
 	}
 
@@ -211,7 +209,7 @@ public class ChatUtil {
 	 * @see #wrap(String)
 	 * @see #sendNoSpam(EntityPlayerMP, IChatComponent...)
 	 */
-	public void sendNoSpam(EntityPlayerMP player, String... lines) {
+	public static void sendNoSpam(EntityPlayerMP player, String... lines) {
 		sendNoSpam(player, wrap(lines));
 	}
 
@@ -225,7 +223,7 @@ public class ChatUtil {
 	 * @param lines
 	 *            The chat lines to send.
 	 */
-	public void sendNoSpam(EntityPlayerMP player, IChatComponent... lines) {
+	public static void sendNoSpam(EntityPlayerMP player, IChatComponent... lines) {
 		if (lines.length > 0) {
 			PacketHandler.INSTANCE.sendTo(new PacketNoSpamChat(lines), player);
 		}

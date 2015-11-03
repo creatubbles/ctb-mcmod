@@ -1,6 +1,7 @@
 package com.creatubbles.ctbmod.client.gui;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -10,13 +11,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.Slot;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.lwjgl.opengl.GL11;
-
+import static org.lwjgl.opengl.GL11.*;
+import org.apache.commons.lang3.tuple.Pair;
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.Creator;
 import com.creatubbles.api.core.User;
@@ -208,6 +210,8 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 	
 	Map<Creation, DownloadableImage> images = Maps.newHashMap();
 	
+	private Map<Slot, Pair<Integer, Integer>> slotPositions = Maps.newHashMap();
+	
 	private TextFieldEnder tfEmail, tfActualPassword;
 	private VScrollbar scrollbar;
 	private PasswordTextField tfVisualPassword;
@@ -233,6 +237,9 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
 	public GuiCreator(InventoryPlayer inv, TileCreator creator) {
 		super(new ContainerCreator(inv, creator));
+		
+		initSlotPositions();
+		
 		this.te = creator;
 		this.mc = Minecraft.getMinecraft();
 		setState(getUser() == null ? State.LOGGED_OUT : State.LOGGED_IN, false);
@@ -403,8 +410,8 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-		GL11.glColor4f(1, 1, 1, 1);
-		GL11.glDisable(GL11.GL_LIGHTING);
+		glColor4f(1, 1, 1, 1);
+		glDisable(GL_LIGHTING);
 
 		State state = getState();
 		
@@ -444,9 +451,9 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 			y -= 6;
 			if (createButton.enabled) {
 				// Mojang didn't add an integer color method...
-				GL11.glColor3f(88f / 255f, 196f / 255f, 61f / 255f);
+				glColor3f(88f / 255f, 196f / 255f, 61f / 255f);
 			} else {
-				GL11.glColor3f(0.5f, 0.5f, 0.5f);
+				glColor3f(0.5f, 0.5f, 0.5f);
 			}
 			EnderWidget.map.render(EnderWidget.ARROW_RIGHT, x, y, 32, 32, 1, true);
 
@@ -479,12 +486,27 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 			y += 25;
 			String s = thread.isInterrupted() ? "Canceling..." : "Logging in...";
 			drawCenteredString(getFontRenderer(), s, x, y, 0xFFFFFF);
-			break;
-		}
-		super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
-	}
-	
-	private void updateSize() {
+            break;
+        }
+        super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
+    }
+
+    /**
+     * Gray out the item that was just painted into a GhostSlot by overpainting it with 50% transparent background. This gives the illusion that the item was painted with 50% transparency. (100%*a °
+     * 100%*b ° 50%*a == 100%*a ° 50%*b)
+     */
+    protected void drawGhostSlotGrayout(GuiContainerBase gui, Slot slot) {
+        glDisable(GL_LIGHTING);
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glColor4f(1, 1, 1, 0.25f);
+        gui.drawTexturedModalRect(gui.getGuiLeft() + slot.xDisplayPosition, gui.getGuiTop() + slot.yDisplayPosition, slot.xDisplayPosition, slot.yDisplayPosition, 16, 16);
+        glDisable(GL_BLEND);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_LIGHTING);
+    }
+
+    private void updateSize() {
 		int newSize = getState() == State.LOGGED_IN ? XSIZE_SIDEBAR : XSIZE_DEFAULT;
 		if (xSize != newSize) {
 			xSize = newSize;
@@ -504,15 +526,29 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 		}
 	}
 
-	@Synchronized("visibleMap")
-	private void updateVisibility() {
-		for (Entry<IHideable, Collection<State>> e : visibleMap.asMap().entrySet()) {
-			boolean visible = e.getValue().contains(getState());
-			e.getKey().setIsVisible(visible);
-		}
-	}
+    @SuppressWarnings("unchecked")
+    private void initSlotPositions() {
+        for (Slot s : (List<Slot>) inventorySlots.inventorySlots) {
+            slotPositions.put(s, Pair.of(s.xDisplayPosition, s.yDisplayPosition));
+        }
+    }
 
-	private User getUser() {
+    @SuppressWarnings("unchecked")
+    @Synchronized("visibleMap")
+    private void updateVisibility() {
+        for (Entry<IHideable, Collection<State>> e : visibleMap.asMap().entrySet()) {
+            boolean visible = e.getValue().contains(getState());
+            e.getKey().setIsVisible(visible);
+        }
+        int offset = getState() == State.LOGGED_IN ? 0 : 5000;
+        for (Slot s : (List<Slot>) inventorySlots.inventorySlots) {
+            Pair<Integer, Integer> pos = slotPositions.get(s);
+            s.xDisplayPosition = pos.getLeft() + offset;
+            s.yDisplayPosition = pos.getRight() + offset;
+        }
+    }
+
+    private User getUser() {
 		return CTBMod.cache.getActiveUser();
 	}
 	

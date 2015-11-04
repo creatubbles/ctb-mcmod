@@ -81,7 +81,7 @@ public class DownloadableImage {
 
 	public static final ResourceLocation MISSING_TEXTURE = new ResourceLocation("missingno");
 
-	private static Executor downloadExecutor = Executors.newFixedThreadPool(3);
+	private static Executor downloadExecutor = Executors.newCachedThreadPool();
 
 	static {
 		Minecraft.getMinecraft().getTextureManager().loadTexture(MISSING_TEXTURE, TextureUtil.missingTexture);

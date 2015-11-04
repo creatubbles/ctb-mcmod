@@ -234,6 +234,8 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 	private String header = DEFAULT_HEADER;
 	
 	private TileCreator te;
+	
+	private boolean init = true;
 
 	public GuiCreator(InventoryPlayer inv, TileCreator creator) {
 		super(new ContainerCreator(inv, creator));
@@ -363,15 +365,15 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 			visibleMap.put(scrollbar, State.LOGGED_IN);
 		}
 
-		creationList.setCreations(CTBMod.cache.getCreationCache());
+        creationList.setCreations(CTBMod.cache.getCreationCache());
 
-		// TODO this needs to go
-		if (thread == null && getUser() != null) {
-			actionPerformed(loginButton);
-		}
-		
-		updateVisibility();
-	}
+        updateVisibility();
+
+        if (init) {
+            init = false;
+            actionPerformed(loginButton);
+        }
+    }
 	
 	@Override
 	public void callback(Creation selected) {

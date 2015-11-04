@@ -2,7 +2,6 @@ package com.creatubbles.ctbmod.common.network;
 
 import io.netty.buffer.ByteBuf;
 import lombok.NoArgsConstructor;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -12,7 +11,6 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import com.creatubbles.api.CreatubblesAPI;
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.ctbmod.common.creator.TileCreator;
-import com.creatubbles.ctbmod.common.painting.BlockPainting;
 import com.creatubbles.repack.endercore.common.network.MessageTileEntity;
 
 @NoArgsConstructor
@@ -47,14 +45,13 @@ public class MessageCreate extends MessageTileEntity<TileCreator> {
     public static class Handler implements IMessageHandler<MessageCreate, IMessage> {
 
         @Override
-        public IMessage onMessage(MessageCreate message, MessageContext ctx) {
+        public IMessage onMessage(final MessageCreate message, MessageContext ctx) {
             final TileCreator te = message.getTileEntity(ctx.getServerHandler().playerEntity.worldObj);
-            final ItemStack created = BlockPainting.create(message.creation, message.width, message.height);
             MinecraftServer.getServer().addScheduledTask(new Runnable() {
 
                 @Override
                 public void run() {
-                    te.setOutput(created);
+                    te.create(message.creation);
                     te.markDirty();
                 }
             });

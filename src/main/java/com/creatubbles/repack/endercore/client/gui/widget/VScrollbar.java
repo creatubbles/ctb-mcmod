@@ -130,7 +130,7 @@ public class VScrollbar implements IHideable {
 				} else {
 					iconThumb = hoverThumb ? EnderWidget.VSCROLL_THUMB_HOVER_OFF : EnderWidget.VSCROLL_THUMB_OFF;
 				}
-				iconThumb.getMap().render(iconThumb, thumbArea.x, thumbPos, false);
+				iconThumb.getMap().render(iconThumb, thumbArea.x, thumbPos, 100, false);
 			}
 
 			Tessellator.getInstance().draw();

@@ -1,7 +1,9 @@
 package com.creatubbles.ctbmod.client;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.Item;
+import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 
@@ -20,5 +22,10 @@ public class ClientProxy extends CommonProxy {
 
         ModelLoader.setCustomStateMapper(CTBMod.painting, new PaintingStateMapper());
         ClientRegistry.bindTileEntitySpecialRenderer(TilePainting.class, new RenderPainting());
+    }
+    
+    @Override
+    public World getClientWorld() {
+        return Minecraft.getMinecraft().theWorld;
     }
 }

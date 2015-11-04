@@ -457,21 +457,31 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
 			x += 74;
 			y += 9;
-			drawTexturedModalRect(x, y, 94, 90, 18, 18);
+            drawTexturedModalRect(x, y, 94, 90, 18, 18);
 
-			x -= 28;
-			y -= 6;
-			if (createButton.isEnabled()) {
-				// Mojang didn't add an integer color method...
-				GlStateManager.color(88f / 255f, 196f / 255f, 61f / 255f);
-			} else {
-				GlStateManager.color(0.5f, 0.5f, 0.5f);
-			}
-			EnderWidget.map.render(EnderWidget.ARROW_RIGHT, x, y, 32, 32, 1, true);
+            x -= 23;
+            y += 3;
+            mc.getTextureManager().bindTexture(OVERLAY_TEX);
+            int progress = te.getProgressScaled(16);
+            if (progress > 0) {
+                progress += 6;
+                // Mojang didn't add an integer color method...
+                GlStateManager.color(88f / 255f, 196f / 255f, 61f / 255f);
+                drawTexturedModalRect(x, y, 0, 210, progress, 12);
+                GlStateManager.color(1, 1, 1);
+                drawTexturedModalRect(x + progress, y, progress, 210, 22 - progress, 12);
+            } else {
+                if (createButton.isEnabled()) {
+                    GlStateManager.color(1, 1, 1);
+                } else {
+                    GlStateManager.color(0.5f, 0.5f, 0.5f);
+                }
+                drawTexturedModalRect(x, y, 0, 210, 22, 12);
+            }
 
-			x = guiLeft + 70;
-			y = guiTop + 65;
-			drawString(getFontRenderer(), "W: " + te.getWidth(), x, y, 0xFFFFFF);
+            x = guiLeft + 70;
+            y = guiTop + 65;
+            drawString(getFontRenderer(), "W: " + te.getWidth(), x, y, 0xFFFFFF);
 			drawString(getFontRenderer(), "H: " + te.getHeight(), x + 50, y, 0xFFFFFF);
 			
 			y += 15;

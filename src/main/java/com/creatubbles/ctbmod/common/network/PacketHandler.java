@@ -11,6 +11,7 @@ import net.minecraftforge.fml.relauncher.Side;
 
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.repack.endercore.common.config.PacketConfigSync;
+import com.creatubbles.repack.endercore.common.network.PacketProgress;
 import com.creatubbles.repack.endercore.common.util.ChatUtil.PacketNoSpamChat;
 
 public class PacketHandler {
@@ -26,11 +27,12 @@ public class PacketHandler {
     public static void init() {
         INSTANCE.registerMessage(PacketNoSpamChat.Handler.class, PacketNoSpamChat.class, nextID(), Side.CLIENT);
         INSTANCE.registerMessage(PacketConfigSync.Handler.class, PacketConfigSync.class, nextID(), Side.CLIENT);
+        INSTANCE.registerMessage(PacketProgress.Handler.class, PacketProgress.class, nextID(), Side.CLIENT);
         INSTANCE.registerMessage(MessageDimensionChange.Handler.class, MessageDimensionChange.class, nextID(), Side.SERVER);
         INSTANCE.registerMessage(MessageCreate.Handler.class, MessageCreate.class, nextID(), Side.SERVER);
     }
 
-	public static void sendToAllAround(IMessage message, TileEntity te, int range) {
+    public static void sendToAllAround(IMessage message, TileEntity te, int range) {
 		BlockPos pos = te.getPos();
 		INSTANCE.sendToAllAround(message, new TargetPoint(te.getWorld().provider.getDimensionId(), pos.getX(), pos.getY(), pos.getZ(), range));
 	}

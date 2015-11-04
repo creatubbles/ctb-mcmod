@@ -66,7 +66,7 @@ public class OverlayCreationList extends OverlayBase {
 	private int rows, cols;
 
 	@Getter
-	private int thumbnailSize = 16;
+	private int thumbnailSize = 64;
 	
 	@Getter
 	private Creation selected;
@@ -185,13 +185,15 @@ public class OverlayCreationList extends OverlayBase {
 		listAbsolute.clear();
 	}
 
-	@Override
-	@Synchronized("list")
-	public void doDraw(int mouseX, int mouseY, float partialTick) {
-		Minecraft.getMinecraft().getTextureManager().bindTexture(GuiCreator.OVERLAY_TEX);
-		drawTexturedModalRect(xRel, yRel, 0, 0, getWidth() + 10, getHeight());
-		
-		Minecraft mc = Minecraft.getMinecraft();
+    @Override
+    @Synchronized("list")
+    public void doDraw(int mouseX, int mouseY, float partialTick) {
+        Minecraft.getMinecraft().getTextureManager().bindTexture(GuiCreator.OVERLAY_TEX);
+        GlStateManager.enableDepth();
+        drawTexturedModalRect(xRel, yRel, 0, 0, getWidth() + 11, getHeight());
+        GlStateManager.disableDepth();
+
+        Minecraft mc = Minecraft.getMinecraft();
 		FontRenderer fr = mc.fontRendererObj;
 		if (list.size() == 0) {
 			drawCenteredString(fr, "No Creations", xRel + (getWidth() / 2), yRel + 4, 0xFFFFFF);
@@ -208,6 +210,10 @@ public class OverlayCreationList extends OverlayBase {
 
 				DownloadableImage img = getGui().images.get(c.creation);
 				ImageType type = ImageType.LIST_VIEW;
+				
+				if (img == null) {
+				    return;
+				}
 
 				ResourceLocation res = img.getResource(type);
 

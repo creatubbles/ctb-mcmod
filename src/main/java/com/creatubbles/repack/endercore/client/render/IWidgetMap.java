@@ -15,6 +15,8 @@ public interface IWidgetMap {
 	void render(IWidgetIcon widget, double x, double y);
 
 	void render(IWidgetIcon widget, double x, double y, boolean doDraw);
+	
+    void render(IWidgetIcon widget, double x, double y, double zLevel, boolean doDraw);
 
 	void render(IWidgetIcon widget, double x, double y, double width, double height, double zLevel, boolean doDraw);
 
@@ -36,23 +38,28 @@ public interface IWidgetMap {
 			return res;
 		}
 
-		@Override
-		public void render(IWidgetIcon widget, double x, double y) {
-			render(widget, x, y, false);
-		}
+        @Override
+        public void render(IWidgetIcon widget, double x, double y) {
+            render(widget, x, y, false);
+        }
 
-		@Override
-		public void render(IWidgetIcon widget, double x, double y, boolean doDraw) {
-			render(widget, x, y, widget.getWidth(), widget.getHeight(), 0, doDraw);
-		}
+        @Override
+        public void render(IWidgetIcon widget, double x, double y, boolean doDraw) {
+            render(widget, x, y, 0, doDraw);
+        }
 
-		@Override
-		public void render(IWidgetIcon widget, double x, double y, double width, double height, double zLevel, boolean doDraw) {
-			render(widget, x, y, width, height, zLevel, doDraw, false);
-		}
+        @Override
+        public void render(IWidgetIcon widget, double x, double y, double zLevel, boolean doDraw) {
+            render(widget, x, y, widget.getWidth(), widget.getHeight(), zLevel, doDraw);
+        }
 
-		@Override
-		public void render(IWidgetIcon widget, double x, double y, double width, double height, double zLevel, boolean doDraw, boolean flipY) {
+        @Override
+        public void render(IWidgetIcon widget, double x, double y, double width, double height, double zLevel, boolean doDraw) {
+            render(widget, x, y, width, height, zLevel, doDraw, false);
+        }
+
+        @Override
+        public void render(IWidgetIcon widget, double x, double y, double width, double height, double zLevel, boolean doDraw, boolean flipY) {
 
 			WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
 			if (doDraw) {

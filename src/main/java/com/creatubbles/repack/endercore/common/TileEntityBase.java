@@ -1,5 +1,6 @@
 package com.creatubbles.repack.endercore.common;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -7,6 +8,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.server.gui.IUpdatePlayerListBox;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
 
 import com.creatubbles.ctbmod.common.network.PacketHandler;
 import com.creatubbles.repack.endercore.api.common.util.IProgressTile;
@@ -131,5 +133,10 @@ public abstract class TileEntityBase extends TileEntity implements IUpdatePlayer
      */
     protected boolean shouldDoWorkThisTick(int interval, int offset) {
         return (worldObj.getTotalWorldTime() + checkOffset + offset) % interval == 0;
+    }
+
+    @Override
+	public boolean shouldRefresh(Block oldBlock, Block newBlock, int oldMeta, int newMeta, World world, int x, int y, int z) {
+        return oldBlock != newBlock;
     }
 }

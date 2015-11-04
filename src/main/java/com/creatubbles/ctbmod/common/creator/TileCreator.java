@@ -10,7 +10,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.server.gui.IUpdatePlayerListBox;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -65,6 +64,12 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, IUpd
 
     public void create(Creation creation) {
         this.creating = creation;
+        for (int i = 0; i < 4; i++) {
+            inventory[i].stackSize -= i == 0 ? getRequiredPaper() : getRequiredDye();
+            if (inventory[i].stackSize == 0) {
+                inventory[i] = null;
+            }
+        }
     }
 
 	public ItemStack[] getInput() {
@@ -271,9 +276,4 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, IUpd
 		setWidth(root.getInteger("paintingWidth"));
 		setHeight(root.getInteger("paintingHeight"));
 	}
-
-	@Override
-	public boolean shouldRefresh(Block oldBlock, Block newBlock, int oldMeta, int newMeta, World world, int x, int y, int z) {
-        return oldBlock != newBlock;
-    }
 }

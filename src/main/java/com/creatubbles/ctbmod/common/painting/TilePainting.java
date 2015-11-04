@@ -2,10 +2,8 @@ package com.creatubbles.ctbmod.common.painting;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.World;
 
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
@@ -60,10 +58,5 @@ public class TilePainting extends TileEntityBase {
         createImage();
 	    width = root.getInteger("width");
 	    height = root.getInteger("height");
-	}
-	
-	@Override
-	public boolean shouldRefresh(Block oldBlock, Block newBlock, int oldMeta, int newMeta, World world, int x, int y, int z) {
-	    return oldBlock != newBlock;
 	}
 }

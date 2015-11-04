@@ -2,7 +2,6 @@ package com.creatubbles.ctbmod.common.creator;
 
 import lombok.Getter;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.ISidedInventory;
@@ -11,11 +10,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.server.gui.IUpdatePlayerListBox;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IChatComponent;
-import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -70,6 +67,12 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, IUpd
 
     public void create(Creation creation) {
         this.creating = creation;
+        for (int i = 0; i < 4; i++) {
+            inventory[i].stackSize -= i == 0 ? getRequiredPaper() : getRequiredDye();
+            if (inventory[i].stackSize == 0) {
+                inventory[i] = null;
+            }
+        }
     }
 
 	public ItemStack[] getInput() {
@@ -305,10 +308,5 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, IUpd
     @Override
     public int getFieldCount() {
         return 0;
-    }
-
-    @Override
-    public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) {
-        return oldState.getBlock() != newSate.getBlock();
     }
 }

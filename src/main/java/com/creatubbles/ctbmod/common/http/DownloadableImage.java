@@ -6,7 +6,8 @@ import java.net.URL;
 import java.util.EnumMap;
 import java.util.Locale;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
@@ -29,6 +30,7 @@ import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.config.DataCache;
 import com.creatubbles.ctbmod.common.util.JsonUtil;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Queues;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
@@ -79,9 +81,9 @@ public class DownloadableImage {
 		}
 	}
 
-	public static final ResourceLocation MISSING_TEXTURE = new ResourceLocation("missingno");
+    public static final ResourceLocation MISSING_TEXTURE = new ResourceLocation("missingno");
 
-	private static Executor downloadExecutor = Executors.newCachedThreadPool();
+    private static Executor downloadExecutor = new ThreadPoolExecutor(0, 3, 20, TimeUnit.SECONDS, Queues.<Runnable> newLinkedBlockingQueue());
 
 	static {
 		Minecraft.getMinecraft().getTextureManager().loadTexture(MISSING_TEXTURE, TextureUtil.missingTexture);

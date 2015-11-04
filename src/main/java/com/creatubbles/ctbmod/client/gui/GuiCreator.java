@@ -14,6 +14,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 
@@ -31,6 +32,7 @@ import com.creatubbles.api.request.user.UserProfileRequest;
 import com.creatubbles.api.response.creation.GetCreationsResponse;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.creator.ContainerCreator;
+import com.creatubbles.ctbmod.common.creator.SlotCreator;
 import com.creatubbles.ctbmod.common.creator.TileCreator;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
 import com.creatubbles.ctbmod.common.http.DownloadableImage.ImageType;
@@ -210,10 +212,10 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
 	private Multimap<IHideable, State> visibleMap = MultimapBuilder.hashKeys().enumSetValues(State.class).build();
 	
-	Map<Creation, DownloadableImage> images = Maps.newHashMap();
-	
-	private Map<Slot, Pair<Integer, Integer>> slotPositions = Maps.newHashMap();
-	
+    Map<Creation, DownloadableImage> images = Maps.newHashMap();
+
+    private Map<Slot, Pair<Integer, Integer>> slotPositions = Maps.newHashMap();
+
 	private TextFieldEnder tfEmail, tfActualPassword;
 	private VScrollbar scrollbar;
 	private PasswordTextField tfVisualPassword;
@@ -289,7 +291,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
             @Override
             public boolean isEnabled() {
-                return super.isEnabled() && te.getOutput() == null;
+                return super.isEnabled() && te.canCreate();
             }
         };
         createButton.setToolTip("Create!");
@@ -365,7 +367,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 			visibleMap.put(widthUpButton, State.LOGGED_IN);
 			visibleMap.put(widthDownButton, State.LOGGED_IN);
 			visibleMap.put(scrollbar, State.LOGGED_IN);
-		}
+        }
 
         creationList.setCreations(CTBMod.cache.getCreationCache());
 
@@ -431,6 +433,12 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 			if (getUser() == null) {
 				System.out.println("!");
 			}
+
+            for (int i = 0; i < 4; i++) {
+                SlotCreator slot = (SlotCreator) inventorySlots.getSlot(i);
+                drawGhostSlotGrayout(slot.getGhostStack(), slot);
+            }
+
 			creationList.setScroll(scrollbar.getScrollPos());
 			
 			x += 25;
@@ -453,7 +461,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
 			x -= 28;
 			y -= 6;
-			if (createButton.enabled) {
+			if (createButton.isEnabled()) {
 				// Mojang didn't add an integer color method...
 				GlStateManager.color(88f / 255f, 196f / 255f, 61f / 255f);
 			} else {
@@ -467,9 +475,9 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 			drawString(getFontRenderer(), "H: " + te.getHeight(), x + 50, y, 0xFFFFFF);
 			
 			y += 15;
-			drawString(getFontRenderer(), "Paper: 100", x, y, 0xFFFFFF);
+			drawString(getFontRenderer(), "Paper: " + te.getRequiredPaper(), x, y, 0xFFFFFF);
 			y += 10;
-			drawString(getFontRenderer(), "Dye: 100", x, y, 0xFFFFFF);
+			drawString(getFontRenderer(), "Dye: " + te.getRequiredDye(), x, y, 0xFFFFFF);
 			break;
 		case LOGGED_OUT:
 			x += xSize / 2;
@@ -488,8 +496,8 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 		case LOGGING_IN:
 			x += xSize / 2;
 			y += 25;
-			String s = thread.isInterrupted() ? "Canceling..." : "Logging in...";
-			drawCenteredString(getFontRenderer(), s, x, y, 0xFFFFFF);
+            String s = thread.isInterrupted() ? "Canceling..." : "Logging in...";
+            drawCenteredString(getFontRenderer(), s, x, y, 0xFFFFFF);
             break;
         }
         super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
@@ -499,15 +507,22 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
      * Gray out the item that was just painted into a GhostSlot by overpainting it with 50% transparent background. This gives the illusion that the item was painted with 50% transparency. (100%*a °
      * 100%*b ° 50%*a == 100%*a ° 50%*b)
      */
-    protected void drawGhostSlotGrayout(GuiContainerBase gui, Slot slot) {
+    protected void drawGhostSlotGrayout(ItemStack stack, Slot slot) {
+        int x = guiLeft + slot.xDisplayPosition;
+        int y = guiTop + slot.yDisplayPosition;
+        
+        GlStateManager.enableLighting();
+        itemRender.renderItemAndEffectIntoGUI(stack, x, y);
+        itemRender.renderItemOverlayIntoGUI(getFontRenderer(), stack, x + 1, y, "");
+
+        GlStateManager.enableBlend();
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();
-        GlStateManager.enableBlend();
-        GlStateManager.color(1, 1, 1, 0.25f);
-        gui.drawTexturedModalRect(gui.getGuiLeft() + slot.xDisplayPosition, gui.getGuiTop() + slot.yDisplayPosition, slot.xDisplayPosition, slot.yDisplayPosition, 16, 16);
+        GlStateManager.color(1, 1, 1, 0.5f);
+        Minecraft.getMinecraft().getTextureManager().bindTexture(BG_TEX);
+        drawTexturedModalRect(x, y, 8, 127, 16, 16);
         GlStateManager.disableBlend();
         GlStateManager.enableDepth();
-        GlStateManager.enableLighting();
     }
 
     private void updateSize() {

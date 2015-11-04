@@ -18,7 +18,7 @@ import com.creatubbles.repack.endercore.common.util.Bound;
 
 public class TileCreator extends TileEntityBase implements IInventory {
 
-	private static final Bound<Integer> DIMENSION_BOUND = Bound.of(1, 20);
+	private static final Bound<Integer> DIMENSION_BOUND = Bound.of(1, 16);
 
 	private ItemStack[] inventory = new ItemStack[5];
 
@@ -59,7 +59,27 @@ public class TileCreator extends TileEntityBase implements IInventory {
 
 	public ItemStack[] getInput() {
 		return ArrayUtils.subarray(inventory, 0, inventory.length - 1);
-	}
+    }
+
+    public boolean canCreate() {
+        if (inventory[0] != null && inventory[0].stackSize >= getRequiredPaper()) {
+            for (int i = 1; i < 4; i++) {
+                if (inventory[i] == null || inventory[i].stackSize < getRequiredDye()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public int getRequiredPaper() {
+        return (3 + getWidth() * getHeight()) / 4;
+    }
+
+    public int getRequiredDye() {
+        return (7 + getWidth() * getHeight()) / 8;
+    }
 
 	@Override
 	public int getSizeInventory() {

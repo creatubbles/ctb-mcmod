@@ -155,7 +155,11 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
     
     @Override
     public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos) {
-        EnumFacing facing = (EnumFacing) getState(worldIn, pos).getValue(FACING);
+        IBlockState state = getState(worldIn, pos);
+        if (state == null) {
+            return;
+        }
+        EnumFacing facing = (EnumFacing) state.getValue(FACING);
         switch (facing) {
         case EAST:
             setBlockBounds(0, 0, 0, 1/16f, 1, 1);

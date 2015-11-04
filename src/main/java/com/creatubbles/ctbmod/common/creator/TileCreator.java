@@ -10,6 +10,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.server.gui.IUpdatePlayerListBox;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -32,7 +33,7 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, IUpd
 	private int progress;
 
 	@Getter
-	private int width, height;
+	private int width = 1, height = 1;
 
 	public void setWidth(int width) {
 		this.width = DIMENSION_BOUND.clamp(width);
@@ -270,4 +271,9 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, IUpd
 		setWidth(root.getInteger("paintingWidth"));
 		setHeight(root.getInteger("paintingHeight"));
 	}
+
+	@Override
+	public boolean shouldRefresh(Block oldBlock, Block newBlock, int oldMeta, int newMeta, World world, int x, int y, int z) {
+        return oldBlock != newBlock;
+    }
 }

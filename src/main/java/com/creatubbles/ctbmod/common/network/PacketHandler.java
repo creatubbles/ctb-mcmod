@@ -5,6 +5,7 @@ import net.minecraft.tileentity.TileEntity;
 
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.repack.endercore.common.config.PacketConfigSync;
+import com.creatubbles.repack.endercore.common.network.PacketProgress;
 import com.creatubbles.repack.endercore.common.util.ChatUtil.PacketNoSpamChat;
 
 import cpw.mods.fml.common.network.NetworkRegistry;
@@ -26,6 +27,7 @@ public class PacketHandler {
     public static void init() {
         INSTANCE.registerMessage(PacketNoSpamChat.Handler.class, PacketNoSpamChat.class, nextID(), Side.CLIENT);
         INSTANCE.registerMessage(PacketConfigSync.Handler.class, PacketConfigSync.class, nextID(), Side.CLIENT);
+        INSTANCE.registerMessage(PacketProgress.Handler.class, PacketProgress.class, nextID(), Side.CLIENT);
         INSTANCE.registerMessage(MessageDimensionChange.Handler.class, MessageDimensionChange.class, nextID(), Side.SERVER);
         INSTANCE.registerMessage(MessageCreate.Handler.class, MessageCreate.class, nextID(), Side.SERVER);
     }

@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.item.Item;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
 import team.chisel.ctmlib.CTMRenderer;
 
@@ -33,5 +34,10 @@ public class ClientProxy extends CommonProxy {
     	RenderPainting rp = new RenderPainting();
         ClientRegistry.bindTileEntitySpecialRenderer(TilePainting.class, rp);
         MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(CTBMod.painting), rp);
+    }
+    
+    @Override
+    public World getClientWorld() {
+        return Minecraft.getMinecraft().theWorld;
     }
 }

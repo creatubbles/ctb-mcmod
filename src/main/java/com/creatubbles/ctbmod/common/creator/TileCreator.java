@@ -1,24 +1,35 @@
 package com.creatubbles.ctbmod.common.creator;
 
 import lombok.Getter;
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.init.Items;
+import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.server.gui.IUpdatePlayerListBox;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraftforge.oredict.OreDictionary;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import com.creatubbles.api.core.Creation;
+import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.network.MessageDimensionChange;
 import com.creatubbles.ctbmod.common.network.PacketHandler;
+import com.creatubbles.ctbmod.common.painting.BlockPainting;
+import com.creatubbles.repack.endercore.api.common.util.IProgressTile;
 import com.creatubbles.repack.endercore.common.TileEntityBase;
 import com.creatubbles.repack.endercore.common.util.Bound;
 
-public class TileCreator extends TileEntityBase implements IInventory {
+public class TileCreator extends TileEntityBase implements ISidedInventory, IUpdatePlayerListBox, IProgressTile {
 
 	private static final Bound<Integer> DIMENSION_BOUND = Bound.of(1, 16);
-
+	
 	private ItemStack[] inventory = new ItemStack[5];
+	private Creation creating;
+	private int progress;
 
 	@Getter
 	private int width, height;
@@ -51,8 +62,8 @@ public class TileCreator extends TileEntityBase implements IInventory {
         return inventory[4];
     }
 
-    public void setOutput(ItemStack created) {
-        setInventorySlotContents(4, created);
+    public void create(Creation creation) {
+        this.creating = creation;
     }
 
 	public ItemStack[] getInput() {
@@ -60,6 +71,9 @@ public class TileCreator extends TileEntityBase implements IInventory {
     }
 
     public boolean canCreate() {
+        if (inventory[4] != null || progress > 0) {
+            return false;
+        }
         if (inventory[0] != null && inventory[0].stackSize >= getRequiredPaper()) {
             for (int i = 1; i < 4; i++) {
                 if (inventory[i] == null || inventory[i].stackSize < getRequiredDye()) {
@@ -79,10 +93,55 @@ public class TileCreator extends TileEntityBase implements IInventory {
         return (7 + getWidth() * getHeight()) / 8;
     }
 
-	@Override
-	public int getSizeInventory() {
-		return inventory.length;
-	}
+    @Override
+    protected void doUpdate() {
+        if (!worldObj.isRemote) {
+            if (creating == null) {
+                progress = 0;
+            } else {
+                if (progress < 20) {
+                    progress++;
+                } else {
+                    inventory[4] = BlockPainting.create(creating, width, height);
+                    markDirty();
+                    creating = null;
+                }
+            }
+        }
+    }
+
+    @Override
+    public float getProgress() {
+        return progress / 20f;
+    }
+
+    @Override
+    public void setProgress(float progress) {
+        this.progress = progress < 0 ? 0 : (int) (progress * 20);
+    }
+
+    @Override
+    public TileEntity getTileEntity() {
+        return this;
+    }
+
+    @Override
+    public boolean canExtractItem(int index, ItemStack stack, int side) {        return index == 4;
+}
+    
+    @Override
+    public boolean canInsertItem(int index, ItemStack stack, int side) {        return index < 4;
+}
+    
+    @Override
+    public int[] getAccessibleSlotsFromSide(int index) {
+        return new int[] { 0, 1, 2, 3, 4 };
+    }
+
+    @Override
+    public int getSizeInventory() {
+        return inventory.length;
+    }
 
 	@Override
 	public ItemStack getStackInSlot(int index) {
@@ -122,8 +181,10 @@ public class TileCreator extends TileEntityBase implements IInventory {
 
     @Override
     public void setInventorySlotContents(int index, ItemStack stack) {
-        this.inventory[index] = stack;
-        markDirty();
+        if (isItemValidForSlot(index, stack)) {
+            this.inventory[index] = stack;
+            markDirty();
+        }
     }
 
     @Override
@@ -154,9 +215,27 @@ public class TileCreator extends TileEntityBase implements IInventory {
 		return "tile.ctbmod.creator";
 	}
 
-	@Override
-	public boolean isItemValidForSlot(int index, ItemStack stack) {
-		return false;
+	private String[] colors = new String[]{ "dyeRed", "dyeGreen", "dyeBlue"};
+	
+    @Override
+    public boolean isItemValidForSlot(int index, ItemStack stack) {
+        if (stack == null) {
+            return true;
+        }
+        if (index == 0) {
+            return stack.getItem() == Items.paper;
+        } else if (index < 4) {
+            int[] ids = OreDictionary.getOreIDs(stack);
+            String ore = colors[index - 1];
+            for (int i : ids) {
+                if (OreDictionary.getOreName(i).equals(ore)) {
+                    return true;
+                }
+            }
+        } else {
+            return Block.getBlockFromItem(stack.getItem()) == CTBMod.painting;
+        }
+        return false;
 	}
 
 	@Override

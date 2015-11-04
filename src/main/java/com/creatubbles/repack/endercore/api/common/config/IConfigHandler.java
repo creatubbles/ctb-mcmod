@@ -1,4 +1,4 @@
-package com.creatubbles.repack.endercore.api.config;
+package com.creatubbles.repack.endercore.api.common.config;
 
 import java.io.File;
 import java.util.List;

@@ -66,7 +66,7 @@ public class OverlayCreationList extends OverlayBase {
 	private int rows, cols;
 
 	@Getter
-	private int thumbnailSize = 64;
+	private int thumbnailSize = 16;
 	
 	@Getter
 	private Creation selected;

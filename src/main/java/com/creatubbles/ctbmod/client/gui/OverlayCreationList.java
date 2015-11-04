@@ -331,13 +331,13 @@ public class OverlayCreationList extends OverlayBase {
 	public void setThumbnailSize(int thumbnailSize) {
 		if (this.thumbnailSize != thumbnailSize) {
 			this.thumbnailSize = thumbnailSize;
-			rebuildList();
-		}
-	}
+            rebuildList();
+        }
+    }
 
-	public int getMaxScroll() {
-		return (rows * (thumbnailSize + minSpacing)) - getHeight() + minSpacing;
-	}
+    public int getMaxScroll() {
+        return (rows * (thumbnailSize + minSpacing)) - getHeight() + minSpacing + paddingY;
+    }
 
 	public void setScroll(int scroll) {
 		if (this.scroll != scroll) {

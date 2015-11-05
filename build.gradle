@@ -61,7 +61,7 @@ repositories {
 }
 
 dependencies {
-    shade 'com.creatubbles.api:creatubbles-wsapi:${wsapi_version}'
+    shade "com.creatubbles.api:creatubbles-wsapi:${wsapi_version}"
     shade fileTree(dir: 'libs', include: '*.jar')
 }
 

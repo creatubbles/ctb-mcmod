@@ -34,6 +34,14 @@ public class TilePainting extends TileEntityBase {
         }
     }
 
+    @Override
+    public void validate() {
+        super.validate();
+        if (worldObj.isRemote) {
+            createImage();
+        }
+    }
+    
     private void createImage() {
         image = new DownloadableImage(creation.image, creation);
         image.download(ImageType.ORIGINAL);
@@ -54,7 +62,6 @@ public class TilePainting extends TileEntityBase {
 	@Override
 	protected void readCustomNBT(NBTTagCompound root) {
 	    creation = NBTUtil.readJsonFromNBT(Creation.class, root);
-        createImage();
 	    width = root.getInteger("width");
 	    height = root.getInteger("height");
 	}

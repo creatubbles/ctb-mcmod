@@ -208,7 +208,7 @@ public class DownloadableImage {
 							image = ImageIO.read(new URL(url));
 							cache.getParentFile().mkdirs();
 							// Cache the original, not the resize, this way we do not lose original size data
-							ImageIO.write(image, "jpg", cache);
+							ImageIO.write(image, "png", cache);
 						}
 						
 						final BufferedImage original = image;

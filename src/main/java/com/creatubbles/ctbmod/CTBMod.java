@@ -2,12 +2,15 @@ package com.creatubbles.ctbmod;
 
 import java.util.Locale;
 
+import net.minecraftforge.client.ClientCommandHandler;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.creatubbles.ctbmod.common.CommonProxy;
 import com.creatubbles.ctbmod.common.command.CommandGetCreators;
 import com.creatubbles.ctbmod.common.command.CommandLogin;
+import com.creatubbles.ctbmod.common.command.CommandUpload;
 import com.creatubbles.ctbmod.common.config.Configs;
 import com.creatubbles.ctbmod.common.config.DataCache;
 import com.creatubbles.ctbmod.common.creator.BlockCreator;
@@ -21,7 +24,6 @@ import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
 
 import static com.creatubbles.ctbmod.CTBMod.*;
 
@@ -58,14 +60,18 @@ public class CTBMod {
     }
 
     @EventHandler
-	public void init(FMLInitializationEvent event) {
-		PacketHandler.init();
-		cache = DataCache.loadCache();
-	}
+    public void init(FMLInitializationEvent event) {
+        PacketHandler.init();
+        cache = DataCache.loadCache();
+        
+        if (event.getSide().isClient()) {
+            registerCommands();
+        }
+    }
 
-	@EventHandler
-	public void onServerStart(FMLServerStartingEvent event) {
-		event.registerServerCommand(new CommandLogin());
-		event.registerServerCommand(new CommandGetCreators());
-	}
+    public void registerCommands() {
+        ClientCommandHandler.instance.registerCommand(new CommandLogin());
+        ClientCommandHandler.instance.registerCommand(new CommandGetCreators());
+        ClientCommandHandler.instance.registerCommand(new CommandUpload());
+    }
 }

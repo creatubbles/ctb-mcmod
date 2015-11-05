@@ -59,12 +59,16 @@ repositories {
 dependencies {
     compile "org.projectlombok:lombok:1.16.6"
     shade 'com.creatubbles.api:creatubbles-wsapi:1.0.0-6'
+    shade fileTree(dir: 'libs', include: '*.jar')
 }
 
 jar {
     from { configurations.exportedCompile.collect { it.isDirectory() ? it : zipTree(it) } }
     configurations.shade.each { dep ->
         from(project.zipTree(dep)) {
+            if (dep.toString().contains('com.creatubbles') && dep.toString().startsWith('C:')) {
+                exclude '**/**'
+            }
             exclude 'META-INF/*', 'META-INF/maven/**'
         }
     }

@@ -41,10 +41,12 @@ public class OverlaySelectedCreation extends OverlayBase implements ISelectionCa
             DownloadableImage img = getGui().images.get(selected);
 			ResourceLocation res;
 			int imgWidth = 16, imgHeight = 16;
+			int scaledSize = 16;
 			if (img.hasSize(ImageType.FULL_VIEW)) {
 				res = img.getResource(ImageType.FULL_VIEW);
 				imgWidth = img.getWidth(ImageType.FULL_VIEW);
 				imgHeight = img.getHeight(ImageType.FULL_VIEW);
+				scaledSize = img.getScaledSize(ImageType.FULL_VIEW);
 			} else {
 				res = OverlayCreationList.LOADING_TEX;
 				img.download(ImageType.FULL_VIEW);
@@ -60,7 +62,6 @@ public class OverlaySelectedCreation extends OverlayBase implements ISelectionCa
 				bounds.setWidth((int) (bounds.getWidth() * ((double) imgWidth / (double) imgHeight)));
 				bounds.translate((48 - bounds.getWidth()) / 2, 0);
 			}
-			int scaledSize = img.getScaledSize(ImageType.FULL_VIEW);
 
 			drawScaledCustomSizeModalRect(bounds.getX(), bounds.getY(), 0, 0, imgWidth, imgHeight, bounds.getWidth(), bounds.getHeight(), scaledSize, scaledSize);
 

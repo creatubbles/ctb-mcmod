@@ -1,13 +1,12 @@
 package com.creatubbles.ctbmod.common.command;
 
-import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 
 import com.creatubbles.api.request.creator.UsersCreatorsRequest;
 import com.creatubbles.api.response.creator.UsersCreatorsResponse;
 import com.creatubbles.repack.endercore.common.util.ChatUtil;
 
-public class CommandGetCreators extends CommandBase {
+public class CommandGetCreators extends ClientCommandBase {
 
     @Override
     public String getCommandName() {

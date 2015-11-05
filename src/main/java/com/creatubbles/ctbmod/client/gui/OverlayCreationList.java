@@ -212,6 +212,7 @@ public class OverlayCreationList extends OverlayBase {
 				ImageType type = ImageType.LIST_VIEW;
 				
 				if (img == null) {
+				    GlStateManager.popMatrix();
 				    return;
 				}
 

@@ -1,14 +1,13 @@
 package com.creatubbles.ctbmod.common.command;
 
 import lombok.SneakyThrows;
-import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 
 import com.creatubbles.api.request.auth.SignInRequest;
 import com.creatubbles.api.response.auth.SignInResponse;
 import com.creatubbles.repack.endercore.common.util.ChatUtil;
 
-public class CommandLogin extends CommandBase {
+public class CommandLogin extends ClientCommandBase {
 
     public static String accessToken;
 

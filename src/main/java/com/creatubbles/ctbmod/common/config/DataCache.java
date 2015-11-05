@@ -52,7 +52,7 @@ public class DataCache {
 	public static DataCache loadCache() {
 		cacheFolder.mkdir();
 
-		if (cache.exists() && Configs.refreshAccessToken) {
+		if (cache.exists() && Configs.refreshUserCache) {
 			cache.delete();
 		}
 		cache.createNewFile();

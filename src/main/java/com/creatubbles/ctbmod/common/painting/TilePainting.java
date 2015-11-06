@@ -3,6 +3,8 @@ package com.creatubbles.ctbmod.common.painting;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -35,9 +37,9 @@ public class TilePainting extends TileEntityBase {
     }
 
     @Override
-    public void validate() {
-        super.validate();
-        if (worldObj.isRemote) {
+    public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
+        super.onDataPacket(net, pkt);
+        if (image == null) {
             createImage();
         }
     }

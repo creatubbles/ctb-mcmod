@@ -2,7 +2,9 @@ package com.creatubbles.ctbmod.common.command;
 
 import lombok.SneakyThrows;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.command.WrongUsageException;
 
+import com.creatubbles.api.CreatubblesAPI;
 import com.creatubbles.api.request.auth.SignInRequest;
 import com.creatubbles.api.response.auth.SignInResponse;
 import com.creatubbles.repack.endercore.common.util.ChatUtil;
@@ -24,6 +26,10 @@ public class CommandLogin extends ClientCommandBase {
     @Override
     @SneakyThrows
     public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_) {
+        if (p_71515_2_.length < 2) {
+            throw new WrongUsageException(getCommandUsage(p_71515_1_));
+        }
+        CreatubblesAPI.setStagingMode(false);
         SignInResponse resp = new SignInRequest(p_71515_2_[0], p_71515_2_[1]).execute().getResponse();
         if (resp.access_token == null) {
             ChatUtil.sendNoSpamClient("Login failed! Invalid email or password.");

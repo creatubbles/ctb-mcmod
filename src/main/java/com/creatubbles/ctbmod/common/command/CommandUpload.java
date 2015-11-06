@@ -8,10 +8,12 @@ import lombok.SneakyThrows;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.command.NumberInvalidException;
 import net.minecraft.command.WrongUsageException;
 
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.Credentials;
@@ -42,6 +44,10 @@ public class CommandUpload extends ClientCommandBase {
             throw new WrongUsageException("Not enough arguments. Usage: %s", getCommandUsage(sender));
         }
         
+        if (CommandLogin.accessToken == null) {
+            throw new WrongUsageException("/ctb-login must be run before this command can be used");
+        }
+        
         // create creation
         UploadCreationResponse uploadResponse = new UploadCreationRequest(CommandLogin.accessToken).execute().getResponse();
         // get required info for s3
@@ -51,15 +57,25 @@ public class CommandUpload extends ClientCommandBase {
         File screenshotsFolder = new File(Minecraft.getMinecraft().mcDataDir, "screenshots");
         File[] screenshots = screenshotsFolder.listFiles((FileFilter) FileFilterUtils.suffixFileFilter(".png"));
         ArrayUtils.reverse(screenshots);
-        byte[] data = Files.readAllBytes(screenshots[Integer.valueOf(args[1])].toPath());
+
+        int id;
+        try {
+            id = Integer.valueOf(args[args.length - 1]);
+        } catch (Exception e) {
+            throw new NumberInvalidException("%s is not a valid ID number. Must be a number from 0 to %d", args[args.length - 1], screenshots.length - 1);
+        }
+
+        args = ArrayUtils.subarray(args, 0, args.length - 1);
+
+        byte[] data = Files.readAllBytes(screenshots[id].toPath());
         String fileName = System.currentTimeMillis() + "creation.png";
         Creation creation = uploadResponse.creation;
         String relativePath = creation.store_dir + "/" + fileName;
-       
+
         // upload image
         new UploadS3ImageRequest(data, relativePath, credentials.access_key_id, credentials.secret_access_key, credentials.session_token).execute().getResponse();
         creation.url = relativePath;
-        creation.name = args[0];
+        creation.name = StringUtils.join(args, " ");
         // update creation(url)
         new UpdateCreationRequest(CommandLogin.accessToken, creation).execute().getResponse();
     }

@@ -241,10 +241,12 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 	
 	private TileCreator te;
 	
-	private boolean init = true;
+	private boolean init;
 
 	public GuiCreator(InventoryPlayer inv, TileCreator creator) {
 		super(new ContainerCreator(inv, creator));
+		
+		init = getUser() != null;
 		
 		initSlotPositions();
 		

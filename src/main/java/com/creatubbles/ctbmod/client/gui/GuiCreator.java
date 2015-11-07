@@ -583,12 +583,16 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 	}
 	
 	private void setState(State state, boolean update) {
-		this.state = state;
-		if (update) {
-			updateSize();
-			updateVisibility();
-		}
-	}
+        this.state = state;
+        if (update) {
+            updateSize();
+            updateVisibility();
+        }
+        if (tfEmail != null && state == State.LOGGED_IN) {
+            tfEmail.setText("");
+            tfVisualPassword.setText("");
+        }
+    }
 
     @SuppressWarnings("unchecked")
     private void initSlotPositions() {

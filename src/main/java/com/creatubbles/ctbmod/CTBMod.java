@@ -2,7 +2,10 @@ package com.creatubbles.ctbmod;
 
 import java.util.Locale;
 
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraftforge.client.ClientCommandHandler;
+import net.minecraftforge.oredict.ShapedOreRecipe;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,6 +27,7 @@ import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.registry.GameRegistry;
 
 import static com.creatubbles.ctbmod.CTBMod.*;
 
@@ -57,6 +61,8 @@ public class CTBMod {
         painting = BlockPainting.create();
 
         proxy.registerRenderers();
+
+        GameRegistry.addRecipe(new ShapedOreRecipe(creator, "ibi", "wpw", "iwi", 'i', "ingotIron", 'b', Items.bucket, 'w', "plankWood", 'p', Blocks.piston));
     }
 
     @EventHandler

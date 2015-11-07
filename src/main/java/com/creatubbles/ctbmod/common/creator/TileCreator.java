@@ -62,6 +62,20 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, IUpd
         return inventory[4];
     }
 
+    public int getPaperCount() {
+        return inventory[0] == null ? 0 : inventory[0].stackSize;
+    }
+    
+    public int getLowestDyeCount() {
+        int ret = 0;
+        for (int i = 1; i < 4; i++) {
+            if (inventory[i] != null) {
+                ret = Math.max(ret, inventory[i].stackSize);
+            }
+        }
+        return ret;
+    }
+
     public void create(Creation creation) {
         this.creating = creation;
         for (int i = 0; i < 4; i++) {
@@ -80,15 +94,7 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, IUpd
         if (inventory[4] != null || progress > 0) {
             return false;
         }
-        if (inventory[0] != null && inventory[0].stackSize >= getRequiredPaper()) {
-            for (int i = 1; i < 4; i++) {
-                if (inventory[i] == null || inventory[i].stackSize < getRequiredDye()) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return false;
+        return getPaperCount() >= getRequiredPaper() && getLowestDyeCount() >= getRequiredDye();
     }
 
     public int getRequiredPaper() {

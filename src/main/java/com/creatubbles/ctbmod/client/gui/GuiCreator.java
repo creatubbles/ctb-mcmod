@@ -383,11 +383,12 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 			visibleMap.put(tfEmail, State.LOGGED_OUT);
 			visibleMap.put(tfVisualPassword, State.LOGGED_OUT);
 			visibleMap.put(userSelection, State.USER_SELECT);
-			visibleMap.put(creationList, State.LOGGED_IN);
-			visibleMap.put(selectedCreation, State.LOGGED_IN);
-			visibleMap.put(userInfo, State.LOGGED_IN);
-			visibleMap.put(resourceInfo, State.LOGGED_IN);
-			visibleMap.put(loginButton, State.LOGGED_OUT);
+            visibleMap.put(creationList, State.LOGGED_IN);
+            visibleMap.put(selectedCreation, State.LOGGED_IN);
+            visibleMap.put(userInfo, State.LOGGED_IN);
+            visibleMap.put(resourceInfo, State.LOGGED_IN);
+            visibleMap.put(creationInfo, State.LOGGED_IN);
+            visibleMap.put(loginButton, State.LOGGED_OUT);
 			visibleMap.put(userButton, State.LOGGED_OUT);
 			visibleMap.putAll(cancelButton, Lists.newArrayList(State.USER_SELECT, State.LOGGING_IN));
 			visibleMap.put(logoutButton, State.LOGGED_IN);

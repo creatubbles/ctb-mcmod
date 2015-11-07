@@ -1,5 +1,9 @@
 package com.creatubbles.ctbmod.client.gui;
 
+import static net.minecraft.util.EnumChatFormatting.GREEN;
+import static net.minecraft.util.EnumChatFormatting.RED;
+
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -222,7 +226,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 	private GuiButtonHideable loginButton, userButton, cancelButton;
 	private IconButton logoutButton, createButton;
 	private MultiIconButton heightUpButton, heightDownButton, widthUpButton, widthDownButton;
-	private GuiToolTip userInfo;
+	private GuiToolTip userInfo, resourceInfo, creationInfo;
 	private OverlayCreationList creationList;
 	private OverlayUserSelection userSelection;
 	private OverlaySelectedCreation selectedCreation;
@@ -301,10 +305,10 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
         creationList.addCallback(this);
 		addOverlay(selectedCreation);
 
-		userInfo = new GuiToolTip(new java.awt.Rectangle(), Lists.<String> newArrayList()) {
+		userInfo = new GuiToolTip(new Rectangle()) {
 
 			@Override
-			public java.awt.Rectangle getBounds() {
+			public Rectangle getBounds() {
 				if (getUser() == null) {
 					System.out.println("!");
 				}
@@ -316,10 +320,37 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 			protected void updateText() {
 				User u = getUser();
 				setToolTipText(StringUtils.capitalize(u.role), getCreator().age, u.country);
-			}
-		};
-		addToolTip(userInfo);
-		
+            }
+        };
+        addToolTip(userInfo);
+
+        resourceInfo = new GuiToolTip(new Rectangle(69, 79, 40, 30)) {
+
+            @Override
+            protected void updateText() {
+                setToolTipText(
+                        "Creating paintings takes resources!", 
+                        "A painting of this size needs:", 
+                        "- " + te.getRequiredPaper() + " pieces of paper", 
+                        "- " + te.getRequiredDye() + " of each dye (red, green, blue)"
+                );
+            }
+        };
+        addToolTip(resourceInfo);
+        
+        creationInfo = new GuiToolTip(new Rectangle(10, 10, 54, 54)) {
+            
+            @Override
+            protected void updateText() {
+                if (selected == null) {
+                    setToolTipText("No creation selected!", "Select a creation from the pane on the right.");
+                } else {
+                    setToolTipText();
+                }
+            }
+        };
+        addToolTip(creationInfo);
+
 		int y = 61;
 		int x = 97;
 	    widthUpButton = MultiIconButton.createAddButton(this, ID_W_PLUS, x, y);
@@ -357,6 +388,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 			visibleMap.put(creationList, State.LOGGED_IN);
 			visibleMap.put(selectedCreation, State.LOGGED_IN);
 			visibleMap.put(userInfo, State.LOGGED_IN);
+			visibleMap.put(resourceInfo, State.LOGGED_IN);
 			visibleMap.put(loginButton, State.LOGGED_OUT);
 			visibleMap.put(userButton, State.LOGGED_OUT);
 			visibleMap.putAll(cancelButton, Lists.newArrayList(State.USER_SELECT, State.LOGGING_IN));
@@ -484,10 +516,12 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
             drawString(getFontRenderer(), "W: " + te.getWidth(), x, y, 0xFFFFFF);
 			drawString(getFontRenderer(), "H: " + te.getHeight(), x + 50, y, 0xFFFFFF);
 			
-			y += 15;
-			drawString(getFontRenderer(), "Paper: " + te.getRequiredPaper(), x, y, 0xFFFFFF);
+			y += 18;
+			EnumChatFormatting color = te.getRequiredPaper() > te.getPaperCount() ? RED : GREEN;
+			drawString(getFontRenderer(), "Paper: " + color + te.getRequiredPaper(), x, y, 0xFFFFFF);
 			y += 10;
-			drawString(getFontRenderer(), "Dye: " + te.getRequiredDye(), x, y, 0xFFFFFF);
+			color = te.getRequiredDye() > te.getLowestDyeCount() ? RED : GREEN;
+			drawString(getFontRenderer(), "Dye: " + color + te.getRequiredDye(), x, y, 0xFFFFFF);
 			break;
 		case LOGGED_OUT:
 			x += xSize / 2;

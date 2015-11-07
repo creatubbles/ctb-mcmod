@@ -168,7 +168,7 @@ curseforge {
         changelogType = 'html'
         releaseType = 'beta'
         mainArtifact(jar) {
-            displayName = "Creatubbles - ${version}"
+            displayName = "Creatubbles - ${mod_version}-${buildnumber}"
         }
         addArtifact deobfJar
     }

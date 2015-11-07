@@ -1,2 +1,7 @@
+0.1.1:
+Fixes
+- Fix creator attempting automatic login when there is no saved user data
+- Fix text creator text fields not being cleared after login
+
 0.1.0:
 - Initial Beta Release

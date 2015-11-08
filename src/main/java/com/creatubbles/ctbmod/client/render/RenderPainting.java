@@ -41,6 +41,7 @@ public class RenderPainting extends TileEntitySpecialRenderer {
                 width = 16;
                 height = 16;
                 scaledSize = 16;
+                GlStateManager.enableBlend();
             }
             
             Minecraft.getMinecraft().renderEngine.bindTexture(res);
@@ -85,7 +86,6 @@ public class RenderPainting extends TileEntitySpecialRenderer {
             
             GL11.glPushAttrib(GL11.GL_COLOR_BUFFER_BIT);
             GlStateManager.disableLighting();
-            GlStateManager.disableBlend();
             GlStateManager.doPolygonOffset(-3.0F, -1.5F);
             GlStateManager.enablePolygonOffset();
             renderer.startDrawingQuads();

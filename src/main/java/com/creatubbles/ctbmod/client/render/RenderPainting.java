@@ -85,8 +85,7 @@ public class RenderPainting extends TileEntitySpecialRenderer {
             
             GL11.glPushAttrib(GL11.GL_COLOR_BUFFER_BIT);
             GlStateManager.disableLighting();
-            GlStateManager.enableBlend();
-            GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+            GlStateManager.disableBlend();
             GlStateManager.doPolygonOffset(-3.0F, -1.5F);
             GlStateManager.enablePolygonOffset();
             renderer.startDrawingQuads();

@@ -3,6 +3,7 @@ package com.creatubbles.ctbmod.common.painting;
 import lombok.NonNull;
 import lombok.Setter;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 
 import com.creatubbles.repack.endercore.common.TileEntityBase;
 import com.creatubbles.repack.endercore.common.util.BlockCoord;
@@ -15,6 +16,15 @@ public class TileDummyPainting extends TileEntityBase {
 
     public TilePainting getDataTile() {
         return (TilePainting) main.getTileEntity(getWorldObj());
+    }
+
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        TileEntity te = main.getTileEntity(worldObj);
+        if (te != null && te instanceof TilePainting) {
+            ((TilePainting) te).render(true);
+        }
     }
 
     @Override

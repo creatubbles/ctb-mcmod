@@ -29,7 +29,7 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
 
 	@Override
 	public void renderTileEntityAt(TileEntity te, double x, double y, double z, float partialTicks) {
-		if (te instanceof TilePainting && ((TilePainting) te).getImage() != null) {
+		if (te instanceof TilePainting && ((TilePainting) te).getImage() != null && ((TilePainting) te).render()) {
 			TilePainting painting = (TilePainting) te;
 			DownloadableImage image = painting.getImage();
 

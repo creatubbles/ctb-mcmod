@@ -25,7 +25,7 @@ public class RenderPainting extends TileEntitySpecialRenderer {
     
     @Override
     public void renderTileEntityAt(TileEntity te, double x, double y, double z, float partialTicks, int destroyStage) {
-        if (te instanceof TilePainting && ((TilePainting)te).getImage() != null) {
+        if (te instanceof TilePainting && ((TilePainting) te).getImage() != null && ((TilePainting) te).render()) {
             TilePainting painting = (TilePainting) te;
             DownloadableImage image = painting.getImage();
 

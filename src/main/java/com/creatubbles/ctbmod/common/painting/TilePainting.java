@@ -2,6 +2,7 @@ package com.creatubbles.ctbmod.common.painting;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
@@ -28,6 +29,12 @@ public class TilePainting extends TileEntityBase {
     @SideOnly(Side.CLIENT)
     @Getter(onMethod = @__({ @SideOnly(Side.CLIENT) }))
     private transient DownloadableImage image;
+    
+    // Client flag to prevent rendering when a dummy TE has been removed on the client
+    @Setter
+    @Getter
+    @Accessors(fluent = true)
+    private boolean render = true;
 
     public void setCreation(Creation image) {
         this.creation = image;

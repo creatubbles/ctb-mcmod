@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
+import lombok.Synchronized;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
@@ -142,6 +143,7 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 	}
 
 	@Override
+	@Synchronized("ttMan")
 	public void addToolTip(GuiToolTip toolTip) {
 		ttMan.addToolTip(toolTip);
 	}
@@ -350,12 +352,14 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 
 		if (draggingScrollbar == null) {
 			if (hoverGhostSlot != null && mc.thePlayer.inventory.getItemStack() == null) {
-				drawGhostSlotTooltip(hoverGhostSlot, par1, par2);
-			}
+                drawGhostSlotTooltip(hoverGhostSlot, par1, par2);
+            }
 
-			ttMan.drawTooltips(this, par1, par2);
-		}
-	}
+            synchronized (ttMan) {
+                ttMan.drawTooltips(this, par1, par2);
+            }
+        }
+    }
 
 	// copied from super with hate
 	protected void drawItemStack(ItemStack stack, int mouseX, int mouseY, String str) {
@@ -457,20 +461,22 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
 	private boolean isMouseInOverlay(int mouseX, int mouseY, IGuiOverlay overlay) {
 		int x = mouseX - getGuiLeft();
 		int y = mouseY - getGuiTop();
-		return overlay.getBounds().contains(x, y);
-	}
+        return overlay.getBounds().contains(x, y);
+    }
 
-	@Override
-	public boolean removeToolTip(GuiToolTip toolTip) {
-		return ttMan.removeToolTip(toolTip);
-	}
+    @Override
+    @Synchronized("ttMan")
+    public boolean removeToolTip(GuiToolTip toolTip) {
+        return ttMan.removeToolTip(toolTip);
+    }
 
-	@Override
-	public void clearToolTips() {
-		ttMan.clearToolTips();
-	}
-	
-	protected void drawForegroundImpl(int mouseX, int mouseY) {
+    @Override
+    @Synchronized("ttMan")
+    public void clearToolTips() {
+        ttMan.clearToolTips();
+    }
+
+    protected void drawForegroundImpl(int mouseX, int mouseY) {
 		super.drawGuiContainerForegroundLayer(mouseX, mouseY);
 	}
 

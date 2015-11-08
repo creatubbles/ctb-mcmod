@@ -111,8 +111,7 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
 			double depth = 1 / 16d;
 
 			glPushAttrib(GL_COLOR_BUFFER_BIT);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glDisable(GL_BLEND);
 			glNormal3d(0, 0, 1);
 			renderer.startDrawingQuads();
 			renderer.setColorOpaque_I(color);

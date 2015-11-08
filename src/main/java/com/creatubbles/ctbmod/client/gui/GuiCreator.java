@@ -310,10 +310,10 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 			@Override
 			public Rectangle getBounds() {
 				if (getUser() == null) {
-					System.out.println("!");
+					return new Rectangle();
 				}
 				FontRenderer fr = getFontRenderer();
-				return new java.awt.Rectangle(25, 110, fr.getStringWidth(getUser().username), 8);
+				return new Rectangle(25, 110, fr.getStringWidth(getUser().username), 8);
 			}
 
 			@Override

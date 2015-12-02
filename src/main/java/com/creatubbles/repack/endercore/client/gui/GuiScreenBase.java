@@ -211,7 +211,6 @@ public abstract class GuiScreenBase extends GuiScreen implements ToolTipRenderer
 		return Minecraft.getMinecraft().fontRendererObj;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void addButton(GuiButton button) {
 		if (!buttonList.contains(button)) {

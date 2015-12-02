@@ -25,7 +25,7 @@ public class ToolTipManager {
 		void drawHoveringText(List<String> par1List, int par2, int par3, FontRenderer font);
 	}
 
-	private Set<GuiToolTip> toolTips = Sets.newHashSet();
+	private final Set<GuiToolTip> toolTips = Sets.newHashSet();
 
 	public void addToolTip(GuiToolTip toolTip) {
 		toolTips.add(toolTip);
@@ -67,13 +67,13 @@ public class ToolTipManager {
 			int maxWidth = 0;
 			Iterator<String> iterator = formatted.iterator();
 			while (iterator.hasNext()) {
-				String s = (String) iterator.next();
+				String s = iterator.next();
 				int w = renderer.getFontRenderer().getStringWidth(s);
 				if (w > maxWidth) {
 					maxWidth = w;
 				}
 			}
-			mouseX -= (maxWidth + 18);
+			mouseX -= maxWidth + 18;
 		}
 		renderer.drawHoveringText(formatted, mouseX, mouseY, renderer.getFontRenderer());
 	}

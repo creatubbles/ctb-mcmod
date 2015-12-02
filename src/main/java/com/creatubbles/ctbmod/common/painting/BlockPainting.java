@@ -37,7 +37,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
 
     public static final PropertyDirection FACING = PropertyDirection.create("facing", EnumFacing.Plane.HORIZONTAL);
     public static final PropertyBool DUMMY = PropertyBool.create("dummy");
-    public static final PropertyEnum CONNECTION = PropertyEnum.create("connection", ConnectionType.class);
+    public static final PropertyEnum<ConnectionType> CONNECTION = PropertyEnum.create("connection", ConnectionType.class);
 
     public static BlockPainting create() {
         BlockPainting res = new BlockPainting();
@@ -103,7 +103,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         painting.setWidth(placed.getTagCompound().getInteger("pWidth"));
         painting.setHeight(placed.getTagCompound().getInteger("pHeight"));
         
-        EnumFacing facing = ((EnumFacing) getState(worldIn, pos).getValue(FACING));
+        EnumFacing facing = getState(worldIn, pos).getValue(FACING);
         EnumFacing ext = facing.rotateYCCW();
         for (int x = 0; x < painting.getWidth(); x++) {
             for (int y = 0; y < painting.getHeight(); y++) {
@@ -118,7 +118,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
 
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
-        EnumFacing facing = ((EnumFacing) state.getValue(FACING));
+        EnumFacing facing = state.getValue(FACING);
         EnumFacing ext = facing.rotateYCCW();
         TilePainting painting = getDataPainting(worldIn, pos);
         pos = painting.getPos();
@@ -159,7 +159,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         if (state == null) {
             return;
         }
-        EnumFacing facing = (EnumFacing) state.getValue(FACING);
+        EnumFacing facing = state.getValue(FACING);
         switch (facing) {
         case EAST:
             setBlockBounds(0, 0, 0, 1/16f, 1, 1);
@@ -194,7 +194,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         IBlockState state = getState(worldIn, pos);
         EnumFacing facing = EnumFacing.EAST;
         if (state != null) {
-            facing = ((EnumFacing)state.getValue(FACING));
+            facing = state.getValue(FACING);
         }
 
         EnumFacing ext = facing.rotateYCCW();
@@ -253,7 +253,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
 
     @Override
     public int getMetaFromState(IBlockState state) {
-        return ((EnumFacing) state.getValue(FACING)).getHorizontalIndex() | (BooleanUtils.toInteger((Boolean) state.getValue(DUMMY)) << 3);
+        return state.getValue(FACING).getHorizontalIndex() | BooleanUtils.toInteger(state.getValue(DUMMY)) << 3;
     }
 
     @Override
@@ -263,7 +263,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
 
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
-        EnumFacing facing = ((EnumFacing) state.getValue(FACING));
+        EnumFacing facing = state.getValue(FACING);
         EnumFacing ext = facing.rotateYCCW();
         Set<Connections> set = Sets.newHashSet();
         for (int x = -1; x <= 1; x++) {

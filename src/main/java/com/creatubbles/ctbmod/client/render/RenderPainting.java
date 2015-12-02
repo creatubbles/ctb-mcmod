@@ -8,7 +8,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 
@@ -21,15 +21,15 @@ import com.creatubbles.ctbmod.common.painting.BlockPainting;
 import com.creatubbles.ctbmod.common.painting.TilePainting;
 
 
-public class RenderPainting extends TileEntitySpecialRenderer {
+public class RenderPainting extends TileEntitySpecialRenderer<TilePainting> {
     
     @Override
-    public void renderTileEntityAt(TileEntity te, double x, double y, double z, float partialTicks, int destroyStage) {
-        if (te instanceof TilePainting && ((TilePainting) te).getImage() != null && ((TilePainting) te).render()) {
-            TilePainting painting = (TilePainting) te;
+    public void renderTileEntityAt(TilePainting te, double x, double y, double z, float partialTicks, int destroyStage) {
+        if (te instanceof TilePainting && te.getImage() != null && te.render()) {
+            TilePainting painting = te;
             DownloadableImage image = painting.getImage();
 
-            EnumFacing facing = (EnumFacing) te.getWorld().getBlockState(te.getPos()).getValue(BlockPainting.FACING);
+            EnumFacing facing = te.getWorld().getBlockState(te.getPos()).getValue(BlockPainting.FACING);
 
             int width = image.getWidth(ImageType.ORIGINAL);
             int height = image.getHeight(ImageType.ORIGINAL);
@@ -88,17 +88,17 @@ public class RenderPainting extends TileEntitySpecialRenderer {
             GlStateManager.disableLighting();
             GlStateManager.doPolygonOffset(-3.0F, -1.5F);
             GlStateManager.enablePolygonOffset();
-            renderer.startDrawingQuads();
+            renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
             
-            int c = (int) (0xFF * getColorMultiplierForFace(facing));
-            renderer.setColorOpaque(c, c, c);
+            float c = getColorMultiplierForFace(facing);
+            renderer.putColorRGB_F4(c, c, c);
             
             double depth = 1/16d;
             
-            renderer.addVertexWithUV(bounds.getX(), bounds.getY() + bounds.getHeight(), depth, 0, 0);
-            renderer.addVertexWithUV(bounds.getX(), bounds.getY(), depth, 0, maxV);
-            renderer.addVertexWithUV(bounds.getX() + bounds.getWidth(), bounds.getY(), depth, maxU, maxV);
-            renderer.addVertexWithUV(bounds.getX() + bounds.getWidth(), bounds.getY() + bounds.getHeight(), depth, maxU, 0);
+            renderer.pos(bounds.getX(), bounds.getY() + bounds.getHeight(), depth).tex(0, 0).endVertex();
+            renderer.pos(bounds.getX(), bounds.getY(), depth).tex(0, maxV).endVertex();
+            renderer.pos(bounds.getX() + bounds.getWidth(), bounds.getY(), depth).tex(maxU, maxV).endVertex();
+            renderer.pos(bounds.getX() + bounds.getWidth(), bounds.getY() + bounds.getHeight(), depth).tex(maxU, 0).endVertex();
             
             Tessellator.getInstance().draw();
             renderer.setTranslation(0, 0, 0);

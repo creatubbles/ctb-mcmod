@@ -27,7 +27,7 @@ public class DataCache {
 	private static final File cache = new File(cacheFolder, "usercache.json");
 	private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-	private Set<User> savedUsers = Sets.newHashSet();
+	private final Set<User> savedUsers = Sets.newHashSet();
 
 	@Getter
 	private User activeUser;

@@ -35,7 +35,7 @@ public class OverlayUserSelection extends OverlayBase {
 			FontRenderer fr = Minecraft.getMinecraft().fontRendererObj;
 			int height = fr.FONT_HEIGHT;
 			int width = fr.getStringWidth(username);
-			return new Rectangle(location.x - (width / 2), location.y, width, height);
+			return new Rectangle(location.x - width / 2, location.y, width, height);
 		}
 	}
 

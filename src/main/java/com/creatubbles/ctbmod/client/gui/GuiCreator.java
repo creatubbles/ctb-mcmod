@@ -6,7 +6,6 @@ import static net.minecraft.util.EnumChatFormatting.RED;
 import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -53,6 +52,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import com.google.gson.Gson;
 
 public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
@@ -214,11 +214,11 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 	    DUMMY_USER.username = "No Users";
 	}
 
-	private Multimap<IHideable, State> visibleMap = MultimapBuilder.hashKeys().enumSetValues(State.class).build();
+	private final Multimap<IHideable, State> visibleMap = MultimapBuilder.hashKeys().enumSetValues(State.class).build();
 	
     Map<Creation, DownloadableImage> images = Maps.newHashMap();
 
-    private Map<Slot, Pair<Integer, Integer>> slotPositions = Maps.newHashMap();
+    private final Map<Slot, Pair<Integer, Integer>> slotPositions = Maps.newHashMap();
 
 	private TextFieldEnder tfEmail, tfActualPassword;
 	private VScrollbar scrollbar;
@@ -262,14 +262,14 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
 		ySize += 44;
 		xSize = getState() == State.LOGGED_IN ? XSIZE_SIDEBAR : XSIZE_DEFAULT;
-		tfEmail = new TextFieldEnder(getFontRenderer(), (XSIZE_DEFAULT / 2) - 75, 35, 150, 12);
+		tfEmail = new TextFieldEnder(getFontRenderer(), XSIZE_DEFAULT / 2 - 75, 35, 150, 12);
 		tfEmail.setFocused(true);
 		textFields.add(tfEmail);
 		
 		// This is a dummy to store the uncensored PW
 		tfActualPassword = new TextFieldEnder(getFontRenderer(), 0, 0, 0, 0);
 
-		tfVisualPassword = new PasswordTextField(getFontRenderer(), (XSIZE_DEFAULT / 2) - 75, 65, 150, 12);
+		tfVisualPassword = new PasswordTextField(getFontRenderer(), XSIZE_DEFAULT / 2 - 75, 65, 150, 12);
 		textFields.add(tfVisualPassword);
 
 		scrollbar = new VScrollbar(this, XSIZE_SIDEBAR - 11, 0, ySize + 1) {
@@ -463,11 +463,12 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
 		// TODO localize all the things
 
-		switch(state) {
-		case LOGGED_IN:
-			if (getUser() == null) {
-				System.out.println("!");
-			}
+        switch (state) {
+        case LOGGED_IN:
+            if (getUser() == null) {
+                System.out.println(new Gson().toJson(CTBMod.cache));
+                break;
+            }
 
             for (int i = 0; i < 4; i++) {
                 SlotCreator slot = (SlotCreator) inventorySlots.getSlot(i);
@@ -596,14 +597,12 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void initSlotPositions() {
-        for (Slot s : (List<Slot>) inventorySlots.inventorySlots) {
+        for (Slot s : inventorySlots.inventorySlots) {
             slotPositions.put(s, Pair.of(s.xDisplayPosition, s.yDisplayPosition));
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Synchronized("visibleMap")
     private void updateVisibility() {
         for (Entry<IHideable, Collection<State>> e : visibleMap.asMap().entrySet()) {
@@ -611,7 +610,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
             e.getKey().setIsVisible(visible);
         }
         int offset = getState() == State.LOGGED_IN ? 0 : 5000;
-        for (Slot s : (List<Slot>) inventorySlots.inventorySlots) {
+        for (Slot s : inventorySlots.inventorySlots) {
             Pair<Integer, Integer> pos = slotPositions.get(s);
             s.xDisplayPosition = pos.getLeft() + offset;
             s.yDisplayPosition = pos.getRight() + offset;

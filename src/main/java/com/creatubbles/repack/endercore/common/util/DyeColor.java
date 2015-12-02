@@ -1,12 +1,12 @@
 package com.creatubbles.repack.endercore.common.util;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.oredict.OreDictionary;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 public enum DyeColor {
 

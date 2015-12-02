@@ -8,11 +8,11 @@ import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.server.gui.IUpdatePlayerListBox;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.util.ITickable;
 import net.minecraftforge.oredict.OreDictionary;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -26,11 +26,11 @@ import com.creatubbles.repack.endercore.api.common.util.IProgressTile;
 import com.creatubbles.repack.endercore.common.TileEntityBase;
 import com.creatubbles.repack.endercore.common.util.Bound;
 
-public class TileCreator extends TileEntityBase implements ISidedInventory, IUpdatePlayerListBox, IProgressTile {
+public class TileCreator extends TileEntityBase implements ISidedInventory, ITickable, IProgressTile {
 
 	private static final Bound<Integer> DIMENSION_BOUND = Bound.of(1, 16);
 	
-	private ItemStack[] inventory = new ItemStack[5];
+	private final ItemStack[] inventory = new ItemStack[5];
 	private Creation creating;
 	private int progress;
 
@@ -70,13 +70,13 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, IUpd
     }
     
     public int getLowestDyeCount() {
-        int ret = 0;
+        int ret = Integer.MAX_VALUE;
         for (int i = 1; i < 4; i++) {
             if (inventory[i] != null) {
-                ret = Math.max(ret, inventory[i].stackSize);
+                ret = Math.min(ret, inventory[i].stackSize);
             }
         }
-        return ret;
+        return ret == Integer.MAX_VALUE ? 0 : ret;
     }
 
     public void create(Creation creation) {
@@ -186,7 +186,7 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, IUpd
 	}
 
 	@Override
-	public ItemStack getStackInSlotOnClosing(int index) {
+	public ItemStack removeStackFromSlot(int index) {
 		if (this.inventory[index] != null) {
 			ItemStack itemstack = this.inventory[index];
 			this.inventory[index] = null;
@@ -229,7 +229,7 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, IUpd
 	public void closeInventory(EntityPlayer player) {
 	}
 
-	private String[] colors = new String[]{ "dyeRed", "dyeGreen", "dyeBlue"};
+	private final String[] colors = new String[]{ "dyeRed", "dyeGreen", "dyeBlue"};
 	
     @Override
     public boolean isItemValidForSlot(int index, ItemStack stack) {
@@ -288,7 +288,7 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, IUpd
 	// Stupid pointless IInventory methods
 
 	@Override
-	public String getCommandSenderName() {
+	public String getName() {
 		return getDisplayName().getUnformattedText();
 	}
 

@@ -71,9 +71,9 @@ public class OverlayCreationList extends OverlayBase {
 	@Getter
 	private Creation selected;
 
-	private List<CreationAndLocation> list = Lists.newArrayList();
-	private List<CreationAndLocation> listAbsolute = Lists.newArrayList();
-	private List<ISelectionCallback> callbacks = Lists.newArrayList();
+	private final List<CreationAndLocation> list = Lists.newArrayList();
+	private final List<CreationAndLocation> listAbsolute = Lists.newArrayList();
+	private final List<ISelectionCallback> callbacks = Lists.newArrayList();
 
 	private int scroll = 0;
 
@@ -119,7 +119,7 @@ public class OverlayCreationList extends OverlayBase {
 		int col = 0;
 
 		// This is the dimensions we have to work with for thumbnails
-		int usableWidth = getSize().getWidth() - (paddingX * 2);
+		int usableWidth = getSize().getWidth() - paddingX * 2;
 
 		// The minimum size a thumbnail can take up
 		int widthPerThumbnail = thumbnailSize + minSpacing;
@@ -149,8 +149,8 @@ public class OverlayCreationList extends OverlayBase {
 		for (Creation c : creations) {
 			int xMin = xRel + paddingX, yMin = yRel + paddingY;
 
-			int x = xMin + (col * (thumbnailSize + spacing));
-			int y = yMin + (row * (thumbnailSize + minSpacing)) - scroll;
+			int x = xMin + col * (thumbnailSize + spacing);
+			int y = yMin + row * (thumbnailSize + minSpacing) - scroll;
 
 			CreationAndLocation data = new CreationAndLocation(c, new Point(x, y));
 			CreationAndLocation absoluteData = new CreationAndLocation(c, new Point(x, y + scroll));
@@ -196,7 +196,7 @@ public class OverlayCreationList extends OverlayBase {
         Minecraft mc = Minecraft.getMinecraft();
 		FontRenderer fr = mc.fontRendererObj;
 		if (list.size() == 0) {
-			drawCenteredString(fr, "No Creations", xRel + (getWidth() / 2), yRel + 4, 0xFFFFFF);
+			drawCenteredString(fr, "No Creations", xRel + getWidth() / 2, yRel + 4, 0xFFFFFF);
 		} else {
 			for (CreationAndLocation c : list) {
 				GlStateManager.pushMatrix();
@@ -240,8 +240,8 @@ public class OverlayCreationList extends OverlayBase {
 
 				int height = thumbnailSize;
 				float v = 0;
-				int pastBottom = (y + height) - (yRel + getHeight() - 1);
-				int pastTop = (yRel + 1) - y;
+				int pastBottom = y + height - (yRel + getHeight() - 1);
+				int pastTop = yRel + 1 - y;
 				boolean clipV = false;
 				if (pastBottom > 0) {
 					height -= pastBottom;
@@ -251,7 +251,7 @@ public class OverlayCreationList extends OverlayBase {
 				}
 				double heightRatio = (double) height / thumbnailSize;
 				if (clipV) {
-					v = h - ((float) heightRatio * h);
+					v = h - (float) heightRatio * h;
 				}
 				drawScaledCustomSizeModalRect(x, y + Math.max(0, pastTop), 0, v, w, (int) (h * heightRatio), thumbnailSize, height, scaledSize, scaledSize);
 				GlStateManager.popMatrix();
@@ -293,14 +293,16 @@ public class OverlayCreationList extends OverlayBase {
 		}
 	}
 
-	public void setX(int x) {
+	@Override
+    public void setX(int x) {
 		if (getX() != x) {
 			rebuildList();
 		}
 		super.setX(x);
 	}
 
-	public void setY(int y) {
+	@Override
+    public void setY(int y) {
 		if (getY() != y) {
 			rebuildList();
 		}
@@ -336,7 +338,7 @@ public class OverlayCreationList extends OverlayBase {
     }
 
     public int getMaxScroll() {
-        return (rows * (thumbnailSize + minSpacing)) - getHeight() + minSpacing + paddingY;
+        return rows * (thumbnailSize + minSpacing) - getHeight() + minSpacing + paddingY;
     }
 
 	public void setScroll(int scroll) {

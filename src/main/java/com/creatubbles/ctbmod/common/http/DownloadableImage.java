@@ -73,7 +73,7 @@ public class DownloadableImage {
 	private static class RescaledTexture extends DynamicTexture {
 		
 		@Getter
-		private Size size;
+		private final Size size;
 		
 		public RescaledTexture(BufferedImage actual, BufferedImage rescale) {
 			super(rescale);

@@ -21,7 +21,7 @@ public class TextFieldEnder extends GuiTextField implements IHideable {
 
 		@Override
 		public boolean passesFilter(TextFieldEnder tf, char c) {
-			return Character.isDigit(c) || (c == '-' && Strings.isNullOrEmpty(tf.getText()));
+			return Character.isDigit(c) || c == '-' && Strings.isNullOrEmpty(tf.getText());
 		}
 	};
 

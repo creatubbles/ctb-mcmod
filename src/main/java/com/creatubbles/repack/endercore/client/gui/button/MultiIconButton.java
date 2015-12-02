@@ -15,7 +15,7 @@ public class MultiIconButton extends IconButton {
 		this.unpressed = unpressed;
 		this.pressed = pressed;
 		this.hover = hover;
-		setSize((int) unpressed.getWidth(), (int) unpressed.getHeight());
+		setSize(unpressed.getWidth(), unpressed.getHeight());
 	}
 
 	@Override

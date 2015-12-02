@@ -20,7 +20,8 @@ public abstract class MessageTileEntity<T extends TileEntity> implements IMessag
 		pos = tile.getPos();
 	}
 
-	public void toBytes(ByteBuf buf) {
+	@Override
+    public void toBytes(ByteBuf buf) {
 		NetworkUtil.writePos(pos, buf);
 	}
 

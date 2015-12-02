@@ -6,6 +6,7 @@ import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 
 import org.lwjgl.opengl.GL11;
 
@@ -54,10 +55,10 @@ public class VScrollbar implements IHideable {
 	public void adjustPosition() {
 		x = xOrigin + gui.getGuiLeft();
 		y = yOrigin + gui.getGuiTop();
-		wholeArea = new Rectangle(x, y, (int) EnderWidget.VSCROLL_THUMB_OFF.width, height);
-		btnUp = new Rectangle(x, y, (int) EnderWidget.UP_ARROW_OFF.width, (int) EnderWidget.UP_ARROW_OFF.height);
-		btnDown = new Rectangle(x, y + Math.max(0, height - (int) EnderWidget.DOWN_ARROW_OFF.height), (int) EnderWidget.DOWN_ARROW_OFF.width, (int) EnderWidget.DOWN_ARROW_OFF.height);
-		thumbArea = new Rectangle(x, y + btnUp.height, (int) EnderWidget.VSCROLL_THUMB_OFF.width, Math.max(0, height - (btnUp.height + btnDown.height)));
+		wholeArea = new Rectangle(x, y, EnderWidget.VSCROLL_THUMB_OFF.width, height);
+		btnUp = new Rectangle(x, y, EnderWidget.UP_ARROW_OFF.width, EnderWidget.UP_ARROW_OFF.height);
+		btnDown = new Rectangle(x, y + Math.max(0, height - EnderWidget.DOWN_ARROW_OFF.height), EnderWidget.DOWN_ARROW_OFF.width, EnderWidget.DOWN_ARROW_OFF.height);
+		thumbArea = new Rectangle(x, y + btnUp.height, EnderWidget.VSCROLL_THUMB_OFF.width, Math.max(0, height - (btnUp.height + btnDown.height)));
 	}
 
 	public int getScrollPos() {
@@ -102,7 +103,7 @@ public class VScrollbar implements IHideable {
 
 			if (scrollDir != 0) {
 				long time = Minecraft.getSystemTime();
-				if ((timeNextScroll - time) <= 0) {
+				if (timeNextScroll - time <= 0) {
 					timeNextScroll = time + 100;
 					scrollBy(scrollDir);
 				}
@@ -112,17 +113,17 @@ public class VScrollbar implements IHideable {
 			GL11.glPushAttrib(GL11.GL_ENABLE_BIT);
 			GL11.glEnable(GL11.GL_BLEND);
 			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			GL11.glColor3f(1, 1, 1);
+            GL11.glColor3f(1, 1, 1);
 
-			WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
-			renderer.startDrawingQuads();
+            WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
+            renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
 
-			iconUp.getMap().render(iconUp, btnUp.x, btnUp.y, false);
+            iconUp.getMap().render(iconUp, btnUp.x, btnUp.y, false);
 			iconDown.getMap().render(iconDown, btnDown.x, btnDown.y, false);
 
 			if (getScrollMax() > 0) {
 				int thumbPos = getThumbPosition();
-				boolean hoverThumb = thumbArea.contains(mouseX, mouseY) && mouseY >= thumbPos && mouseY < thumbPos + (int) EnderWidget.VSCROLL_THUMB_OFF.height;
+				boolean hoverThumb = thumbArea.contains(mouseX, mouseY) && mouseY >= thumbPos && mouseY < thumbPos + EnderWidget.VSCROLL_THUMB_OFF.height;
 
 				EnderWidget iconThumb;
 				if (pressedThumb) {
@@ -143,7 +144,7 @@ public class VScrollbar implements IHideable {
 			if (getScrollMax() > 0 && thumbArea.contains(x, y)) {
 				int thumbPos = getThumbPosition();
 				pressedUp = y < thumbPos;
-				pressedDown = y >= thumbPos + (int) EnderWidget.VSCROLL_THUMB_OFF.height;
+				pressedDown = y >= thumbPos + EnderWidget.VSCROLL_THUMB_OFF.height;
 				pressedThumb = !pressedUp && !pressedDown;
 			} else {
 				pressedUp = btnUp.contains(x, y);
@@ -162,10 +163,10 @@ public class VScrollbar implements IHideable {
 
 	public boolean mouseClickMove(int x, int y, int button, long time) {
 		if (pressedThumb) {
-			int pos = y - (thumbArea.y + (int) EnderWidget.VSCROLL_THUMB_OFF.height / 2);
-			int len = thumbArea.height - (int) EnderWidget.VSCROLL_THUMB_OFF.height;
+			int pos = y - (thumbArea.y + EnderWidget.VSCROLL_THUMB_OFF.height / 2);
+			int len = thumbArea.height - EnderWidget.VSCROLL_THUMB_OFF.height;
 			if (len > 0) {
-				setScrollPos(Math.round(pos * (float) getScrollMax() / (float) len));
+				setScrollPos(Math.round(pos * (float) getScrollMax() / len));
 			}
 			return true;
 		}
@@ -190,7 +191,7 @@ public class VScrollbar implements IHideable {
 	}
 
 	protected int getThumbPosition() {
-		return thumbArea.y + (thumbArea.height - (int) EnderWidget.VSCROLL_THUMB_OFF.height) * scrollPos / getScrollMax();
+		return thumbArea.y + (thumbArea.height - EnderWidget.VSCROLL_THUMB_OFF.height) * scrollPos / getScrollMax();
 	}
 
 	protected int limitPos(int pos) {

@@ -10,12 +10,12 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.common.config.Property.Type;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientDisconnectionFromServerEvent;
@@ -103,7 +103,7 @@ public class ConfigProcessor {
 	Map<String, Object> defaultValues = Maps.newHashMap();
 	Map<String, Object> originalValues = Maps.newHashMap();
 
-	private Set<String> sections = Sets.newHashSet();
+	private final Set<String> sections = Sets.newHashSet();
 
 	/**
 	 * This constructor omits the callback arg.
@@ -136,7 +136,7 @@ public class ConfigProcessor {
 		this.modid = modid;
 		this.callback = callback;
 		processorMap.put(modid, this);
-		FMLCommonHandler.instance().bus().register(this);
+		MinecraftForge.EVENT_BUS.register(this);
 		adapters.addAll(TypeAdapterBase.all);
 	}
 
@@ -299,7 +299,7 @@ public class ConfigProcessor {
 
 	@SuppressWarnings("unchecked")
 	private <T extends Number & Comparable<T>> T boundValue(Property prop, Bound<T> bound, T defVal) throws IllegalArgumentException {
-		Object b = (Object) bound;
+		Object b = bound;
 		if (defVal instanceof Integer) {
 			return (T) boundInt(prop, (Bound<Integer>) b);
 		}
@@ -329,7 +329,7 @@ public class ConfigProcessor {
 	private final Lang fmlLang = new Lang("fml.configgui.tooltip");
 
 	void addCommentDetails(Property prop, Bound<?> bound) {
-		prop.comment += (prop.comment.isEmpty() ? "" : "\n");
+		prop.comment += prop.comment.isEmpty() ? "" : "\n";
 		if (bound.equals(Bound.MAX_BOUND)) {
 			prop.comment += fmlLang.localize("default", prop.isList() ? Arrays.toString(prop.getDefaults()) : prop.getDefault());
 		} else {
@@ -345,7 +345,7 @@ public class ConfigProcessor {
 		TypeToken<?> t = TypeToken.of(f.getGenericType());
 		Class<?> c = f.getType();
 		for (ITypeAdapter adapter : adapters) {
-			if ((c.isPrimitive() && c == adapter.getPrimitiveType()) || adapter.getActualType().isAssignableFrom(t)) {
+			if (c.isPrimitive() && c == adapter.getPrimitiveType() || adapter.getActualType().isAssignableFrom(t)) {
 				return adapter;
 			}
 		}

@@ -11,12 +11,10 @@ public class TextUtil {
 
 	private static final Gui GUI = new Gui();
 
-	@SuppressWarnings("unchecked")
 	public void drawCenteredSplitString(FontRenderer fr, String string, int x, int y, int width, int color) {
 		List<String> strings = fr.listFormattedStringToWidth(string, width);
 		for (int i = 0; i < strings.size(); i++) {
-			GUI.drawCenteredString(fr, strings.get(i), x, y + (i * (fr.FONT_HEIGHT + 2)), color);
+			GUI.drawCenteredString(fr, strings.get(i), x, y + i * (fr.FONT_HEIGHT + 2), color);
 		}
 	}
-
 }

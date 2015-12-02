@@ -4,7 +4,10 @@ import lombok.RequiredArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
+
+import org.lwjgl.opengl.GL11;
 
 public interface IWidgetMap {
 
@@ -64,7 +67,7 @@ public interface IWidgetMap {
 			WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
 			if (doDraw) {
 				Minecraft.getMinecraft().getTextureManager().bindTexture(getTexture());
-				renderer.startDrawingQuads();
+				renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 			}
 			double minU = (double) widget.getX() / getSize();
 			double maxU = (double) (widget.getX() + widget.getWidth()) / getSize();
@@ -72,15 +75,15 @@ public interface IWidgetMap {
 			double maxV = (double) (widget.getY() + widget.getHeight()) / getSize();
 
 			if (flipY) {
-				renderer.addVertexWithUV(x, y + height, zLevel, minU, minV);
-				renderer.addVertexWithUV(x + width, y + height, zLevel, maxU, minV);
-				renderer.addVertexWithUV(x + width, y + 0, zLevel, maxU, maxV);
-				renderer.addVertexWithUV(x, y + 0, zLevel, minU, maxV);
+				renderer.pos(x, y + height, zLevel).tex(minU, minV).endVertex();
+				renderer.pos(x + width, y + height, zLevel).tex(maxU, minV).endVertex();
+				renderer.pos(x + width, y + 0, zLevel).tex(maxU, maxV).endVertex();
+				renderer.pos(x, y + 0, zLevel).tex(minU, maxV).endVertex();
 			} else {
-				renderer.addVertexWithUV(x, y + height, zLevel, minU, maxV);
-				renderer.addVertexWithUV(x + width, y + height, zLevel, maxU, maxV);
-				renderer.addVertexWithUV(x + width, y + 0, zLevel, maxU, minV);
-				renderer.addVertexWithUV(x, y + 0, zLevel, minU, minV);
+				renderer.pos(x, y + height, zLevel).tex(minU, maxV).endVertex();
+				renderer.pos(x + width, y + height, zLevel).tex(maxU, maxV).endVertex();
+				renderer.pos(x + width, y + 0, zLevel).tex(maxU, minV).endVertex();
+				renderer.pos(x, y + 0, zLevel).tex(minU, minV).endVertex();
 			}
 			if (widget.getOverlay() != null) {
 				widget.getOverlay().getMap().render(widget.getOverlay(), x, y, width, height, zLevel, false, flipY);

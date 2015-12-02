@@ -8,6 +8,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
@@ -180,10 +181,10 @@ public abstract class GuiScrollableList<T> {
 		GL11.glDisable(GL11.GL_LIGHTING);
 		GL11.glDisable(GL11.GL_FOG);
 
-		ScaledResolution sr = new ScaledResolution(mc, mc.displayWidth, mc.displayHeight);
+		ScaledResolution sr = new ScaledResolution(mc);
 		int sx = minX * sr.getScaleFactor();
 		int sw = width * sr.getScaleFactor();
-		int sy = mc.displayHeight - (maxY * sr.getScaleFactor());
+		int sy = mc.displayHeight - maxY * sr.getScaleFactor();
 		int sh = height * sr.getScaleFactor();
 		GL11.glEnable(GL11.GL_SCISSOR_TEST);
 		GL11.glScissor(sx, sy, sw, sh);
@@ -203,17 +204,17 @@ public abstract class GuiScrollableList<T> {
 				if (showSelectionBox && i == selectedIndex) {
 					GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 					GL11.glDisable(GL11.GL_TEXTURE_2D);
-					renderer.startDrawingQuads();
-					renderer.setColorOpaque_I(8421504);
-					renderer.addVertexWithUV(minX, elementY + slotHeight + 2, 0.0D, 0.0D, 1.0D);
-					renderer.addVertexWithUV(maxX, elementY + slotHeight + 2, 0.0D, 1.0D, 1.0D);
-					renderer.addVertexWithUV(maxX, elementY - 2, 0.0D, 1.0D, 0.0D);
-					renderer.addVertexWithUV(minX, elementY - 2, 0.0D, 0.0D, 0.0D);
-					renderer.setColorOpaque_I(0);
-					renderer.addVertexWithUV(minX + 1, elementY + slotHeight + 1, 0.0D, 0.0D, 1.0D);
-					renderer.addVertexWithUV(maxX - 1, elementY + slotHeight + 1, 0.0D, 1.0D, 1.0D);
-					renderer.addVertexWithUV(maxX - 1, elementY - 1, 0.0D, 1.0D, 0.0D);
-					renderer.addVertexWithUV(minX + 1, elementY - 1, 0.0D, 0.0D, 0.0D);
+					renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+					renderer.putColor4(8421504);
+					renderer.pos(minX, elementY + slotHeight + 2, 0.0D).tex(0.0D, 1.0D).endVertex();
+					renderer.pos(maxX, elementY + slotHeight + 2, 0.0D).tex(1.0D, 1.0D).endVertex();
+					renderer.pos(maxX, elementY - 2, 0.0D).tex(1.0D, 0.0D).endVertex();
+					renderer.pos(minX, elementY - 2, 0.0D).tex(0.0D, 0.0D).endVertex();
+					renderer.putColor4(0);
+					renderer.pos(minX + 1, elementY + slotHeight + 1, 0.0D).tex(0.0D, 1.0D).endVertex();
+					renderer.pos(maxX - 1, elementY + slotHeight + 1, 0.0D).tex(1.0D, 1.0D).endVertex();
+					renderer.pos(maxX - 1, elementY - 1, 0.0D).tex(1.0D, 0.0D).endVertex();
+					renderer.pos(minX + 1, elementY - 1, 0.0D).tex(0.0D, 0.0D).endVertex();
 					Tessellator.getInstance().draw();
 					GL11.glEnable(GL11.GL_TEXTURE_2D);
 				}
@@ -231,21 +232,21 @@ public abstract class GuiScrollableList<T> {
 		GL11.glShadeModel(GL11.GL_SMOOTH);
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 
-		renderer.startDrawingQuads();
-		renderer.setColorRGBA_I(0, 0);
-		renderer.addVertexWithUV(this.minX, this.minY + margin, 0.0D, 0.0D, 1.0D);
-		renderer.addVertexWithUV(this.maxX, this.minY + margin, 0.0D, 1.0D, 1.0D);
-		renderer.setColorRGBA_I(0, 255);
-		renderer.addVertexWithUV(this.maxX, this.minY, 0.0D, 1.0D, 0.0D);
-		renderer.addVertexWithUV(this.minX, this.minY, 0.0D, 0.0D, 0.0D);
+        renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+		renderer.putColor4(0);
+		renderer.pos(this.minX, this.minY + margin, 0.0D).tex(0.0D, 1.0D).endVertex();
+		renderer.pos(this.maxX, this.minY + margin, 0.0D).tex(1.0D, 1.0D).endVertex();
+        renderer.putColor4(0xFF000000);
+		renderer.pos(this.maxX, this.minY, 0.0D).tex(1.0D, 0.0D).endVertex();
+		renderer.pos(this.minX, this.minY, 0.0D).tex(0.0D, 0.0D).endVertex();
 		Tessellator.getInstance().draw();
-		renderer.startDrawingQuads();
-		renderer.setColorRGBA_I(0, 255);
-		renderer.addVertexWithUV(this.minX, this.maxY, 0.0D, 0.0D, 1.0D);
-		renderer.addVertexWithUV(this.maxX, this.maxY, 0.0D, 1.0D, 1.0D);
-		renderer.setColorRGBA_I(0, 0);
-		renderer.addVertexWithUV(this.maxX, this.maxY - margin, 0.0D, 1.0D, 0.0D);
-		renderer.addVertexWithUV(this.minX, this.maxY - margin, 0.0D, 0.0D, 0.0D);
+        renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+		renderer.putColor4(0xFF000000);
+		renderer.pos(this.minX, this.maxY, 0.0D).tex(0.0D, 1.0D).endVertex();
+		renderer.pos(this.maxX, this.maxY, 0.0D).tex(1.0D, 1.0D).endVertex();
+		renderer.putColor4(0);
+		renderer.pos(this.maxX, this.maxY - margin, 0.0D).tex(1.0D, 0.0D).endVertex();
+		renderer.pos(this.minX, this.maxY - margin, 0.0D).tex(0.0D, 0.0D).endVertex();
 		Tessellator.getInstance().draw();
 
 		renderScrollBar(renderer);
@@ -279,25 +280,25 @@ public abstract class GuiScrollableList<T> {
 			GL11.glDisable(GL11.GL_TEXTURE_2D);
 			int scrollBarMinX = getScrollBarX();
 			int scrollBarMaxX = scrollBarMinX + 6;
-			renderer.startDrawingQuads();
+	        renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
 
-			renderer.setColorRGBA_I(0, 255);
-			renderer.addVertexWithUV(scrollBarMinX, maxY, 0.0D, 0.0D, 1.0D);
-			renderer.addVertexWithUV(scrollBarMaxX, maxY, 0.0D, 1.0D, 1.0D);
-			renderer.addVertexWithUV(scrollBarMaxX, minY, 0.0D, 1.0D, 0.0D);
-			renderer.addVertexWithUV(scrollBarMinX, minY, 0.0D, 0.0D, 0.0D);
+			renderer.putColor4(0xFF000000);
+			renderer.pos(scrollBarMinX, maxY, 0.0D).tex(0.0D, 1.0D).endVertex();
+			renderer.pos(scrollBarMaxX, maxY, 0.0D).tex(1.0D, 1.0D).endVertex();
+			renderer.pos(scrollBarMaxX, minY, 0.0D).tex(1.0D, 0.0D).endVertex();
+			renderer.pos(scrollBarMinX, minY, 0.0D).tex(0.0D, 0.0D).endVertex();
 
-			renderer.setColorRGBA_F(0.3f, 0.3f, 0.3f, 1);
-			renderer.addVertexWithUV(scrollBarMinX, (y + clear), 0.0D, 0.0D, 1.0D);
-			renderer.addVertexWithUV(scrollBarMaxX, (y + clear), 0.0D, 1.0D, 1.0D);
-			renderer.addVertexWithUV(scrollBarMaxX, y, 0.0D, 1.0D, 0.0D);
-			renderer.addVertexWithUV(scrollBarMinX, y, 0.0D, 0.0D, 0.0D);
+			renderer.putColorRGB_F4(0.3f, 0.3f, 0.3f);
+			renderer.pos(scrollBarMinX, y + clear, 0.0D).tex(0.0D, 1.0D).endVertex();
+			renderer.pos(scrollBarMaxX, y + clear, 0.0D).tex(1.0D, 1.0D).endVertex();
+			renderer.pos(scrollBarMaxX, y, 0.0D).tex(1.0D, 0.0D).endVertex();
+			renderer.pos(scrollBarMinX, y, 0.0D).tex(0.0D, 0.0D).endVertex();
 
-			renderer.setColorRGBA_F(0.7f, 0.7f, 0.7f, 1);
-			renderer.addVertexWithUV(scrollBarMinX, (y + clear - 1), 0.0D, 0.0D, 1.0D);
-			renderer.addVertexWithUV((scrollBarMaxX - 1), (y + clear - 1), 0.0D, 1.0D, 1.0D);
-			renderer.addVertexWithUV((scrollBarMaxX - 1), y, 0.0D, 1.0D, 0.0D);
-			renderer.addVertexWithUV(scrollBarMinX, y, 0.0D, 0.0D, 0.0D);
+			renderer.putColorRGB_F4(0.7f, 0.7f, 0.7f);
+			renderer.pos(scrollBarMinX, y + clear - 1, 0.0D).tex(0.0D, 1.0D).endVertex();
+			renderer.pos(scrollBarMaxX - 1, y + clear - 1, 0.0D).tex(1.0D, 1.0D).endVertex();
+			renderer.pos(scrollBarMaxX - 1, y, 0.0D).tex(1.0D, 0.0D).endVertex();
+			renderer.pos(scrollBarMinX, y, 0.0D).tex(0.0D, 0.0D).endVertex();
 
 			Tessellator.getInstance().draw();
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -396,12 +397,12 @@ public abstract class GuiScrollableList<T> {
 
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		renderer.startDrawingQuads();
-		renderer.setColorOpaque_I(2105376);
-		renderer.addVertex(minX, maxY, 0.0D);
-		renderer.addVertex(maxX, maxY, 0.0D);
-		renderer.addVertex(maxX, minY, 0.0D);
-		renderer.addVertex(minX, minY, 0.0D);
+        renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+		renderer.putColor4(2105376);
+		renderer.pos(minX, maxY, 0.0D).endVertex();
+		renderer.pos(maxX, maxY, 0.0D).endVertex();
+		renderer.pos(maxX, minY, 0.0D).endVertex();
+		renderer.pos(minX, minY, 0.0D).endVertex();
 		Tessellator.getInstance().draw();
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 

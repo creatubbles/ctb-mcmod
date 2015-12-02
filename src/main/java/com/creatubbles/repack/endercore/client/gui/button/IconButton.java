@@ -171,7 +171,7 @@ public class IconButton extends GuiButtonHideable {
 
 			background.getMap().render(background, x, y, width, height, 0, true);
 			if (icon != null) {
-				icon.getMap().render(icon, x + marginX, y + marginY, width - (2 * marginX), height - (2 * marginY), 0, true);
+				icon.getMap().render(icon, x + marginX, y + marginY, width - 2 * marginX, height - 2 * marginY, 0, true);
 			}
 
 			GL11.glPopAttrib();

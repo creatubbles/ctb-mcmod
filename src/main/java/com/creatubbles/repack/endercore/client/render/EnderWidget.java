@@ -1,10 +1,10 @@
 package com.creatubbles.repack.endercore.client.render;
 
-import com.creatubbles.ctbmod.CTBMod;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.minecraft.util.ResourceLocation;
+
+import com.creatubbles.ctbmod.CTBMod;
 
 @AllArgsConstructor
 @Getter

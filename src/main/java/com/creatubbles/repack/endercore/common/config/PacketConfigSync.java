@@ -51,8 +51,9 @@ public class PacketConfigSync implements IMessage {
 		short len = buf.readShort();
 		byte[] compressedBody = new byte[len];
 
-		for (short i = 0; i < len; i++)
-			compressedBody[i] = buf.readByte();
+		for (short i = 0; i < len; i++) {
+            compressedBody[i] = buf.readByte();
+        }
 
 		ObjectInputStream obj = new ObjectInputStream(new GZIPInputStream(new ByteArrayInputStream(compressedBody)));
 		configValues = (Map<String, Object>) obj.readObject();

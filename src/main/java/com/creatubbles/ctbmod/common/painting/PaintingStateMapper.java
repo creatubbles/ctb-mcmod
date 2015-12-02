@@ -1,9 +1,10 @@
 package com.creatubbles.ctbmod.common.painting;
 
-import java.util.Map;
+import static com.creatubbles.ctbmod.common.painting.BlockPainting.CONNECTION;
+import static com.creatubbles.ctbmod.common.painting.BlockPainting.DUMMY;
+import static com.creatubbles.ctbmod.common.painting.BlockPainting.FACING;
 
-import com.creatubbles.ctbmod.CTBMod;
-import com.google.common.collect.Maps;
+import java.util.Map;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -11,7 +12,9 @@ import net.minecraft.client.renderer.block.statemap.IStateMapper;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import static com.creatubbles.ctbmod.common.painting.BlockPainting.*;
+
+import com.creatubbles.ctbmod.CTBMod;
+import com.google.common.collect.Maps;
 
 public class PaintingStateMapper implements IStateMapper {
 

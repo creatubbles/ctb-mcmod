@@ -3,6 +3,7 @@ package com.creatubbles.repack.endercore.client.gui.button;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemDye;
 import net.minecraft.util.MathHelper;
 
@@ -86,7 +87,7 @@ public class ColorButton extends IconButton {
 		super.drawButton(mc, mouseX, mouseY);
 		if (visible) {
 			WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
-			renderer.startDrawingQuads();
+			renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 
 			int x = xPosition + 2;
 			int y = yPosition + 2;
@@ -94,11 +95,11 @@ public class ColorButton extends IconButton {
 			GL11.glDisable(GL11.GL_TEXTURE_2D);
 
 			int col = ItemDye.dyeColors[colorIndex];
-			renderer.setColorOpaque_I(col);
-			renderer.addVertex(x, y + height - 4, zLevel);
-			renderer.addVertex(x + width - 4, y + height - 4, zLevel);
-			renderer.addVertex(x + width - 4, y + 0, zLevel);
-			renderer.addVertex(x, y + 0, zLevel);
+			renderer.putColor4(col);
+			renderer.pos(x, y + height - 4, zLevel).endVertex();
+			renderer.pos(x + width - 4, y + height - 4, zLevel).endVertex();
+			renderer.pos(x + width - 4, y + 0, zLevel).endVertex();
+			renderer.pos(x, y + 0, zLevel).endVertex();
 
 			Tessellator.getInstance().draw();
 

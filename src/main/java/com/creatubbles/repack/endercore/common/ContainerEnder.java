@@ -28,8 +28,8 @@ public class ContainerEnder<T extends IInventory> extends Container {
 	@Getter
 	private int endHotBarSlot;
 
-	private T inv;
-	private InventoryPlayer playerInv;
+	private final T inv;
+	private final InventoryPlayer playerInv;
 
 	public ContainerEnder(InventoryPlayer playerInv, @Nullable T inv) {
 		this.inv = inv;
@@ -89,7 +89,7 @@ public class ContainerEnder<T extends IInventory> extends Container {
 	@Override
 	public ItemStack transferStackInSlot(EntityPlayer p_82846_1_, int p_82846_2_) {
 		ItemStack itemstack = null;
-		Slot slot = (Slot) this.inventorySlots.get(p_82846_2_);
+		Slot slot = this.inventorySlots.get(p_82846_2_);
 
 		if (slot != null && slot.getHasStack()) {
 			ItemStack itemstack1 = slot.getStack();
@@ -133,7 +133,7 @@ public class ContainerEnder<T extends IInventory> extends Container {
 		if (par1ItemStack.isStackable()) {
 
 			while (par1ItemStack.stackSize > 0 && (!reversOrder && checkIndex < toIndex || reversOrder && checkIndex >= fromIndex)) {
-				slot = (Slot) this.inventorySlots.get(checkIndex);
+				slot = this.inventorySlots.get(checkIndex);
 				itemstack1 = slot.getStack();
 
 				if (itemstack1 != null && itemstack1.getItem() == par1ItemStack.getItem() && (!par1ItemStack.getHasSubtypes() || par1ItemStack.getItemDamage() == itemstack1.getItemDamage())
@@ -170,7 +170,7 @@ public class ContainerEnder<T extends IInventory> extends Container {
 			}
 
 			while (!reversOrder && checkIndex < toIndex || reversOrder && checkIndex >= fromIndex) {
-				slot = (Slot) this.inventorySlots.get(checkIndex);
+				slot = this.inventorySlots.get(checkIndex);
 				itemstack1 = slot.getStack();
 
 				if (itemstack1 == null && slot.isItemValid(par1ItemStack)) {

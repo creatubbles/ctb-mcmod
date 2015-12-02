@@ -74,6 +74,7 @@ public abstract class TypeAdapterBase<ACTUAL, BASE> implements ITypeAdapter<ACTU
                     return data.floatValue();
                 }
                 
+                @Override
                 public Double createBaseType(Float actual) 
                 {
                     return Double.parseDouble(Floatfmt.format(actual));

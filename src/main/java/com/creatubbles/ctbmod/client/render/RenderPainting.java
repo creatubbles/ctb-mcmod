@@ -88,17 +88,15 @@ public class RenderPainting extends TileEntitySpecialRenderer<TilePainting> {
             GlStateManager.disableLighting();
             GlStateManager.doPolygonOffset(-3.0F, -1.5F);
             GlStateManager.enablePolygonOffset();
-            renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+            renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
             
-            float c = getColorMultiplierForFace(facing);
-            renderer.putColorRGB_F4(c, c, c);
-            
+            float c = getColorMultiplierForFace(facing);            
             double depth = 1/16d;
             
-            renderer.pos(bounds.getX(), bounds.getY() + bounds.getHeight(), depth).tex(0, 0).endVertex();
-            renderer.pos(bounds.getX(), bounds.getY(), depth).tex(0, maxV).endVertex();
-            renderer.pos(bounds.getX() + bounds.getWidth(), bounds.getY(), depth).tex(maxU, maxV).endVertex();
-            renderer.pos(bounds.getX() + bounds.getWidth(), bounds.getY() + bounds.getHeight(), depth).tex(maxU, 0).endVertex();
+            renderer.pos(bounds.getX(), bounds.getY() + bounds.getHeight(), depth).tex(0, 0).color(c, c, c, 1).endVertex();
+            renderer.pos(bounds.getX(), bounds.getY(), depth).tex(0, maxV).color(c, c, c, 1).endVertex();
+            renderer.pos(bounds.getX() + bounds.getWidth(), bounds.getY(), depth).tex(maxU, maxV).color(c, c, c, 1).endVertex();
+            renderer.pos(bounds.getX() + bounds.getWidth(), bounds.getY() + bounds.getHeight(), depth).tex(maxU, 0).color(c, c, c, 1).endVertex();
             
             Tessellator.getInstance().draw();
             renderer.setTranslation(0, 0, 0);

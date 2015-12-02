@@ -67,7 +67,7 @@ public interface IWidgetMap {
 			WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
 			if (doDraw) {
 				Minecraft.getMinecraft().getTextureManager().bindTexture(getTexture());
-				renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+				renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 			}
 			double minU = (double) widget.getX() / getSize();
 			double maxU = (double) (widget.getX() + widget.getWidth()) / getSize();

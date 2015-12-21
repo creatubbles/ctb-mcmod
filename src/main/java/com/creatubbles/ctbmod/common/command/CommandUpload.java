@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import com.creatubbles.api.request.amazon.UploadS3ImageRequest;
 import com.creatubbles.api.request.creation.CreateCreationRequest;
 import com.creatubbles.api.request.creation.CreationsUploadsRequest;
+import com.creatubbles.api.request.creation.PingCreationsUploadsRequest;
 import com.creatubbles.api.response.creation.CreateCreationResponse;
 import com.creatubbles.api.response.creation.CreationsUploadsResponse;
 
@@ -68,5 +69,8 @@ public class CommandUpload extends ClientCommandBase {
         // upload image to s3
         UploadS3ImageRequest uploadS3Image = new UploadS3ImageRequest(data, creationsUploadsResponse.url);
         uploadS3Image.execute().getResponse();
+
+        PingCreationsUploadsRequest pingCreationsUploads = new PingCreationsUploadsRequest(creationsUploadsResponse.id, CommandLogin.accessToken);
+        pingCreationsUploads.execute().getResponse();
     }
 }

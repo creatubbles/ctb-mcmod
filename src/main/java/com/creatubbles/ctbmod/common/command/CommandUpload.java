@@ -4,6 +4,12 @@ import java.io.File;
 import java.io.FileFilter;
 import java.nio.file.Files;
 
+import com.creatubbles.api.request.amazon.UploadS3ImageRequest;
+import com.creatubbles.api.request.creation.CreateCreationRequest;
+import com.creatubbles.api.request.creation.CreationsUploadsRequest;
+import com.creatubbles.api.response.creation.CreateCreationResponse;
+import com.creatubbles.api.response.creation.CreationsUploadsResponse;
+
 import lombok.SneakyThrows;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandException;
@@ -13,16 +19,6 @@ import net.minecraft.command.WrongUsageException;
 
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import com.creatubbles.api.core.Creation;
-import com.creatubbles.api.core.Credentials;
-import com.creatubbles.api.request.amazon.GetAmazonTokenRequest;
-import com.creatubbles.api.request.amazon.UploadS3ImageRequest;
-import com.creatubbles.api.request.creation.UpdateCreationRequest;
-import com.creatubbles.api.request.creation.UploadCreationRequest;
-import com.creatubbles.api.response.amazon.GetAmazonTokenResponse;
-import com.creatubbles.api.response.creation.UploadCreationResponse;
 
 public class CommandUpload extends ClientCommandBase {
 
@@ -48,10 +44,14 @@ public class CommandUpload extends ClientCommandBase {
         }
 
         // create creation
-        UploadCreationResponse uploadResponse = new UploadCreationRequest(CommandLogin.accessToken).execute().getResponse();
-        // get required info for s3
-        GetAmazonTokenResponse amazonTokenResponse = new GetAmazonTokenRequest(CommandLogin.accessToken).execute().getResponse();
-        Credentials credentials = amazonTokenResponse.credentials;
+        CreateCreationRequest createCreation = new CreateCreationRequest(CommandLogin.accessToken);
+        CreateCreationResponse createCreationResponse = createCreation.execute().getResponse();
+        System.out.println(createCreationResponse.creation.id);
+
+        // create url for upload
+        CreationsUploadsRequest creationsUploads = new CreationsUploadsRequest(createCreationResponse.creation.id, CommandLogin.accessToken);
+        CreationsUploadsResponse creationsUploadsResponse = creationsUploads.execute().getResponse();
+        System.out.println(creationsUploadsResponse.url);
 
         File screenshotsFolder = new File(Minecraft.getMinecraft().mcDataDir, "screenshots");
         File[] screenshots = screenshotsFolder.listFiles((FileFilter) FileFilterUtils.suffixFileFilter(".png"));
@@ -64,18 +64,10 @@ public class CommandUpload extends ClientCommandBase {
             throw new NumberInvalidException("%s is not a valid ID number. Must be a number from 0 to %d", args[args.length - 1], screenshots.length - 1);
         }
 
-        args = ArrayUtils.subarray(args, 0, args.length - 1);
-
         byte[] data = Files.readAllBytes(screenshots[id].toPath());
-        String fileName = System.currentTimeMillis() + "creation.png";
-        Creation creation = uploadResponse.creation;
-        String relativePath = creation.store_dir + "/" + fileName;
 
-        // upload image
-        new UploadS3ImageRequest(data, relativePath, credentials.access_key_id, credentials.secret_access_key, credentials.session_token).execute().getResponse();
-        creation.url = relativePath;
-        creation.name = StringUtils.join(args, " ");
-        // update creation(url)
-        new UpdateCreationRequest(CommandLogin.accessToken, creation).execute().getResponse();
+        // upload image to s3
+        UploadS3ImageRequest uploadS3Image = new UploadS3ImageRequest(data, creationsUploadsResponse.url);
+        uploadS3Image.execute().getResponse();
     }
 }

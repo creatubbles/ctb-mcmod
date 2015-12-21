@@ -24,9 +24,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.Creator;
 import com.creatubbles.api.core.User;
-import com.creatubbles.api.request.auth.SignInRequest;
+import com.creatubbles.api.request.auth.OAuthAccessTokenRequest;
 import com.creatubbles.api.request.creation.GetCreationsRequest;
-import com.creatubbles.api.request.creator.UsersCreatorsRequest;
+import com.creatubbles.api.request.creator.GetCreatorsRequest;
 import com.creatubbles.api.request.user.UserProfileRequest;
 import com.creatubbles.api.response.creation.GetCreationsResponse;
 import com.creatubbles.ctbmod.CTBMod;
@@ -55,73 +55,73 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
-    private class PasswordTextField extends TextFieldEnder {
+	private class PasswordTextField extends TextFieldEnder {
 
-        public PasswordTextField(FontRenderer fnt, int x, int y, int width, int height) {
-            super(fnt, x, y, width, height);
-        }
+		public PasswordTextField(FontRenderer fnt, int x, int y, int width, int height) {
+			super(fnt, x, y, width, height);
+		}
+		
+		@Override
+		public void setFocused(boolean state) {
+			super.setFocused(state);
+			GuiCreator.this.tfActualPassword.setFocused(state);
+		}
 
-        @Override
-        public void setFocused(boolean state) {
-            super.setFocused(state);
-            tfActualPassword.setFocused(state);
-        }
+		private String transformText(String text) {
+			if (!"_".equals(text)) {
+				text = text.replaceAll(".", "\u2022");
+			}
+			return text;
+		}
 
-        private String transformText(String text) {
-            if (!"_".equals(text)) {
-                text = text.replaceAll(".", "\u2022");
-            }
-            return text;
-        }
+		@Override
+		public void setText(String text) {
+			GuiCreator.this.tfActualPassword.setText(text);
+			super.setText(transformText(text));
+		}
 
-        @Override
-        public void setText(String text) {
-            tfActualPassword.setText(text);
-            super.setText(transformText(text));
-        }
+		@Override
+		public void writeText(String text) {
+			GuiCreator.this.tfActualPassword.writeText(text);
+			super.writeText(transformText(text));
+		}
+		
+		@Override
+		public void deleteWords(int cursor) {
+			GuiCreator.this.tfActualPassword.deleteWords(cursor);
+			super.deleteWords(cursor);
+		}
+		
+		@Override
+		public void deleteFromCursor(int cursor) {
+			GuiCreator.this.tfActualPassword.deleteFromCursor(cursor);
+			super.deleteFromCursor(cursor);
+		}
+	}
+	
+	private class LoginRunnable implements Runnable {
 
-        @Override
-        public void writeText(String text) {
-            tfActualPassword.writeText(text);
-            super.writeText(transformText(text));
-        }
+		@Override
+		public void run() {
 
-        @Override
-        public void deleteWords(int cursor) {
-            tfActualPassword.deleteWords(cursor);
-            super.deleteWords(cursor);
-        }
+			try {
+				checkCancel();
+				
+				if (getUser() == null) {
+					setState(State.LOGGING_IN, true);
+					loginReq = new OAuthAccessTokenRequest(tfEmail.getText(), tfActualPassword.getText());
+					loginReq.execute();
+				}
 
-        @Override
-        public void deleteFromCursor(int cursor) {
-            tfActualPassword.deleteFromCursor(cursor);
-            super.deleteFromCursor(cursor);
-        }
-    }
+				checkCancel();
 
-    private class LoginRunnable implements Runnable {
-
-        @Override
-        public void run() {
-
-            try {
-                checkCancel();
-
-                if (getUser() == null) {
-                    setState(State.LOGGING_IN, true);
-                    loginReq = new SignInRequest(tfEmail.getText(), tfActualPassword.getText());
-                    loginReq.execute();
-                }
-
-                checkCancel();
-
-                if (loginReq != null && !loginReq.wasSuccessful()) {
-                    header = EnumChatFormatting.YELLOW.toString().concat(loginReq.getResponse().message);
-                    loginReq = null;
-                    logout();
+				if (loginReq != null && !loginReq.wasSuccessful()) {
+					header = EnumChatFormatting.YELLOW.toString().concat(loginReq.getResponse().message);
+					loginReq = null;
+					logout();
                 } else {
                     if (getUser() == null) {
-                        userReq = new UserProfileRequest("me", loginReq.getResponse().access_token);
+                        userReq = new UserProfileRequest(loginReq.getResponse().access_token);
                         userReq.execute();
                         CTBMod.cache.activateUser(userReq.getResponse().user);
                         CTBMod.cache.getActiveUser().access_token = loginReq.getResponse().access_token;
@@ -132,30 +132,29 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
                     if (getCreator() == null) {
                         setState(State.LOGGING_IN, true);
-                        UsersCreatorsRequest creatorsReq = new UsersCreatorsRequest(Integer.toString(getUser().id));
+                        GetCreatorsRequest creatorsReq = new GetCreatorsRequest(getUser().id, getUser().access_token);
                         creatorsReq.execute();
                         CTBMod.cache.setCreators(creatorsReq.getResponse().creators.toArray(new Creator[0]));
                     }
 
-                    checkCancel();
+					checkCancel();
 
-                    Creation[] creations = creationList.getCreations();
-                    if (creations == null) {
-                        setState(State.LOGGING_IN, true);
-                        for (Creator c : CTBMod.cache.getCreators()) {
-                            int page = 1;
-                            GetCreationsRequest creationsReq = new GetCreationsRequest(c.id);
-                            creationsReq.execute();
-                            GetCreationsResponse resp = creationsReq.getResponse();
-                            creations = ArrayUtils.addAll(creations, resp.creations);
-                            while (resp.page < resp.total_pages) {
-                                creationsReq = new GetCreationsRequest(c.id, ++page);
-                                creationsReq.execute();
-                                resp = creationsReq.getResponse();
-                                creations = ArrayUtils.addAll(creations, resp.creations);
-                            }
-                        }
-                        creationList.setCreations(creations);
+					Creation[] creations = creationList.getCreations();
+					if (creations == null) {
+						setState(State.LOGGING_IN, true);
+						for (Creator c : CTBMod.cache.getCreators()) {
+							GetCreationsRequest creationsReq = new GetCreationsRequest(getUser().id, getUser().access_token);
+							creationsReq.execute();
+							GetCreationsResponse resp = creationsReq.getResponse();
+							creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[]{}));
+							for (int i = 2; i <= resp.total_pages; i++) {
+								creationsReq = new GetCreationsRequest(getUser().id, i, getUser().access_token);
+								creationsReq.execute();
+								resp = creationsReq.getResponse();
+								creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[]{}));
+							}
+						}
+						creationList.setCreations(creations);
                         CTBMod.cache.setCreationCache(creations);
                     }
 
@@ -235,7 +234,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
     private Thread thread;
 
-    private SignInRequest loginReq;
+    private OAuthAccessTokenRequest loginReq;
     private UserProfileRequest userReq;
 
     private String header = DEFAULT_HEADER;
@@ -288,6 +287,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
         creationList = new OverlayCreationList(XSIZE_DEFAULT, 0);
         addOverlay(creationList);
+
 
         logoutButton = new IconButton(this, ID_LOGOUT, 7, 106, EnderWidget.CROSS);
         logoutButton.setToolTip("Log Out");
@@ -548,8 +548,13 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
     }
 
     /**
+<<<<<<< HEAD
      * Gray out the item that was just painted into a GhostSlot by overpainting it with 50% transparent background. This
      * gives the illusion that the item was painted with 50% transparency. (100%*a ° 100%*b ° 50%*a == 100%*a ° 50%*b)
+=======
+     * Gray out the item that was just painted into a GhostSlot by overpainting it with 50% transparent background. This gives the illusion that the item was painted with 50% transparency. (100%*a ï¿½
+     * 100%*b ï¿½ 50%*a == 100%*a ï¿½ 50%*b)
+>>>>>>> 9157c69... api v2
      */
     protected void drawGhostSlotGrayout(ItemStack stack, Slot slot) {
         int x = guiLeft + slot.xDisplayPosition;

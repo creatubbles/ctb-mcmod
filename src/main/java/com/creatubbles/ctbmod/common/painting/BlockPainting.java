@@ -62,7 +62,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
     }
     
     public ForgeDirection getFacing(int meta) {
-    	return ForgeDirection.getOrientation(meta & 3 + 2);
+    	return ForgeDirection.getOrientation((meta & 3) + 2);
     }
     
     @Override
@@ -82,7 +82,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
             for (int y2 = 0; y2 < painting.getHeight(); y2++) {
             	BlockCoord pos2 = pos.add(x2 * ext.offsetX, y2, x2 * ext.offsetZ);
                 if (pos2.isAirBlock(world)) {
-                    world.setBlockMetadataWithNotify(x, y, z, pos2.getMetadata(world) | 4, 3);
+                    world.setBlock(pos2.x, pos2.y, pos2.z, CTBMod.painting, pos2.getMetadata(world) | 4, 3);
                     ((TileDummyPainting) pos2.getTileEntity(world)).setMain(pos);
                 }
             }

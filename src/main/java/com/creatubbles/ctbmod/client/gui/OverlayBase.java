@@ -20,7 +20,7 @@ public abstract class OverlayBase extends Gui implements IGuiOverlay {
 	private int xAbs, yAbs;
 
 	@Getter
-	private IGuiScreen gui;
+	private GuiCreator gui;
 
 	@Getter
 	private boolean visible;
@@ -33,7 +33,8 @@ public abstract class OverlayBase extends Gui implements IGuiOverlay {
 
 	@Override
 	public void init(IGuiScreen screen) {
-		this.gui = screen;
+	    // Hack for now
+		this.gui = (GuiCreator) screen;
 		this.xAbs = xRel + screen.getGuiLeft();
 		this.yAbs = yRel + screen.getGuiTop();
 	}

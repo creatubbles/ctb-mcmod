@@ -3,6 +3,7 @@ package com.creatubbles.ctbmod.client.gui;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import lombok.Getter;
@@ -16,11 +17,11 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.Dimension;
 
+import com.creatubbles.api.core.Creation;
+import com.creatubbles.api.core.Creator;
 import com.creatubbles.ctbmod.CTBMod;
-import com.creatubbles.ctbmod.common.http.Creation;
-import com.creatubbles.ctbmod.common.http.Creator;
-import com.creatubbles.ctbmod.common.http.Image;
-import com.creatubbles.ctbmod.common.http.Image.ImageType;
+import com.creatubbles.ctbmod.common.http.DownloadableImage;
+import com.creatubbles.ctbmod.common.http.DownloadableImage.ImageType;
 import com.creatubbles.repack.endercore.api.client.gui.IGuiScreen;
 import com.creatubbles.repack.endercore.client.gui.widget.GuiToolTip;
 import com.google.common.collect.Lists;
@@ -42,10 +43,10 @@ public class OverlayCreationList extends OverlayBase {
 
 			// TODO more localization here
 			List<String> tt = Lists.newArrayList();
-			tt.add(c.getName());
-			tt.add(c.getCreators().length == 1 ? "Creator:" : "Creators:");
-			for (Creator creator : c.getCreators()) {
-				tt.add("    " + creator.getName());
+			tt.add(c.name);
+			tt.add(c.creators.length == 1 ? "Creator:" : "Creators:");
+			for (Creator creator : c.creators) {
+				tt.add("    " + creator.name);
 			}
 			this.tooltip = new GuiToolTip(bounds, tt);
 		}
@@ -102,11 +103,17 @@ public class OverlayCreationList extends OverlayBase {
 
 		Creation[] creations = this.creations == null ? CTBMod.cache.getCreationCache() : this.creations;
 
-		if (creations == null || creations.length == 0) {
-			return;
-		}
-		
-		Arrays.sort(creations);
+        if (creations == null || creations.length == 0) {
+            return;
+        }
+
+        Arrays.sort(creations, new Comparator<Creation>() {
+
+            @Override
+            public int compare(Creation o1, Creation o2) {
+                return o1.name.compareTo(o2.name);
+            }
+        });
 
 		int row = 0;
 		int col = 0;
@@ -199,7 +206,7 @@ public class OverlayCreationList extends OverlayBase {
 				int x = c.getLocation().x;
 				int y = c.getLocation().y;
 
-				Image img = c.getCreation().getImage();
+				DownloadableImage img = getGui().images.get(c.creation);
 				ImageType type = ImageType.LIST_VIEW;
 
 				ResourceLocation res = img.getResource(type);

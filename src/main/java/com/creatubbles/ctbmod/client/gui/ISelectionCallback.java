@@ -2,7 +2,7 @@ package com.creatubbles.ctbmod.client.gui;
 
 import javax.annotation.Nullable;
 
-import com.creatubbles.ctbmod.common.http.Creation;
+import com.creatubbles.api.core.Creation;
 
 public interface ISelectionCallback {
 

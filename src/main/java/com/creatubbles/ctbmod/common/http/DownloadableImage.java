@@ -24,12 +24,14 @@ import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.util.Dimension;
 
+import com.creatubbles.api.core.Creation;
+import com.creatubbles.api.core.Image;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.config.DataCache;
 import com.google.common.collect.Maps;
 
 @ToString
-public class Image {
+public class DownloadableImage {
 
 	public enum ImageType {
 		ORIGINAL,
@@ -93,9 +95,9 @@ public class Image {
 	private final EnumMap<ImageType, ResourceLocation> locations = Maps.newEnumMap(ImageType.class);
 	private EnumMap<ImageType, Size> sizes = Maps.newEnumMap(ImageType.class);
 
-	public Image(String url) {
-		fileName = url.substring(url.lastIndexOf("/") + 1, url.length());
-		urlBase = url.substring(0, url.indexOf("original"));
+	public DownloadableImage(Image image) {
+		fileName = image.url.substring(image.url.lastIndexOf("/") + 1, image.url.length());
+		urlBase = image.url.substring(0, image.url.indexOf("original"));
 		for (ImageType type : ImageType.values()) {
 			locations.put(type, new ResourceLocation("missingno"));
 			sizes.put(type, new Size());
@@ -172,7 +174,7 @@ public class Image {
 	public void download(final ImageType type) {
 		if (locations.get(type) != MISSING_TEXTURE) {
 			TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
-			final String filepath = "creations/" + owner.getUserId() + "/" + type + "/" + owner.getId() + ".jpg";
+			final String filepath = "creations/" + owner.user_id + "/" + type + "/" + owner.id + ".jpg";
 			final ResourceLocation res = new ResourceLocation(CTBMod.DOMAIN, filepath);
 			ITextureObject texture = texturemanager.getTexture(res);
 
@@ -180,6 +182,7 @@ public class Image {
 
 				downloadExecutor.execute(new Runnable() {
 
+					@Override
 					@SneakyThrows
 					public void run() {
 						String url = urlBase.concat(type.toString()).concat("/").concat(fileName);

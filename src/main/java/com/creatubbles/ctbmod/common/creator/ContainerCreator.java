@@ -7,6 +7,7 @@ import net.minecraft.init.Items;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
+import com.creatubbles.ctbmod.common.config.Configs;
 import com.creatubbles.repack.endercore.common.ContainerEnder;
 import com.creatubbles.repack.endercore.common.util.DyeColor;
 
@@ -20,10 +21,11 @@ public class ContainerCreator extends ContainerEnder<TileCreator> {
     protected void addSlots(InventoryPlayer playerInv) {
         int x = 71;
         int y = 20;
-        addSlotToContainer(new SlotCreator(new ItemStack(Items.paper), getInv(), 0, x, y));
-        addSlotToContainer(new SlotCreator(new ItemStack(Items.dye, 1, DyeColor.RED.ordinal()), getInv(), 1, x + 18, y));
-        addSlotToContainer(new SlotCreator(new ItemStack(Items.dye, 1, DyeColor.GREEN.ordinal()), getInv(), 2, x, y + 18));
-        addSlotToContainer(new SlotCreator(new ItemStack(Items.dye, 1, DyeColor.BLUE.ordinal()), getInv(), 3, x + 18, y + 18));
+        ItemStack paper = new ItemStack(Items.paper);
+        addSlotToContainer(new SlotCreator(paper.copy(), getInv(), 0, x, y));
+        addSlotToContainer(new SlotCreator(Configs.harderPaintings ? new ItemStack(Items.dye, 1, DyeColor.RED.ordinal()) : paper.copy(), getInv(), 1, x + 18, y));
+        addSlotToContainer(new SlotCreator(Configs.harderPaintings ? new ItemStack(Items.dye, 1, DyeColor.GREEN.ordinal()) : paper.copy(), getInv(), 2, x, y + 18));
+        addSlotToContainer(new SlotCreator(Configs.harderPaintings ? new ItemStack(Items.dye, 1, DyeColor.BLUE.ordinal()) : paper.copy(), getInv(), 3, x + 18, y + 18));
 
         addSlotToContainer(new Slot(getInv(), 4, 145, 29) {
 

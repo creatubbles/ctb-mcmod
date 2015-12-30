@@ -9,4 +9,8 @@ public class Configs {
     @Comment("Setting this to true will cause the cached user and creator info to be refreshed every time the game is launched.")
     public static boolean refreshUserCache = false;
 
+    @Config
+    @Comment("Setting this to true will cause paintings to require dye to make.")
+    public static boolean harderPaintings = false;
+
 }

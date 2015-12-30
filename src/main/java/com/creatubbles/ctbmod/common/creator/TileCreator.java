@@ -16,6 +16,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.ctbmod.common.config.Configs;
 import com.creatubbles.ctbmod.common.network.MessageDimensionChange;
 import com.creatubbles.ctbmod.common.network.PacketHandler;
 import com.creatubbles.ctbmod.common.painting.BlockPainting;
@@ -63,7 +64,13 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, IUpd
     }
 
     public int getPaperCount() {
-        return inventory[0] == null ? 0 : inventory[0].stackSize;
+        int count = inventory[0] == null ? 0 : inventory[0].stackSize;
+        if (!Configs.harderPaintings) {
+            for (int i = 1; i < 4; i++) {
+                count += inventory[i] == null ? 0 : inventory[i].stackSize;
+            }
+        }
+        return count;
     }
     
     public int getLowestDyeCount() {
@@ -77,11 +84,32 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, IUpd
     }
 
     public void create(Creation creation) {
+        if (!canCreate()) {
+            return;
+        }
         this.creating = creation;
-        for (int i = 0; i < 4; i++) {
-            inventory[i].stackSize -= i == 0 ? getRequiredPaper() : getRequiredDye();
-            if (inventory[i].stackSize == 0) {
-                inventory[i] = null;
+        if (Configs.harderPaintings) {
+            for (int i = 0; i < 4; i++) {
+                inventory[i].stackSize -= i == 0 ? getRequiredPaper() : getRequiredDye();
+                if (inventory[i].stackSize == 0) {
+                    inventory[i] = null;
+                }
+            }
+        } else {
+            int required = getRequiredPaper();
+            for (int i = 0; i < 4 && required > 0; i++) {
+                if (inventory[i] != null) {
+                    if (inventory[i].stackSize < required) {
+                        required -= inventory[i].stackSize;
+                        inventory[i] = null;
+                    } else {
+                        inventory[i].stackSize -= required;
+                        required = 0;
+                        if (inventory[i].stackSize == 0) {
+                            inventory[i] = null;
+                        }
+                    }
+                }
             }
         }
     }
@@ -94,7 +122,7 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, IUpd
         if (inventory[4] != null || progress > 0) {
             return false;
         }
-        return getPaperCount() >= getRequiredPaper() && getLowestDyeCount() >= getRequiredDye();
+        return getPaperCount() >= getRequiredPaper() && (!Configs.harderPaintings || getLowestDyeCount() >= getRequiredDye());
     }
 
     public int getRequiredPaper() {
@@ -234,7 +262,7 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, IUpd
         if (stack == null) {
             return true;
         }
-        if (index == 0) {
+        if (index == 0 || (!Configs.harderPaintings && index < 4)) {
             return stack.getItem() == Items.paper;
         } else if (index < 4) {
             int[] ids = OreDictionary.getOreIDs(stack);

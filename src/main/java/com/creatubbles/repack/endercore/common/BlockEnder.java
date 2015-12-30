@@ -11,12 +11,15 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 import com.creatubbles.ctbmod.CTBMod;
 import com.google.common.collect.Lists;
 
 import cpw.mods.fml.common.registry.GameRegistry;
+
+
 
 public abstract class BlockEnder<T extends TileEntityBase> extends Block {
 
@@ -69,59 +72,53 @@ public abstract class BlockEnder<T extends TileEntityBase> extends Block {
 	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer entityPlayer, int side, float par7, float par8, float par9) {
 		if (entityPlayer.isSneaking()) {
 			return false;
-		}
-		if (!world.isRemote) {
-			return openGui(world, x, y, z, entityPlayer, side);
-		}
-		return false;
+        }
+        return openGui(world, x, y, z, entityPlayer, side);
+    }
+
+    protected boolean openGui(World world, int x, int y, int z, EntityPlayer entityPlayer, int side) {
+        return false;
+    }
+
+    public boolean doNormalDrops(IBlockAccess world, int x, int y, int z) {
+        return true;
+    }
+
+    @Override
+    public boolean removedByPlayer(World world, EntityPlayer player, int x, int y, int z, boolean willHarvest) {
+        if (willHarvest) {
+            return true;
+        }
+        return super.removedByPlayer(world, player, x, y, z, willHarvest);
+    }
+
+    @Override
+	public void harvestBlock(World worldIn, EntityPlayer player, int x, int y, int z, int meta) {
+		super.harvestBlock(worldIn, player, x, y, z, meta);
+		worldIn.setBlockToAir(x, y, z);
 	}
 
-	protected boolean shouldWrench(World world, int x, int y, int z, EntityPlayer entityPlayer, int side) {
-		return true;
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int meta, int fortune) {
+        if (doNormalDrops(world, x, y, z)) {
+            return super.getDrops(world, x, y, z, meta, fortune);
+        }
+        return Lists.newArrayList(getNBTDrop(world, x, y, z, (T) world.getTileEntity(x, y, z)));
+    }
 
-	protected boolean openGui(World world, int x, int y, int z, EntityPlayer entityPlayer, int side) {
-		return false;
-	}
+    public ItemStack getNBTDrop(IBlockAccess world, int x, int y, int z, T te) {
+        int meta = damageDropped(world.getBlockMetadata(x, y, z));
+        ItemStack itemStack = new ItemStack(this, 1, meta);
+        processDrop(world, x, y, z, te, itemStack);
+        return itemStack;
+    }
 
-	public boolean doNormalDrops(World world, int x, int y, int z) {
-		return true;
-	}
+    protected void processDrop(IBlockAccess world, int x, int y, int z, @Nullable T te, ItemStack drop) {
+    }
 
-	@Override
-	public boolean removedByPlayer(World world, EntityPlayer player, int x, int y, int z, boolean willHarvest) {
-		if (willHarvest) {
-			return true;
-		}
-		return super.removedByPlayer(world, player, x, y, z, willHarvest);
-	}
-
-	@Override
-	public void harvestBlock(World world, EntityPlayer player, int x, int y, int z, int meta) {
-		super.harvestBlock(world, player, x, y, z, meta);
-		world.setBlockToAir(x, y, z);
-	}
-
-	@Override
-	public final ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int metadata, int fortune) {
-		if (doNormalDrops(world, x, y, z)) {
-			return super.getDrops(world, x, y, z, metadata, fortune);
-		}
-		return Lists.newArrayList(getNBTDrop(world, x, y, z, getTileEntity(world, x, y, z)));
-	}
-
-	public ItemStack getNBTDrop(World world, int x, int y, int z, T te) {
-		int meta = damageDropped(te.getBlockMetadata());
-		ItemStack itemStack = new ItemStack(this, 1, meta);
-		processDrop(world, x, y, z, te, itemStack);
-		return itemStack;
-	}
-
-	protected void processDrop(World world, int x, int y, int z, @Nullable T te, ItemStack drop) {
-	}
-
-	@SuppressWarnings("unchecked")
-	protected T getTileEntity(World world, int x, int y, int z) {
+    @SuppressWarnings("unchecked")
+    protected T getTileEntity(World world, int x, int y, int z) {
 		TileEntity te = world.getTileEntity(x, y, z);
 		if (teClass.isInstance(te)) {
 			return (T) te;

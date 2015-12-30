@@ -7,7 +7,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 
-import com.creatubbles.repack.enderlib.common.util.BlockCoord;
+import com.creatubbles.repack.endercore.common.util.BlockCoord;
 
 public abstract class TileEntityBase extends TileEntity {
 

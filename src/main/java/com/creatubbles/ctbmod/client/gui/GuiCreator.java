@@ -34,6 +34,7 @@ import com.creatubbles.api.request.creator.UsersCreatorsRequest;
 import com.creatubbles.api.request.user.UserProfileRequest;
 import com.creatubbles.api.response.creation.GetCreationsResponse;
 import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.ctbmod.common.config.Configs;
 import com.creatubbles.ctbmod.common.creator.ContainerCreator;
 import com.creatubbles.ctbmod.common.creator.SlotCreator;
 import com.creatubbles.ctbmod.common.creator.TileCreator;
@@ -263,7 +264,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 		ySize += 44;
 		xSize = getState() == State.LOGGED_IN ? XSIZE_SIDEBAR : XSIZE_DEFAULT;
 		tfEmail = new TextFieldEnder(getFontRenderer(), XSIZE_DEFAULT / 2 - 75, 35, 150, 12);
-		tfEmail.setFocused(true);
+		tfEmail.setFocused(getState() == State.LOGGED_OUT);
 		textFields.add(tfEmail);
 		
 		// This is a dummy to store the uncensored PW
@@ -447,11 +448,14 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 		if (thread != null) {
 			thread.interrupt();
 		}
-	}
+    }
 
-	@Override
-	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-		GlStateManager.color(1, 1, 1, 1);
+    @Override
+    protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+//        System.out.println(inventorySlots.inventorySlots.get(4).getStack());
+//        System.out.println(inventorySlots.inventoryItemStacks.get(4));
+
+        GlStateManager.color(1, 1, 1, 1);
 		GlStateManager.disableLighting();
 
 		State state = getState();
@@ -521,12 +525,14 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 			drawString(getFontRenderer(), "H: " + te.getHeight(), x + 50, y, 0xFFFFFF);
 			
 			y += 18;
-			EnumChatFormatting color = te.getRequiredPaper() > te.getPaperCount() ? RED : GREEN;
-			drawString(getFontRenderer(), "Paper: " + color + te.getRequiredPaper(), x, y, 0xFFFFFF);
-			y += 10;
-			color = te.getRequiredDye() > te.getLowestDyeCount() ? RED : GREEN;
-			drawString(getFontRenderer(), "Dye: " + color + te.getRequiredDye(), x, y, 0xFFFFFF);
-			break;
+            EnumChatFormatting color = te.getRequiredPaper() > te.getPaperCount() ? RED : GREEN;
+            drawString(getFontRenderer(), "Paper: " + color + te.getRequiredPaper(), x, y, 0xFFFFFF);
+            if (Configs.harderPaintings) {
+                y += 10;
+                color = te.getRequiredDye() > te.getLowestDyeCount() ? RED : GREEN;
+                drawString(getFontRenderer(), "Dye: " + color + te.getRequiredDye(), x, y, 0xFFFFFF);
+            }
+            break;
 		case LOGGED_OUT:
 			x += xSize / 2;
 			y += 5;
@@ -591,9 +597,13 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
             updateSize();
             updateVisibility();
         }
-        if (tfEmail != null && state == State.LOGGED_IN) {
-            tfEmail.setText("");
-            tfVisualPassword.setText("");
+        if (tfEmail != null) {
+            tfEmail.setFocused(state == State.LOGGED_OUT);
+            tfVisualPassword.setFocused(false);
+            if (state == State.LOGGED_IN) {
+                tfEmail.setText("");
+                tfVisualPassword.setText("");
+            }
         }
     }
 

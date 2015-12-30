@@ -22,8 +22,8 @@ public class MessageCreate extends MessageTileEntity<TileCreator> {
     public MessageCreate(Creation creation, TileCreator creator) {
         super(creator);
         this.creation = creation;
-        this.width = creator.getWidth();
-        this.height = creator.getHeight();
+        width = creator.getWidth();
+        height = creator.getHeight();
     }
 
     @Override

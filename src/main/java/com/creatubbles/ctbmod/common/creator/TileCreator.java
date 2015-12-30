@@ -29,30 +29,30 @@ import com.creatubbles.repack.endercore.common.util.Bound;
 
 public class TileCreator extends TileEntityBase implements ISidedInventory, ITickable, IProgressTile {
 
-	private static final Bound<Integer> DIMENSION_BOUND = Bound.of(1, 16);
-	
-	private final ItemStack[] inventory = new ItemStack[5];
-	private Creation creating;
-	private int progress;
+    private static final Bound<Integer> DIMENSION_BOUND = Bound.of(1, 16);
 
-	@Getter
-	private int width = 1, height = 1;
+    private final ItemStack[] inventory = new ItemStack[5];
+    private Creation creating;
+    private int progress;
 
-	public void setWidth(int width) {
-		this.width = DIMENSION_BOUND.clamp(width);
-		dimensionsChanged();
-	}
+    @Getter
+    private int width = 1, height = 1;
 
-	public void setHeight(int height) {
-		this.height = DIMENSION_BOUND.clamp(height);
-		dimensionsChanged();
-	}
+    public void setWidth(int width) {
+        this.width = DIMENSION_BOUND.clamp(width);
+        dimensionsChanged();
+    }
 
-	public int getMinSize() {
-		return DIMENSION_BOUND.getMin();
-	}
+    public void setHeight(int height) {
+        this.height = DIMENSION_BOUND.clamp(height);
+        dimensionsChanged();
+    }
 
-	public int getMaxSize() {
+    public int getMinSize() {
+        return DIMENSION_BOUND.getMin();
+    }
+
+    public int getMaxSize() {
         return DIMENSION_BOUND.getMax();
     }
 
@@ -75,7 +75,7 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, ITic
         }
         return count;
     }
-    
+
     public int getLowestDyeCount() {
         int ret = Integer.MAX_VALUE;
         for (int i = 1; i < 4; i++) {
@@ -90,7 +90,7 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, ITic
         if (!canCreate()) {
             return;
         }
-        this.creating = creation;
+        creating = creation;
         if (Configs.harderPaintings) {
             for (int i = 0; i < 4; i++) {
                 inventory[i].stackSize -= i == 0 ? getRequiredPaper() : getRequiredDye();
@@ -117,8 +117,8 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, ITic
         }
     }
 
-	public ItemStack[] getInput() {
-		return ArrayUtils.subarray(inventory, 0, inventory.length - 1);
+    public ItemStack[] getInput() {
+        return ArrayUtils.subarray(inventory, 0, inventory.length - 1);
     }
 
     public boolean canCreate() {
@@ -172,7 +172,7 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, ITic
     public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction) {
         return index == 4;
     }
-    
+
     @Override
     public boolean canInsertItem(int index, ItemStack itemStackIn, EnumFacing direction) {
         return index < 4;
@@ -188,83 +188,81 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, ITic
         return inventory.length;
     }
 
-	@Override
-	public ItemStack getStackInSlot(int index) {
-		return inventory[index % inventory.length];
-	}
+    @Override
+    public ItemStack getStackInSlot(int index) {
+        return inventory[index % inventory.length];
+    }
 
-	@Override
-	public ItemStack decrStackSize(int index, int count) {
-		if (this.inventory[index] != null) {
-			ItemStack itemstack;
-			if (this.inventory[index].stackSize <= count) {
-				itemstack = this.inventory[index];
-				this.inventory[index] = null;
-				return itemstack;
-			} else {
-				itemstack = this.inventory[index].splitStack(count);
-				if (this.inventory[index].stackSize == 0) {
-					this.inventory[index] = null;
-				}
-				return itemstack;
-			}
-		} else {
-			return null;
-		}
-	}
+    @Override
+    public ItemStack decrStackSize(int index, int count) {
+        if (inventory[index] != null) {
+            ItemStack itemstack;
+            if (inventory[index].stackSize <= count) {
+                itemstack = inventory[index];
+                inventory[index] = null;
+                return itemstack;
+            } else {
+                itemstack = inventory[index].splitStack(count);
+                if (inventory[index].stackSize == 0) {
+                    inventory[index] = null;
+                }
+                return itemstack;
+            }
+        } else {
+            return null;
+        }
+    }
 
-	@Override
-	public ItemStack removeStackFromSlot(int index) {
-		if (this.inventory[index] != null) {
-			ItemStack itemstack = this.inventory[index];
-			this.inventory[index] = null;
-			return itemstack;
-		} else {
-			return null;
-		}
+    @Override
+    public ItemStack removeStackFromSlot(int index) {
+        if (inventory[index] != null) {
+            ItemStack itemstack = inventory[index];
+            inventory[index] = null;
+            return itemstack;
+        } else {
+            return null;
+        }
     }
 
     @Override
     public void setInventorySlotContents(int index, ItemStack stack) {
         if (isItemValidForSlot(index, stack)) {
-            this.inventory[index] = stack;
+            inventory[index] = stack;
             markDirty();
         }
     }
 
     @Override
-	public int getInventoryStackLimit() {
-		return 64;
-	}
+    public int getInventoryStackLimit() {
+        return 64;
+    }
 
-	@Override
-	public boolean isUseableByPlayer(EntityPlayer player) {
-		return canPlayerAccess(player);
-	}
+    @Override
+    public boolean isUseableByPlayer(EntityPlayer player) {
+        return canPlayerAccess(player);
+    }
 
-	@Override
-	public void clear() {
-		for (int i = 0; i < inventory.length; i++) {
-			inventory[i] = null;
-		}
-	}
+    @Override
+    public void clear() {
+        for (int i = 0; i < inventory.length; i++) {
+            inventory[i] = null;
+        }
+    }
 
-	@Override
-	public void openInventory(EntityPlayer player) {
-	}
+    @Override
+    public void openInventory(EntityPlayer player) {}
 
-	@Override
-	public void closeInventory(EntityPlayer player) {
-	}
+    @Override
+    public void closeInventory(EntityPlayer player) {}
 
-	private final String[] colors = new String[]{ "dyeRed", "dyeGreen", "dyeBlue"};
-	
+    private final String[] colors = new String[] { "dyeRed", "dyeGreen", "dyeBlue" };
+
     @Override
     public boolean isItemValidForSlot(int index, ItemStack stack) {
         if (stack == null) {
             return true;
         }
-        if (index == 0 || (!Configs.harderPaintings && index < 4)) {
+        if (index == 0 || !Configs.harderPaintings && index < 4) {
             return stack.getItem() == Items.paper;
         } else if (index < 4) {
             int[] ids = OreDictionary.getOreIDs(stack);
@@ -278,66 +276,65 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, ITic
             return Block.getBlockFromItem(stack.getItem()) == CTBMod.painting;
         }
         return false;
-	}
+    }
 
-	@Override
-	protected void writeCustomNBT(NBTTagCompound root) {
-		NBTTagList nbttaglist = new NBTTagList();
+    @Override
+    protected void writeCustomNBT(NBTTagCompound root) {
+        NBTTagList nbttaglist = new NBTTagList();
 
-		for (int i = 0; i < this.inventory.length; ++i) {
-			if (this.inventory[i] != null) {
-				NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-				nbttagcompound1.setByte("Slot", (byte) i);
-				this.inventory[i].writeToNBT(nbttagcompound1);
-				nbttaglist.appendTag(nbttagcompound1);
-			}
-		}
-		root.setTag("Items", nbttaglist);
-		
-		root.setInteger("paintingWidth", getWidth());
-		root.setInteger("paintingHeight", getHeight());
-	}
+        for (int i = 0; i < inventory.length; ++i) {
+            if (inventory[i] != null) {
+                NBTTagCompound nbttagcompound1 = new NBTTagCompound();
+                nbttagcompound1.setByte("Slot", (byte) i);
+                inventory[i].writeToNBT(nbttagcompound1);
+                nbttaglist.appendTag(nbttagcompound1);
+            }
+        }
+        root.setTag("Items", nbttaglist);
 
-	@Override
-	protected void readCustomNBT(NBTTagCompound root) {
-		NBTTagList nbttaglist = root.getTagList("Items", 10);
+        root.setInteger("paintingWidth", getWidth());
+        root.setInteger("paintingHeight", getHeight());
+    }
 
-		for (int i = 0; i < nbttaglist.tagCount(); ++i) {
-			NBTTagCompound nbttagcompound1 = nbttaglist.getCompoundTagAt(i);
-			int j = nbttagcompound1.getByte("Slot") & 255;
+    @Override
+    protected void readCustomNBT(NBTTagCompound root) {
+        NBTTagList nbttaglist = root.getTagList("Items", 10);
 
-			this.inventory[j] = ItemStack.loadItemStackFromNBT(nbttagcompound1);
-		}
-		
-		setWidth(root.getInteger("paintingWidth"));
-		setHeight(root.getInteger("paintingHeight"));
-	}
+        for (int i = 0; i < nbttaglist.tagCount(); ++i) {
+            NBTTagCompound nbttagcompound1 = nbttaglist.getCompoundTagAt(i);
+            int j = nbttagcompound1.getByte("Slot") & 255;
 
-	// Stupid pointless IInventory methods
+            inventory[j] = ItemStack.loadItemStackFromNBT(nbttagcompound1);
+        }
 
-	@Override
-	public String getName() {
-		return getDisplayName().getUnformattedText();
-	}
+        setWidth(root.getInteger("paintingWidth"));
+        setHeight(root.getInteger("paintingHeight"));
+    }
 
-	@Override
-	public boolean hasCustomName() {
-		return false;
-	}
+    // Stupid pointless IInventory methods
 
-	@Override
-	public IChatComponent getDisplayName() {
-		return new ChatComponentText("This is stupid");
-	}
+    @Override
+    public String getName() {
+        return getDisplayName().getUnformattedText();
+    }
 
-	@Override
-	public int getField(int id) {
-		return 0;
-	}
+    @Override
+    public boolean hasCustomName() {
+        return false;
+    }
 
-	@Override
-	public void setField(int id, int value) {
-	}
+    @Override
+    public IChatComponent getDisplayName() {
+        return new ChatComponentText("This is stupid");
+    }
+
+    @Override
+    public int getField(int id) {
+        return 0;
+    }
+
+    @Override
+    public void setField(int id, int value) {}
 
     @Override
     public int getFieldCount() {

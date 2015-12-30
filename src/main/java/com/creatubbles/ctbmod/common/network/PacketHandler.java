@@ -16,9 +16,9 @@ import com.creatubbles.repack.endercore.common.util.ChatUtil.PacketNoSpamChat;
 
 public class PacketHandler {
 
-	public static final SimpleNetworkWrapper INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel(CTBMod.MODID);
+    public static final SimpleNetworkWrapper INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel(CTBMod.MODID);
 
-	private static int ID = 0;
+    private static int ID = 0;
 
     public static int nextID() {
         return ID++;
@@ -33,15 +33,15 @@ public class PacketHandler {
     }
 
     public static void sendToAllAround(IMessage message, TileEntity te, int range) {
-		BlockPos pos = te.getPos();
-		INSTANCE.sendToAllAround(message, new TargetPoint(te.getWorld().provider.getDimensionId(), pos.getX(), pos.getY(), pos.getZ(), range));
-	}
+        BlockPos pos = te.getPos();
+        INSTANCE.sendToAllAround(message, new TargetPoint(te.getWorld().provider.getDimensionId(), pos.getX(), pos.getY(), pos.getZ(), range));
+    }
 
-	public static void sendToAllAround(IMessage message, TileEntity te) {
-		sendToAllAround(message, te, 64);
-	}
+    public static void sendToAllAround(IMessage message, TileEntity te) {
+        sendToAllAround(message, te, 64);
+    }
 
-	public static void sendTo(IMessage message, EntityPlayerMP player) {
-		INSTANCE.sendTo(message, player);
-	}
+    public static void sendTo(IMessage message, EntityPlayerMP player) {
+        INSTANCE.sendTo(message, player);
+    }
 }

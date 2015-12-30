@@ -13,8 +13,7 @@ public class PacketProgress extends MessageTileEntity<TileEntity> {
 
     private float progress;
 
-    public PacketProgress() {
-    }
+    public PacketProgress() {}
 
     public PacketProgress(IProgressTile tile) {
         super(tile.getTileEntity());

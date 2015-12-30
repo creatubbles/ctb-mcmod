@@ -13,8 +13,8 @@ public class SlotCreator extends Slot {
 
     public SlotCreator(ItemStack stack, TileCreator inventoryIn, int index, int xPosition, int yPosition) {
         super(inventoryIn, index, xPosition, yPosition);
-        this.ghostStack = stack;
-        this.te = inventoryIn;
+        ghostStack = stack;
+        te = inventoryIn;
     }
 
     @Override

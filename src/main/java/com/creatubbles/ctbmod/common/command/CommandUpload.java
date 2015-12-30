@@ -24,7 +24,6 @@ import com.creatubbles.api.request.creation.UploadCreationRequest;
 import com.creatubbles.api.response.amazon.GetAmazonTokenResponse;
 import com.creatubbles.api.response.creation.UploadCreationResponse;
 
-
 public class CommandUpload extends ClientCommandBase {
 
     @Override
@@ -43,11 +42,11 @@ public class CommandUpload extends ClientCommandBase {
         if (args.length < 2) {
             throw new WrongUsageException("Not enough arguments. Usage: %s", getCommandUsage(sender));
         }
-        
+
         if (CommandLogin.accessToken == null) {
             throw new WrongUsageException("/ctb-login must be run before this command can be used");
         }
-        
+
         // create creation
         UploadCreationResponse uploadResponse = new UploadCreationRequest(CommandLogin.accessToken).execute().getResponse();
         // get required info for s3

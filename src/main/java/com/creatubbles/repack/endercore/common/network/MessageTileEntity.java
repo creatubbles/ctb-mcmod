@@ -11,42 +11,41 @@ import com.google.common.reflect.TypeToken;
 
 public abstract class MessageTileEntity<T extends TileEntity> implements IMessage {
 
-	protected BlockPos pos;
+    protected BlockPos pos;
 
-	protected MessageTileEntity() {
-	}
+    protected MessageTileEntity() {}
 
-	protected MessageTileEntity(T tile) {
-		pos = tile.getPos();
-	}
+    protected MessageTileEntity(T tile) {
+        pos = tile.getPos();
+    }
 
-	@Override
+    @Override
     public void toBytes(ByteBuf buf) {
-		NetworkUtil.writePos(pos, buf);
-	}
+        NetworkUtil.writePos(pos, buf);
+    }
 
-	@Override
-	public void fromBytes(ByteBuf buf) {
-		pos = NetworkUtil.readPos(buf);
-	}
+    @Override
+    public void fromBytes(ByteBuf buf) {
+        pos = NetworkUtil.readPos(buf);
+    }
 
-	@SuppressWarnings("unchecked")
-	protected T getTileEntity(World worldObj) {
-		if (worldObj == null) {
-			return null;
-		}
-		TileEntity te = worldObj.getTileEntity(pos);
-		if (te == null) {
-			return null;
-		}
-		TypeToken<?> teType = TypeToken.of(getClass()).resolveType(MessageTileEntity.class.getTypeParameters()[0]);
-		if (teType.isAssignableFrom(te.getClass())) {
-			return (T) te;
-		}
-		return null;
-	}
+    @SuppressWarnings("unchecked")
+    protected T getTileEntity(World worldObj) {
+        if (worldObj == null) {
+            return null;
+        }
+        TileEntity te = worldObj.getTileEntity(pos);
+        if (te == null) {
+            return null;
+        }
+        TypeToken<?> teType = TypeToken.of(getClass()).resolveType(MessageTileEntity.class.getTypeParameters()[0]);
+        if (teType.isAssignableFrom(te.getClass())) {
+            return (T) te;
+        }
+        return null;
+    }
 
-	protected World getWorld(MessageContext ctx) {
-		return ctx.getServerHandler().playerEntity.worldObj;
-	}
+    protected World getWorld(MessageContext ctx) {
+        return ctx.getServerHandler().playerEntity.worldObj;
+    }
 }

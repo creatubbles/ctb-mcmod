@@ -73,15 +73,15 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
     public static Creation getCreation(ItemStack painting) {
         return NBTUtil.readJsonFromNBT(Creation.class, painting.getTagCompound());
     }
-    
+
     public static int getWidth(ItemStack painting) {
         return painting.getTagCompound().getInteger("pWidth");
     }
-    
+
     public static int getHeight(ItemStack painting) {
         return painting.getTagCompound().getInteger("pHeight");
     }
-    
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public void getSubBlocks(Item itemIn, CreativeTabs tab, List list) {
@@ -102,7 +102,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         }
         painting.setWidth(placed.getTagCompound().getInteger("pWidth"));
         painting.setHeight(placed.getTagCompound().getInteger("pHeight"));
-        
+
         EnumFacing facing = getState(worldIn, pos).getValue(FACING);
         EnumFacing ext = facing.rotateYCCW();
         for (int x = 0; x < painting.getWidth(); x++) {
@@ -152,7 +152,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
     public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side) {
         return side.getFrontOffsetY() == 0 && super.canPlaceBlockOnSide(worldIn, pos, side);
     }
-    
+
     @Override
     public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos) {
         IBlockState state = getState(worldIn, pos);
@@ -161,21 +161,21 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         }
         EnumFacing facing = state.getValue(FACING);
         switch (facing) {
-        case EAST:
-            setBlockBounds(0, 0, 0, 1/16f, 1, 1);
-            break;
-        case NORTH:
-            setBlockBounds(0, 0, 15/16f, 1, 1, 1);
-            break;
-        case SOUTH:
-            setBlockBounds(0, 0, 0, 1, 1, 1/16f);
-            break;
-        case WEST:
-            setBlockBounds(15/16f, 0, 0, 1, 1, 1);
-            break;
-        default:
-            setBlockBounds(0, 0, 0, 1, 1, 1);
-            break;
+            case EAST:
+                setBlockBounds(0, 0, 0, 1 / 16f, 1, 1);
+                break;
+            case NORTH:
+                setBlockBounds(0, 0, 15 / 16f, 1, 1, 1);
+                break;
+            case SOUTH:
+                setBlockBounds(0, 0, 0, 1, 1, 1 / 16f);
+                break;
+            case WEST:
+                setBlockBounds(15 / 16f, 0, 0, 1, 1, 1);
+                break;
+            default:
+                setBlockBounds(0, 0, 0, 1, 1, 1);
+                break;
         }
     }
 
@@ -202,7 +202,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         if (te != null) {
             pos = te.getPos();
         }
-        
+
         BlockPainting painting = CTBMod.painting;
         painting.setBlockBoundsBasedOnState(worldIn, pos);
         AxisAlignedBB bb = new AxisAlignedBB(pos.getX() + painting.minX, pos.getY() + painting.minY, pos.getZ() + painting.minZ, pos.getX() + painting.maxX, pos.getY() + painting.maxY, pos.getZ()
@@ -234,7 +234,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         }
         return null;
     }
-    
+
     @Override
     public ItemStack getPickBlock(MovingObjectPosition target, World world, BlockPos pos, EntityPlayer player) {
         TilePainting te = getDataPainting(world, pos);
@@ -248,7 +248,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
 
     @Override
     public IBlockState getStateFromMeta(int meta) {
-        return this.getDefaultState().withProperty(FACING, EnumFacing.getHorizontal(meta)).withProperty(DUMMY, (meta & 8) != 0);
+        return getDefaultState().withProperty(FACING, EnumFacing.getHorizontal(meta)).withProperty(DUMMY, (meta & 8) != 0);
     }
 
     @Override

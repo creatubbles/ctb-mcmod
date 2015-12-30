@@ -11,35 +11,35 @@ import org.lwjgl.opengl.GL11;
 
 public interface IWidgetMap {
 
-	int getSize();
+    int getSize();
 
-	ResourceLocation getTexture();
+    ResourceLocation getTexture();
 
-	void render(IWidgetIcon widget, double x, double y);
+    void render(IWidgetIcon widget, double x, double y);
 
-	void render(IWidgetIcon widget, double x, double y, boolean doDraw);
-	
+    void render(IWidgetIcon widget, double x, double y, boolean doDraw);
+
     void render(IWidgetIcon widget, double x, double y, double zLevel, boolean doDraw);
 
-	void render(IWidgetIcon widget, double x, double y, double width, double height, double zLevel, boolean doDraw);
+    void render(IWidgetIcon widget, double x, double y, double width, double height, double zLevel, boolean doDraw);
 
-	void render(IWidgetIcon widget, double x, double y, double width, double height, double zLevel, boolean doDraw, boolean flipY);
+    void render(IWidgetIcon widget, double x, double y, double width, double height, double zLevel, boolean doDraw, boolean flipY);
 
-	@RequiredArgsConstructor
-	static class WidgetMapImpl implements IWidgetMap {
+    @RequiredArgsConstructor
+    static class WidgetMapImpl implements IWidgetMap {
 
-		private final int size;
-		private final ResourceLocation res;
+        private final int size;
+        private final ResourceLocation res;
 
-		@Override
-		public int getSize() {
-			return size;
-		}
+        @Override
+        public int getSize() {
+            return size;
+        }
 
-		@Override
-		public ResourceLocation getTexture() {
-			return res;
-		}
+        @Override
+        public ResourceLocation getTexture() {
+            return res;
+        }
 
         @Override
         public void render(IWidgetIcon widget, double x, double y) {
@@ -64,33 +64,33 @@ public interface IWidgetMap {
         @Override
         public void render(IWidgetIcon widget, double x, double y, double width, double height, double zLevel, boolean doDraw, boolean flipY) {
 
-			WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
-			if (doDraw) {
-				Minecraft.getMinecraft().getTextureManager().bindTexture(getTexture());
-				renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-			}
-			double minU = (double) widget.getX() / getSize();
-			double maxU = (double) (widget.getX() + widget.getWidth()) / getSize();
-			double minV = (double) widget.getY() / getSize();
-			double maxV = (double) (widget.getY() + widget.getHeight()) / getSize();
+            WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
+            if (doDraw) {
+                Minecraft.getMinecraft().getTextureManager().bindTexture(getTexture());
+                renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+            }
+            double minU = (double) widget.getX() / getSize();
+            double maxU = (double) (widget.getX() + widget.getWidth()) / getSize();
+            double minV = (double) widget.getY() / getSize();
+            double maxV = (double) (widget.getY() + widget.getHeight()) / getSize();
 
-			if (flipY) {
-				renderer.pos(x, y + height, zLevel).tex(minU, minV).endVertex();
-				renderer.pos(x + width, y + height, zLevel).tex(maxU, minV).endVertex();
-				renderer.pos(x + width, y + 0, zLevel).tex(maxU, maxV).endVertex();
-				renderer.pos(x, y + 0, zLevel).tex(minU, maxV).endVertex();
-			} else {
-				renderer.pos(x, y + height, zLevel).tex(minU, maxV).endVertex();
-				renderer.pos(x + width, y + height, zLevel).tex(maxU, maxV).endVertex();
-				renderer.pos(x + width, y + 0, zLevel).tex(maxU, minV).endVertex();
-				renderer.pos(x, y + 0, zLevel).tex(minU, minV).endVertex();
-			}
-			if (widget.getOverlay() != null) {
-				widget.getOverlay().getMap().render(widget.getOverlay(), x, y, width, height, zLevel, false, flipY);
-			}
-			if (doDraw) {
-				Tessellator.getInstance().draw();
-			}
-		}
-	}
+            if (flipY) {
+                renderer.pos(x, y + height, zLevel).tex(minU, minV).endVertex();
+                renderer.pos(x + width, y + height, zLevel).tex(maxU, minV).endVertex();
+                renderer.pos(x + width, y + 0, zLevel).tex(maxU, maxV).endVertex();
+                renderer.pos(x, y + 0, zLevel).tex(minU, maxV).endVertex();
+            } else {
+                renderer.pos(x, y + height, zLevel).tex(minU, maxV).endVertex();
+                renderer.pos(x + width, y + height, zLevel).tex(maxU, maxV).endVertex();
+                renderer.pos(x + width, y + 0, zLevel).tex(maxU, minV).endVertex();
+                renderer.pos(x, y + 0, zLevel).tex(minU, minV).endVertex();
+            }
+            if (widget.getOverlay() != null) {
+                widget.getOverlay().getMap().render(widget.getOverlay(), x, y, width, height, zLevel, false, flipY);
+            }
+            if (doDraw) {
+                Tessellator.getInstance().draw();
+            }
+        }
+    }
 }

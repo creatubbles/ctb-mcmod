@@ -26,7 +26,7 @@ public abstract class TileEntityBase extends TileEntity implements ITickable {
     public TileEntityBase() {
         isProgressTile = this instanceof IProgressTile;
     }
-    
+
     @Override
     public final void update() {
         doUpdate();
@@ -112,15 +112,15 @@ public abstract class TileEntityBase extends TileEntity implements ITickable {
 
     /**
      * Called directly after the TE is constructed. This is the place to call non-final methods.
-     * 
+     *
      * Note: This will not be called when the TE is loaded from the save. Hook into the nbt methods for that.
      */
-    public void init() {
-    }
+    public void init() {}
 
     /**
-     * Call this with an interval (in ticks) to find out if the current tick is the one you want to do some work. This is staggered so the work of different TEs is stretched out over time.
-     * 
+     * Call this with an interval (in ticks) to find out if the current tick is the one you want to do some work. This
+     * is staggered so the work of different TEs is stretched out over time.
+     *
      * @see #shouldDoWorkThisTick(int, int) If you need to offset work ticks
      */
     protected boolean shouldDoWorkThisTick(int interval) {
@@ -128,8 +128,9 @@ public abstract class TileEntityBase extends TileEntity implements ITickable {
     }
 
     /**
-     * Call this with an interval (in ticks) to find out if the current tick is the one you want to do some work. This is staggered so the work of different TEs is stretched out over time.
-     * 
+     * Call this with an interval (in ticks) to find out if the current tick is the one you want to do some work. This
+     * is staggered so the work of different TEs is stretched out over time.
+     *
      * If you have different work items in your TE, use this variant to stagger your work.
      */
     protected boolean shouldDoWorkThisTick(int interval, int offset) {

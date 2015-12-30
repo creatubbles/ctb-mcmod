@@ -13,7 +13,6 @@ import net.minecraft.world.World;
 
 import com.creatubbles.api.core.Creation;
 
-
 public class ItemBlockPainting extends ItemBlock {
 
     public ItemBlockPainting(Block block) {

@@ -11,21 +11,21 @@ import com.creatubbles.repack.endercore.common.config.Section;
 
 public interface IConfigHandler {
 
-	void initialize(File cfg);
+    void initialize(File cfg);
 
-	List<Section> getSections();
+    List<Section> getSections();
 
-	ConfigCategory getCategory(String name);
+    ConfigCategory getCategory(String name);
 
-	String getModID();
+    String getModID();
 
-	/**
-	 * A hook for the {@link FMLInitializationEvent}.
-	 */
-	void initHook();
+    /**
+     * A hook for the {@link FMLInitializationEvent}.
+     */
+    void initHook();
 
-	/**
-	 * A hook for the {@link FMLPostInitializationEvent}.
-	 */
-	void postInitHook();
+    /**
+     * A hook for the {@link FMLPostInitializationEvent}.
+     */
+    void postInitHook();
 }

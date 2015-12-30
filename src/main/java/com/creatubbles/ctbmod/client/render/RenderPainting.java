@@ -1,6 +1,5 @@
 package com.creatubbles.ctbmod.client.render;
 
-
 import java.awt.geom.Rectangle2D;
 
 import net.minecraft.client.Minecraft;
@@ -20,9 +19,8 @@ import com.creatubbles.ctbmod.common.http.DownloadableImage.ImageType;
 import com.creatubbles.ctbmod.common.painting.BlockPainting;
 import com.creatubbles.ctbmod.common.painting.TilePainting;
 
-
 public class RenderPainting extends TileEntitySpecialRenderer<TilePainting> {
-    
+
     @Override
     public void renderTileEntityAt(TilePainting te, double x, double y, double z, float partialTicks, int destroyStage) {
         if (te instanceof TilePainting && te.getImage() != null && te.render()) {
@@ -43,9 +41,9 @@ public class RenderPainting extends TileEntitySpecialRenderer<TilePainting> {
                 scaledSize = 16;
                 GlStateManager.enableBlend();
             }
-            
+
             Minecraft.getMinecraft().renderEngine.bindTexture(res);
-            
+
             WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
 
             // TODO this code is duped between here and OverlaySelectedCreation (kinda)
@@ -63,41 +61,41 @@ public class RenderPainting extends TileEntitySpecialRenderer<TilePainting> {
 
             double maxU = width / scaledSize;
             double maxV = height / scaledSize;
-            
+
             GlStateManager.pushMatrix();
             GlStateManager.translate(x, y, z);
 
-            switch(facing) {
-            case EAST:
-                GL11.glTranslatef(0, 0, 1);
-                GL11.glRotatef(90, 0, 1, 0);
-                break;
-            case NORTH:
-                GL11.glTranslatef(1, 0, 1);
-                GL11.glRotatef(180, 0, 1, 0);
-                break;
-            case WEST:
-                GL11.glTranslatef(1, 0, 0);
-                GL11.glRotatef(-90, 0, 1, 0);
-                break;
-            default:
-                break;
+            switch (facing) {
+                case EAST:
+                    GL11.glTranslatef(0, 0, 1);
+                    GL11.glRotatef(90, 0, 1, 0);
+                    break;
+                case NORTH:
+                    GL11.glTranslatef(1, 0, 1);
+                    GL11.glRotatef(180, 0, 1, 0);
+                    break;
+                case WEST:
+                    GL11.glTranslatef(1, 0, 0);
+                    GL11.glRotatef(-90, 0, 1, 0);
+                    break;
+                default:
+                    break;
             }
-            
+
             GL11.glPushAttrib(GL11.GL_COLOR_BUFFER_BIT);
             GlStateManager.disableLighting();
             GlStateManager.doPolygonOffset(-3.0F, -1.5F);
             GlStateManager.enablePolygonOffset();
             renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-            
-            float c = getColorMultiplierForFace(facing);            
-            double depth = 1/16d;
-            
+
+            float c = getColorMultiplierForFace(facing);
+            double depth = 1 / 16d;
+
             renderer.pos(bounds.getX(), bounds.getY() + bounds.getHeight(), depth).tex(0, 0).color(c, c, c, 1).endVertex();
             renderer.pos(bounds.getX(), bounds.getY(), depth).tex(0, maxV).color(c, c, c, 1).endVertex();
             renderer.pos(bounds.getX() + bounds.getWidth(), bounds.getY(), depth).tex(maxU, maxV).color(c, c, c, 1).endVertex();
             renderer.pos(bounds.getX() + bounds.getWidth(), bounds.getY() + bounds.getHeight(), depth).tex(maxU, 0).color(c, c, c, 1).endVertex();
-            
+
             Tessellator.getInstance().draw();
             renderer.setTranslation(0, 0, 0);
 

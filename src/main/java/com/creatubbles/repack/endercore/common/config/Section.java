@@ -7,15 +7,15 @@ import java.util.Locale;
  */
 public class Section {
 
-	public final String name;
-	public final String lang;
+    public final String name;
+    public final String lang;
 
-	public Section(String name, String lang) {
-		this.name = name;
-		this.lang = "section." + lang;
-	}
+    public Section(String name, String lang) {
+        this.name = name;
+        this.lang = "section." + lang;
+    }
 
-	public String lc() {
-		return name.toLowerCase(Locale.US);
-	}
+    public String lc() {
+        return name.toLowerCase(Locale.US);
+    }
 }

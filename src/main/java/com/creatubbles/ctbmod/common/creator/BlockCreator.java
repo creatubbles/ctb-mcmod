@@ -15,25 +15,25 @@ import com.creatubbles.repack.endercore.common.BlockEnder;
 
 public class BlockCreator extends BlockEnder<TileCreator> implements IGuiHandler {
 
-	public static BlockCreator create() {
-		BlockCreator res = new BlockCreator();
-		res.init();
-		return res;
-	}
+    public static BlockCreator create() {
+        BlockCreator res = new BlockCreator();
+        res.init();
+        return res;
+    }
 
-	public BlockCreator() {
-		super("creator", TileCreator.class, Material.rock);
-	}
+    public BlockCreator() {
+        super("creator", TileCreator.class, Material.rock);
+    }
 
-	@Override
-	protected void init() {
-		super.init();
-		setCreativeTab(CreativeTabs.tabDecorations);
-		setUnlocalizedName(CTBMod.DOMAIN + "." + name);
-		NetworkRegistry.INSTANCE.registerGuiHandler(CTBMod.instance, this);
-	}
+    @Override
+    protected void init() {
+        super.init();
+        setCreativeTab(CreativeTabs.tabDecorations);
+        setUnlocalizedName(CTBMod.DOMAIN + "." + name);
+        NetworkRegistry.INSTANCE.registerGuiHandler(CTBMod.instance, this);
+    }
 
-	@Override
+    @Override
     protected boolean openGui(World world, BlockPos pos, EntityPlayer entityPlayer, EnumFacing side) {
         if (!world.isRemote) {
             entityPlayer.openGui(CTBMod.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
@@ -42,14 +42,14 @@ public class BlockCreator extends BlockEnder<TileCreator> implements IGuiHandler
     }
 
     @Override
-	public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-		TileCreator te = getTileEntity(world, new BlockPos(x, y, z));
-		return te == null ? null : new ContainerCreator(player.inventory, te);
-	}
+    public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
+        TileCreator te = getTileEntity(world, new BlockPos(x, y, z));
+        return te == null ? null : new ContainerCreator(player.inventory, te);
+    }
 
-	@Override
-	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-		TileCreator te = getTileEntity(world, new BlockPos(x, y, z));
-		return te == null ? null : new GuiCreator(player.inventory, te);
-	}
+    @Override
+    public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
+        TileCreator te = getTileEntity(world, new BlockPos(x, y, z));
+        return te == null ? null : new GuiCreator(player.inventory, te);
+    }
 }

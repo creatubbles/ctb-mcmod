@@ -13,11 +13,11 @@ import com.creatubbles.repack.endercore.common.util.DyeColor;
 
 public class ContainerCreator extends ContainerEnder<TileCreator> {
 
-	public ContainerCreator(InventoryPlayer playerInv, TileCreator creator) {
-		super(playerInv, creator);
-	}
+    public ContainerCreator(InventoryPlayer playerInv, TileCreator creator) {
+        super(playerInv, creator);
+    }
 
-	@Override
+    @Override
     protected void addSlots(InventoryPlayer playerInv) {
         int x = 71;
         int y = 20;
@@ -32,14 +32,14 @@ public class ContainerCreator extends ContainerEnder<TileCreator> {
             @Override
             public boolean isItemValid(ItemStack stack) {
                 return false;
-			}
-		});
-	}
+            }
+        });
+    }
 
-	@Override
-	public Point getPlayerInventoryOffset() {
-		Point p = super.getPlayerInventoryOffset();
-		p.translate(0, 44);
-		return p;
-	}
+    @Override
+    public Point getPlayerInventoryOffset() {
+        Point p = super.getPlayerInventoryOffset();
+        p.translate(0, 44);
+        return p;
+    }
 }

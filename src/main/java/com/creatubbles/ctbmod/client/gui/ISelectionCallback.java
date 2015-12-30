@@ -6,6 +6,6 @@ import com.creatubbles.api.core.Creation;
 
 public interface ISelectionCallback {
 
-	void callback(@Nullable Creation selected);
+    void callback(@Nullable Creation selected);
 
 }

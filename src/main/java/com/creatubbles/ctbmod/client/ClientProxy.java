@@ -23,7 +23,7 @@ public class ClientProxy extends CommonProxy {
         ModelLoader.setCustomStateMapper(CTBMod.painting, new PaintingStateMapper());
         ClientRegistry.bindTileEntitySpecialRenderer(TilePainting.class, new RenderPainting());
     }
-    
+
     @Override
     public World getClientWorld() {
         return Minecraft.getMinecraft().theWorld;

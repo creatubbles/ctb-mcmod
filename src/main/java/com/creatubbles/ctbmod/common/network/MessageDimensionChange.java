@@ -12,36 +12,36 @@ import com.creatubbles.repack.endercore.common.network.MessageTileEntity;
 @NoArgsConstructor
 public class MessageDimensionChange extends MessageTileEntity<TileCreator> {
 
-	private int width, height;
+    private int width, height;
 
-	public MessageDimensionChange(TileCreator te) {
-		super(te);
-		this.width = te.getWidth();
-		this.height = te.getHeight();
-	}
+    public MessageDimensionChange(TileCreator te) {
+        super(te);
+        width = te.getWidth();
+        height = te.getHeight();
+    }
 
-	@Override
-	public void toBytes(ByteBuf buf) {
-		super.toBytes(buf);
-		buf.writeByte(width);
-		buf.writeByte(height);
-	}
+    @Override
+    public void toBytes(ByteBuf buf) {
+        super.toBytes(buf);
+        buf.writeByte(width);
+        buf.writeByte(height);
+    }
 
-	@Override
-	public void fromBytes(ByteBuf buf) {
-		super.fromBytes(buf);
-		this.width = buf.readByte();
-		this.height = buf.readByte();
-	}
-	
-	public static class Handler implements IMessageHandler<MessageDimensionChange, IMessage> {
-		
-		@Override
-		public IMessage onMessage(MessageDimensionChange message, MessageContext ctx) {
-			TileCreator te = message.getTileEntity(ctx.getServerHandler().playerEntity.worldObj);
-			te.setWidth(message.width);
-			te.setHeight(message.height);
-			return null;
-		}
-	}
+    @Override
+    public void fromBytes(ByteBuf buf) {
+        super.fromBytes(buf);
+        width = buf.readByte();
+        height = buf.readByte();
+    }
+
+    public static class Handler implements IMessageHandler<MessageDimensionChange, IMessage> {
+
+        @Override
+        public IMessage onMessage(MessageDimensionChange message, MessageContext ctx) {
+            TileCreator te = message.getTileEntity(ctx.getServerHandler().playerEntity.worldObj);
+            te.setWidth(message.width);
+            te.setHeight(message.height);
+            return null;
+        }
+    }
 }

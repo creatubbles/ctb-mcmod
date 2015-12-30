@@ -23,86 +23,86 @@ import com.google.gson.JsonParser;
 
 public class DataCache {
 
-	public static final File cacheFolder = new File(".", "creatubbles");
-	private static final File cache = new File(cacheFolder, "usercache.json");
-	private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    public static final File cacheFolder = new File(".", "creatubbles");
+    private static final File cache = new File(cacheFolder, "usercache.json");
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-	private final Set<User> savedUsers = Sets.newHashSet();
+    private final Set<User> savedUsers = Sets.newHashSet();
 
-	@Getter
-	private User activeUser;
+    @Getter
+    private User activeUser;
 
-	@Getter
-	private Creator[] creators;
+    @Getter
+    private Creator[] creators;
 
-	@Getter
-	private Creator activeCreator;
+    @Getter
+    private Creator activeCreator;
 
-	/**
-	 * This is not written to file, it is to save creations between openings of the GUI.
-	 */
-	@Getter
-	@Setter
-	private transient Creation[] creationCache;
-	
-	@Getter
-	private transient boolean dirty;
+    /**
+     * This is not written to file, it is to save creations between openings of the GUI.
+     */
+    @Getter
+    @Setter
+    private transient Creation[] creationCache;
 
-	@SneakyThrows
-	public static DataCache loadCache() {
-		cacheFolder.mkdir();
+    @Getter
+    private transient boolean dirty;
 
-		if (cache.exists() && Configs.refreshUserCache) {
-			cache.delete();
-		}
-		cache.createNewFile();
-		JsonElement parsed = new JsonParser().parse(new FileReader(cache));
-		if (parsed != null && !parsed.isJsonNull()) {
-			return gson.fromJson(parsed, DataCache.class);
-		}
-		return new DataCache();
-	}
+    @SneakyThrows
+    public static DataCache loadCache() {
+        cacheFolder.mkdir();
 
-	public void activateUser(User user) {
-		if (user != null) {
-			savedUsers.add(user);
-		}
-		activeUser = user;
-		save();
-	}
+        if (cache.exists() && Configs.refreshUserCache) {
+            cache.delete();
+        }
+        cache.createNewFile();
+        JsonElement parsed = new JsonParser().parse(new FileReader(cache));
+        if (parsed != null && !parsed.isJsonNull()) {
+            return gson.fromJson(parsed, DataCache.class);
+        }
+        return new DataCache();
+    }
 
-	public void setCreators(Creator[] creators) {
-		if (creators == null) {
-			this.creators = null;
-			this.activeCreator = null;
-			return;
-		}
-		this.creators = Arrays.copyOf(creators, creators.length);
-		if (getActiveUser() != null) {
-			int userId = getActiveUser().id;
-			for (Creator c : creators) {
-				if (c.creator_user_id == userId) {
-					activeCreator = c;
-				}
-			}
-		}
-		save();
-	}
+    public void activateUser(User user) {
+        if (user != null) {
+            savedUsers.add(user);
+        }
+        activeUser = user;
+        save();
+    }
 
-	public Collection<User> getSavedUsers() {
-		return ImmutableSet.copyOf(savedUsers);
-	}
+    public void setCreators(Creator[] creators) {
+        if (creators == null) {
+            this.creators = null;
+            activeCreator = null;
+            return;
+        }
+        this.creators = Arrays.copyOf(creators, creators.length);
+        if (getActiveUser() != null) {
+            int userId = getActiveUser().id;
+            for (Creator c : creators) {
+                if (c.creator_user_id == userId) {
+                    activeCreator = c;
+                }
+            }
+        }
+        save();
+    }
 
-	@SneakyThrows
-	public void save() {
-		String json = gson.toJson(this);
-		FileWriter fw = new FileWriter(cache);
-		fw.write(json);
-		fw.flush();
-		fw.close();
-	}
+    public Collection<User> getSavedUsers() {
+        return ImmutableSet.copyOf(savedUsers);
+    }
 
-	public void dirty(boolean dirty) {
-		this.dirty = dirty;
-	}
+    @SneakyThrows
+    public void save() {
+        String json = gson.toJson(this);
+        FileWriter fw = new FileWriter(cache);
+        fw.write(json);
+        fw.flush();
+        fw.close();
+    }
+
+    public void dirty(boolean dirty) {
+        this.dirty = dirty;
+    }
 }

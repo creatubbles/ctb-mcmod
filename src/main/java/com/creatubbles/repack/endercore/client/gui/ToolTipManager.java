@@ -12,70 +12,70 @@ import com.google.common.collect.Sets;
 
 public class ToolTipManager {
 
-	public static interface ToolTipRenderer {
+    public static interface ToolTipRenderer {
 
-		int getGuiLeft();
+        int getGuiLeft();
 
-		int getGuiTop();
+        int getGuiTop();
 
-		int getXSize();
+        int getXSize();
 
-		FontRenderer getFontRenderer();
+        FontRenderer getFontRenderer();
 
-		void drawHoveringText(List<String> par1List, int par2, int par3, FontRenderer font);
-	}
+        void drawHoveringText(List<String> par1List, int par2, int par3, FontRenderer font);
+    }
 
-	private final Set<GuiToolTip> toolTips = Sets.newHashSet();
+    private final Set<GuiToolTip> toolTips = Sets.newHashSet();
 
-	public void addToolTip(GuiToolTip toolTip) {
-		toolTips.add(toolTip);
-	}
+    public void addToolTip(GuiToolTip toolTip) {
+        toolTips.add(toolTip);
+    }
 
-	public boolean removeToolTip(GuiToolTip toolTip) {
-		return toolTips.remove(toolTip);
-	}
-	
-	public void clearToolTips() {
-		toolTips.clear();
-	}
+    public boolean removeToolTip(GuiToolTip toolTip) {
+        return toolTips.remove(toolTip);
+    }
 
-	protected final void drawTooltips(ToolTipRenderer renderer, int mouseX, int mouseY) {
-		for (GuiToolTip toolTip : toolTips) {
-			toolTip.onTick(mouseX - renderer.getGuiLeft(), mouseY - renderer.getGuiTop());
-			if (toolTip.shouldDraw()) {
-				drawTooltip(toolTip, mouseX, mouseY, renderer);
-			}
-		}
-	}
+    public void clearToolTips() {
+        toolTips.clear();
+    }
 
-	protected void drawTooltip(GuiToolTip toolTip, int mouseX, int mouseY, ToolTipRenderer renderer) {
-		List<String> list = toolTip.getToolTipText();
-		if (list == null) {
-			return;
-		}
+    protected final void drawTooltips(ToolTipRenderer renderer, int mouseX, int mouseY) {
+        for (GuiToolTip toolTip : toolTips) {
+            toolTip.onTick(mouseX - renderer.getGuiLeft(), mouseY - renderer.getGuiTop());
+            if (toolTip.shouldDraw()) {
+                drawTooltip(toolTip, mouseX, mouseY, renderer);
+            }
+        }
+    }
 
-		List<String> formatted = new ArrayList<String>(list.size());
-		for (int i = 0; i < list.size(); i++) {
-			if (i == 0) {
-				formatted.add("\u00a7f" + list.get(i));
-			} else {
-				formatted.add("\u00a77" + list.get(i));
-			}
-		}
+    protected void drawTooltip(GuiToolTip toolTip, int mouseX, int mouseY, ToolTipRenderer renderer) {
+        List<String> list = toolTip.getToolTipText();
+        if (list == null) {
+            return;
+        }
 
-		if (mouseX > renderer.getGuiLeft() + renderer.getXSize() / 2) {
-			int maxWidth = 0;
-			Iterator<String> iterator = formatted.iterator();
-			while (iterator.hasNext()) {
-				String s = iterator.next();
-				int w = renderer.getFontRenderer().getStringWidth(s);
-				if (w > maxWidth) {
-					maxWidth = w;
-				}
-			}
-			mouseX -= maxWidth + 18;
-		}
-		renderer.drawHoveringText(formatted, mouseX, mouseY, renderer.getFontRenderer());
-	}
+        List<String> formatted = new ArrayList<String>(list.size());
+        for (int i = 0; i < list.size(); i++) {
+            if (i == 0) {
+                formatted.add("\u00a7f" + list.get(i));
+            } else {
+                formatted.add("\u00a77" + list.get(i));
+            }
+        }
+
+        if (mouseX > renderer.getGuiLeft() + renderer.getXSize() / 2) {
+            int maxWidth = 0;
+            Iterator<String> iterator = formatted.iterator();
+            while (iterator.hasNext()) {
+                String s = iterator.next();
+                int w = renderer.getFontRenderer().getStringWidth(s);
+                if (w > maxWidth) {
+                    maxWidth = w;
+                }
+            }
+            mouseX -= maxWidth + 18;
+        }
+        renderer.drawHoveringText(formatted, mouseX, mouseY, renderer.getFontRenderer());
+    }
 
 }

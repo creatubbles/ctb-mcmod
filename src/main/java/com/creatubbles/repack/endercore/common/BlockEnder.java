@@ -25,18 +25,18 @@ import com.google.common.collect.Lists;
 
 public abstract class BlockEnder<T extends TileEntityBase> extends Block {
 
-	protected final Class<? extends T> teClass;
-	protected final String name;
-	
-	@Setter
-	private Class<? extends ItemBlock> itemBlockClass;
+    protected final Class<? extends T> teClass;
+    protected final String name;
 
-	protected BlockEnder(String name, Class<? extends T> teClass) {
-		this(name, teClass, new Material(MapColor.ironColor));
-	}
+    @Setter
+    private Class<? extends ItemBlock> itemBlockClass;
 
-	protected BlockEnder(String name, Class<? extends T> teClass, Material mat) {
-		super(mat);
+    protected BlockEnder(String name, Class<? extends T> teClass) {
+        this(name, teClass, new Material(MapColor.ironColor));
+    }
+
+    protected BlockEnder(String name, Class<? extends T> teClass, Material mat) {
+        super(mat);
         this.teClass = teClass;
         this.name = name;
         setHardness(0.5F);
@@ -54,33 +54,33 @@ public abstract class BlockEnder<T extends TileEntityBase> extends Block {
         if (teClass != null) {
             GameRegistry.registerTileEntity(teClass, name + "TileEntity");
         }
-	}
+    }
 
-	@Override
-	public boolean hasTileEntity(IBlockState state) {
-		return teClass != null;
-	}
+    @Override
+    public boolean hasTileEntity(IBlockState state) {
+        return teClass != null;
+    }
 
-	@Override
-	public TileEntity createTileEntity(World world, IBlockState state) {
-		if (teClass != null) {
-			try {
-				T te = teClass.newInstance();
-				te.init();
-				return te;
-			} catch (Exception e) {
-				CTBMod.logger.error("Could not create tile entity for block " + name + " for class " + teClass);
-			}
-		}
-		return null;
-	}
+    @Override
+    public TileEntity createTileEntity(World world, IBlockState state) {
+        if (teClass != null) {
+            try {
+                T te = teClass.newInstance();
+                te.init();
+                return te;
+            } catch (Exception e) {
+                CTBMod.logger.error("Could not create tile entity for block " + name + " for class " + teClass);
+            }
+        }
+        return null;
+    }
 
-	/* Subclass Helpers */
+    /* Subclass Helpers */
 
-	@Override
-	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ) {
-		if (playerIn.isSneaking()) {
-			return false;
+    @Override
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ) {
+        if (playerIn.isSneaking()) {
+            return false;
         }
         return openGui(worldIn, pos, playerIn, side);
     }
@@ -123,47 +123,46 @@ public abstract class BlockEnder<T extends TileEntityBase> extends Block {
         return itemStack;
     }
 
-    protected void processDrop(IBlockAccess world, BlockPos pos, @Nullable T te, ItemStack drop) {
-    }
+    protected void processDrop(IBlockAccess world, BlockPos pos, @Nullable T te, ItemStack drop) {}
 
     @SuppressWarnings("unchecked")
     protected T getTileEntity(World world, BlockPos pos) {
-		TileEntity te = world.getTileEntity(pos);
-		if (teClass.isInstance(te)) {
-			return (T) te;
-		}
-		return null;
-	}
+        TileEntity te = world.getTileEntity(pos);
+        if (teClass.isInstance(te)) {
+            return (T) te;
+        }
+        return null;
+    }
 
-	protected boolean shouldDoWorkThisTick(World world, BlockPos pos, int interval) {
-		T te = getTileEntity(world, pos);
-		if (te == null) {
-			return world.getTotalWorldTime() % interval == 0;
-		} else {
-			return te.shouldDoWorkThisTick(interval);
-		}
-	}
+    protected boolean shouldDoWorkThisTick(World world, BlockPos pos, int interval) {
+        T te = getTileEntity(world, pos);
+        if (te == null) {
+            return world.getTotalWorldTime() % interval == 0;
+        } else {
+            return te.shouldDoWorkThisTick(interval);
+        }
+    }
 
-	protected boolean shouldDoWorkThisTick(World world, BlockPos pos, int interval, int offset) {
-		T te = getTileEntity(world, pos);
-		if (te == null) {
-			return (world.getTotalWorldTime() + offset) % interval == 0;
-		} else {
-			return te.shouldDoWorkThisTick(interval, offset);
-		}
-	}
+    protected boolean shouldDoWorkThisTick(World world, BlockPos pos, int interval, int offset) {
+        T te = getTileEntity(world, pos);
+        if (te == null) {
+            return (world.getTotalWorldTime() + offset) % interval == 0;
+        } else {
+            return te.shouldDoWorkThisTick(interval, offset);
+        }
+    }
 
-	// Because the vanilla method takes floats...
-	public void setBlockBounds(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
-		this.minX = minX;
-		this.minY = minY;
-		this.minZ = minZ;
-		this.maxX = maxX;
-		this.maxY = maxY;
-		this.maxZ = maxZ;
-	}
+    // Because the vanilla method takes floats...
+    public void setBlockBounds(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+        this.minX = minX;
+        this.minY = minY;
+        this.minZ = minZ;
+        this.maxX = maxX;
+        this.maxY = maxY;
+        this.maxZ = maxZ;
+    }
 
-	public void setBlockBounds(AxisAlignedBB bb) {
-		setBlockBounds(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ);
-	}
+    public void setBlockBounds(AxisAlignedBB bb) {
+        setBlockBounds(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ);
+    }
 }

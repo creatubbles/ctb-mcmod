@@ -15,6 +15,7 @@ import org.lwjgl.opengl.GL11;
 import com.creatubbles.ctbmod.client.gui.OverlayCreationList;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
 import com.creatubbles.ctbmod.common.http.DownloadableImage.ImageType;
+import com.creatubbles.ctbmod.common.painting.BlockPainting;
 import com.creatubbles.ctbmod.common.painting.TilePainting;
 
 
@@ -26,7 +27,7 @@ public class RenderPainting extends TileEntitySpecialRenderer {
             TilePainting painting = (TilePainting) te;
             DownloadableImage image = painting.getImage();
 
-            ForgeDirection facing = ForgeDirection.getOrientation(te.getBlockMetadata() & 3 + 2);
+            ForgeDirection facing = BlockPainting.getFacing(te.getBlockMetadata());
 
             int width = image.getWidth(ImageType.ORIGINAL);
             int height = image.getHeight(ImageType.ORIGINAL);

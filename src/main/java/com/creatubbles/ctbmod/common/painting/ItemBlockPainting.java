@@ -6,12 +6,12 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.ForgeDirection;
 
 import com.creatubbles.api.core.Creation;
+import com.creatubbles.repack.endercore.common.util.BlockCoord;
 
 
 public class ItemBlockPainting extends ItemBlock {
@@ -31,16 +31,18 @@ public class ItemBlockPainting extends ItemBlock {
     }
 
     @Override
-    public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side, EntityPlayer player, ItemStack stack) {
-        if (super.canPlaceBlockOnSide(worldIn, pos, side, player, stack)) {
-            EnumFacing ext = side.rotateYCCW();
-            pos = pos.offset(side);
+    public boolean func_150936_a(World world, int x, int y, int z, int side, EntityPlayer player, ItemStack stack) {
+        if (super.func_150936_a(world, x, y, z, side, player, stack)) {
+        	ForgeDirection facing = ForgeDirection.getOrientation(side);
+        	ForgeDirection ext = facing.getRotation(ForgeDirection.DOWN);
+            BlockCoord pos = new BlockCoord(x, y, z);
+            pos = pos.getLocation(facing);
             int width = BlockPainting.getWidth(stack);
             int height = BlockPainting.getHeight(stack);
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
-                    BlockPos pos2 = pos.add(x * ext.getFrontOffsetX(), y, x * ext.getFrontOffsetZ());
-                    if (!worldIn.isAirBlock(pos2) && !worldIn.getBlockState(pos2).getBlock().isReplaceable(worldIn, pos2)) {
+            for (int x2 = 0; x2 < width; x2++) {
+                for (int y2 = 0; y2 < height; y2++) {
+                	BlockCoord pos2 = pos.add(x2 * ext.offsetX, y2, x2 * ext.offsetZ);
+                    if (!pos2.isAirBlock(world) && !pos2.getBlock(world).isReplaceable(world, pos2.x, pos2.y, pos2.z)) {
                         return false;
                     }
                 }

@@ -224,7 +224,17 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
     public boolean isOpaqueCube() {
         return false;
     }
+    
+    @Override
+    public boolean renderAsNormalBlock() {
+    	return false;
+    }
 
+    @Override
+    public boolean isBlockSolid(IBlockAccess p_149747_1_, int p_149747_2_, int p_149747_3_, int p_149747_4_, int p_149747_5_) {
+    	return false;
+    }
+    
     @Override
     public int getRenderType() {
     	return CTBMod.renderIdPainting;

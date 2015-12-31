@@ -33,7 +33,7 @@ public class GuiButtonHideable extends GuiButton implements IHideable {
     }
 
     @Override
-    protected int getHoverState(boolean mouseOver) {
+	public int getHoverState(boolean mouseOver) {
         int b = super.getHoverState(mouseOver);
         if (!isEnabled()) {
             b = 0;

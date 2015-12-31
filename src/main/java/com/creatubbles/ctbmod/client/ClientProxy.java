@@ -1,19 +1,20 @@
 package com.creatubbles.ctbmod.client;
 
+import team.chisel.ctmlib.CTMRenderer;
+
+import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.client.render.RenderPainting;
 import com.creatubbles.ctbmod.common.CommonProxy;
 import com.creatubbles.ctbmod.common.painting.TilePainting;
 
 import cpw.mods.fml.client.registry.ClientRegistry;
+import cpw.mods.fml.client.registry.RenderingRegistry;
 
 public class ClientProxy extends CommonProxy {
 
     @Override
     public void registerRenderers() {
-//        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(CTBMod.creator), 0, new ModelResourceLocation(CTBMod.DOMAIN + ":creator", "inventory"));
-//        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(CTBMod.painting), 0, new ModelResourceLocation(CTBMod.DOMAIN + ":painting", "inventory"));
-//
-//        ModelLoader.setCustomStateMapper(CTBMod.painting, new PaintingStateMapper());
+    	RenderingRegistry.registerBlockHandler(new CTMRenderer(CTBMod.renderIdPainting = RenderingRegistry.getNextAvailableRenderId()));
         ClientRegistry.bindTileEntitySpecialRenderer(TilePainting.class, new RenderPainting());
     }
 }

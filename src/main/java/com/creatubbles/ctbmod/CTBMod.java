@@ -44,6 +44,8 @@ public class CTBMod {
 	public static BlockPainting painting;
 	
     public static DataCache cache;
+    
+    public static int renderIdPainting;
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {

@@ -4,6 +4,7 @@ import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.Item;
@@ -11,9 +12,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
+import team.chisel.ctmlib.ICTMBlock;
+import team.chisel.ctmlib.SubmapManagerCTM;
 
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.ctbmod.CTBMod;
@@ -23,15 +27,20 @@ import com.creatubbles.repack.endercore.common.TileEntityBase;
 import com.creatubbles.repack.endercore.common.util.BlockCoord;
 
 import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
-public class BlockPainting extends BlockEnder<TileEntityBase> {
+public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlock<SubmapManagerCTM> {
     
     public static BlockPainting create() {
         BlockPainting res = new BlockPainting();
         res.init();
         return res;
     }
-
+    
+    @SideOnly(Side.CLIENT)
+    private SubmapManagerPainting manager;
+    
     protected BlockPainting() {
         super("painting", TilePainting.class, Material.cloth);
         setHardness(0.25f);
@@ -59,6 +68,13 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
             }
         }
     }
+    
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void registerBlockIcons(IIconRegister register) {
+    	manager = new SubmapManagerPainting(name);
+    	manager.registerIcons(CTBMod.DOMAIN, this, register);
+    }
 
     public static ForgeDirection getFacing(IBlockAccess world, int x, int y, int z) {
     	return getFacing(world.getBlockMetadata(x, y, z));
@@ -85,7 +101,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
             for (int y2 = 0; y2 < painting.getHeight(); y2++) {
             	BlockCoord pos2 = pos.add(x2 * ext.offsetX, y2, x2 * ext.offsetZ);
                 if (pos2.isAirBlock(world)) {
-                    world.setBlock(pos2.x, pos2.y, pos2.z, CTBMod.painting, pos2.getMetadata(world) | 4, 3);
+                    world.setBlock(pos2.x, pos2.y, pos2.z, CTBMod.painting, pos.getMetadata(world) | 4, 3);
                     ((TileDummyPainting) pos2.getTileEntity(world)).setMain(pos);
                 }
             }
@@ -164,7 +180,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
 		BlockPainting painting = CTBMod.painting;
         painting.setBlockBoundsBasedOnState(world, x, y, z);
 		AxisAlignedBB bb = AxisAlignedBB.getBoundingBox(pos.x + painting.minX, pos.y + painting.minY, pos.z + painting.minZ, pos.x + painting.maxX, pos.y + painting.maxY, pos.z + painting.maxZ);
-		AxisAlignedBB corner = bb.offset(ext.offsetX * (te.getWidth() - 1), te.getHeight() - 1, ext.offsetZ * (te.getWidth() - 1));
+		AxisAlignedBB corner = bb.copy().offset(ext.offsetX * (te.getWidth() - 1), te.getHeight() - 1, ext.offsetZ * (te.getWidth() - 1));
 		return bb.func_111270_a(corner); // union
 	}
 
@@ -187,4 +203,24 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
     public boolean isOpaqueCube() {
         return false;
     }
+
+    @Override
+    public int getRenderType() {
+    	return CTBMod.renderIdPainting;
+    }
+    
+    @Override
+    public IIcon getIcon(int side, int meta) {
+    	return manager.getIcon(side, meta);
+    }
+    
+	@Override
+	public SubmapManagerCTM getManager(IBlockAccess world, int x, int y, int z, int meta) {
+		return getManager(meta);
+	}
+
+	@Override
+	public SubmapManagerCTM getManager(int meta) {
+		return manager;
+	}
 }

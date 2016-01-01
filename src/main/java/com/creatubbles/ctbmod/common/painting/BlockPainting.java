@@ -171,6 +171,10 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
     @Override
     public void setBlockBoundsBasedOnState(IBlockAccess worldIn, int x, int y, int z) {
         ForgeDirection facing = getFacing(worldIn, x, y, z);
+        setBlockBoundsBasedOnFacing(facing);
+    }
+    
+    public void setBlockBoundsBasedOnFacing(ForgeDirection facing) {
         switch (facing) {
         case EAST:
             setBlockBounds(0, 0, 0, 1/16f, 1, 1);

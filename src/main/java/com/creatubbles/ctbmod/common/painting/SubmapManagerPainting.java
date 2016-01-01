@@ -11,7 +11,6 @@ import team.chisel.ctmlib.CTM;
 import team.chisel.ctmlib.RenderBlocksCTM;
 import team.chisel.ctmlib.SubmapManagerCTM;
 
-import com.creatubbles.ctbmod.CTBMod;
 import com.google.common.base.Optional;
 
 import cpw.mods.fml.relauncher.Side;
@@ -90,8 +89,6 @@ public class SubmapManagerPainting extends SubmapManagerCTM {
 
 	@SideOnly(Side.CLIENT)
 	private static RenderBlocksPainting rb;
-	@SideOnly(Side.CLIENT)
-	private IIcon edges;
 
 	public SubmapManagerPainting(String textureName) {
 		super(textureName);
@@ -100,12 +97,11 @@ public class SubmapManagerPainting extends SubmapManagerCTM {
 	@Override
 	public void registerIcons(String modName, Block block, IIconRegister register) {
 		super.registerIcons(modName, block, register);
-		edges = register.registerIcon(CTBMod.DOMAIN + ":" + getTextureName() + "_edges");
 	}
 
 	@Override
 	public IIcon getIcon(int side, int meta) {
-		return side == 2 || side == 3 ? super.getIcon(side, meta) : edges;
+		return side == 2 || side == 3 ? super.getIcon(side, meta) : getSubmapSmall().getBaseIcon();
 	}
 
 	@Override
@@ -114,7 +110,7 @@ public class SubmapManagerPainting extends SubmapManagerCTM {
 		if (side == facing.ordinal() || side == facing.getOpposite().ordinal()) {
 			return super.getIcon(world, x, y, z, side);
 		}
-		return edges;
+		return getSubmapSmall().getBaseIcon();
 	}
 
 	@Override

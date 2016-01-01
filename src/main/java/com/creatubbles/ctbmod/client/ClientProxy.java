@@ -3,7 +3,9 @@ package com.creatubbles.ctbmod.client;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.item.Item;
 import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.client.MinecraftForgeClient;
 import team.chisel.ctmlib.CTMRenderer;
 
 import com.creatubbles.ctbmod.CTBMod;
@@ -28,6 +30,8 @@ public class ClientProxy extends CommonProxy {
     			return ret;
     		}
     	});
-        ClientRegistry.bindTileEntitySpecialRenderer(TilePainting.class, new RenderPainting());
+    	RenderPainting rp = new RenderPainting();
+        ClientRegistry.bindTileEntitySpecialRenderer(TilePainting.class, rp);
+        MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(CTBMod.painting), rp);
     }
 }

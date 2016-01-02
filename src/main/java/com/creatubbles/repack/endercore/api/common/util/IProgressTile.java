@@ -1,8 +1,8 @@
 package com.creatubbles.repack.endercore.api.common.util;
 
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 public interface IProgressTile {
 

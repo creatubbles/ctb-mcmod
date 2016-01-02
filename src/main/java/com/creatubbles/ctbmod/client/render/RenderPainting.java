@@ -108,13 +108,14 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
 
 		glPushMatrix();
 		{
+			double depth = 1 / 16d;
+
 			glPushAttrib(GL_COLOR_BUFFER_BIT);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glNormal3d(0, 0, 1);
 			renderer.startDrawingQuads();
 			renderer.setColorOpaque_I(color);
-
-			double depth = 1 / 16d;
 
 			renderer.addVertexWithUV(bounds.getX(), bounds.getY() + bounds.getHeight(), depth, 0, 0);
 			renderer.addVertexWithUV(bounds.getX(), bounds.getY(), depth, 0, maxV);
@@ -146,6 +147,11 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
 		Minecraft.getMinecraft().renderEngine.bindTexture(TextureMap.locationBlocksTexture);
 		Tessellator tess = Tessellator.instance;
 		IIcon frontIcon = CTBMod.painting.getIcon(3, 0);
+		
+		Creation c = BlockPainting.getCreation(item);
+		DownloadableImage img = new DownloadableImage(c.image, c);
+		img.download(ImageType.ORIGINAL);
+		
 		glPushMatrix();
 		{
 			switch (type) {
@@ -170,6 +176,10 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
 				tess.addVertexWithUV(1, 0, 0, frontIcon.getMaxU(), frontIcon.getMinV());
 				tess.addVertexWithUV(0, 0, 0, frontIcon.getMinU(), frontIcon.getMinV());
 				tess.draw();
+				glTranslatef(0, 1, 1);
+				glRotatef(180, 0, 1, 0);
+				glRotatef(180, 0, 0, 1);
+				renderPainting(img, 1, 1, 0xFFFFFF);
 				glPopMatrix();
 				glPopMatrix(); // pop switch matrix
 				return;
@@ -181,15 +191,17 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
 			rb.setRenderBoundsFromBlock(CTBMod.painting);
 			Drawing.drawBlock(CTBMod.painting, frontIcon, rb);
 
-			// TODO render painting image
-//			glDisable(GL_CULL_FACE);
-//			Creation c = BlockPainting.getCreation(item);
-//			DownloadableImage img = new DownloadableImage(c.image, c);
-//			img.download(ImageType.ORIGINAL);
-//			glRotatef(-45, 0, 1, 0);
-//			glRotatef(-90, 1, 0, 0);
-//			glTranslatef(0.2f, 0.275f, 0.1f);
-//			renderPainting(img, 1, 1, 0xFFFFFF);
+			glDisable(GL_CULL_FACE);
+			if (type == ItemRenderType.EQUIPPED_FIRST_PERSON) {
+				glRotatef(-90, 0, 1, 0);
+			} else {
+				glRotatef(90, 0, 1, 0);
+			}
+			glTranslatef(0, 0, -0.06f);
+			if (type == ItemRenderType.EQUIPPED) {
+				glTranslatef(-1, 0, 1/16f);
+			}
+			renderPainting(img, 1, 1, 0xFFFFFF);
 		}
 		glPopMatrix();
 	}

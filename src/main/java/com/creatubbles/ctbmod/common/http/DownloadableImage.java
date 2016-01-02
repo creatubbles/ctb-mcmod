@@ -1,7 +1,9 @@
 package com.creatubbles.ctbmod.common.http;
 
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.EnumMap;
 import java.util.Locale;
@@ -120,7 +122,7 @@ public class DownloadableImage {
 
     /**
      * Gets the bindable {@link ResourceLocation} for the given {@link ImageType type}.
-     *
+     * 
      * @param type
      *            The {@link ImageType} to get the resource for.
      * @return A {@link ResourceLocation}, which may be a dummy if this Image has not been downloaded, or is in the
@@ -136,7 +138,7 @@ public class DownloadableImage {
 
     /**
      * The dimensions for this image.
-     *
+     * 
      * @param type
      *            The {@link ImageType} to get the dimensions for.
      * @return An {@link Dimension} representing the size of this image. May be zero if the image is not downloaded.
@@ -147,7 +149,7 @@ public class DownloadableImage {
 
     /**
      * The width of this image.
-     *
+     * 
      * @param type
      *            The {@link ImageType} to get the width for.
      * @return The width of this image. May be zero if the image is not downloaded.
@@ -158,7 +160,7 @@ public class DownloadableImage {
 
     /**
      * The height of this image.
-     *
+     * 
      * @param type
      *            The {@link ImageType} to get the height for.
      * @return The height of this image. May be zero if the image is not downloaded.
@@ -170,7 +172,7 @@ public class DownloadableImage {
     /**
      * To avoid issues with certain GPUs, the in-memory image is scaled up to the nearest power of two square dimension.
      * This method returns that value for use in rendering.
-     *
+     * 
      * @param type
      *            The {@link ImageType} to get the size for.
      * @return The scaled size of this image.
@@ -182,7 +184,7 @@ public class DownloadableImage {
     /**
      * This method is not blocking, but note that {@link #getSize(ImageType)} will return a 0-size rectangle before the
      * image finishes downloading. Check for this with {@link #hasSize(ImageType)}.
-     *
+     * 
      * @param type
      *            The {@link ImageType} to download.
      * @see #updateSize(ImageType)
@@ -210,8 +212,15 @@ public class DownloadableImage {
                         } else {
                             image = ImageIO.read(new URL(url));
                             cache.getParentFile().mkdirs();
-                            // Cache the original, not the resize, this way we do not lose original size data
-                            ImageIO.write(image, "png", cache);
+                            try {
+                                // Cache the original, not the resize, this way we do not lose original size data
+                                ImageIO.write(image, "png", cache);
+                            } catch (IOException e) {
+                                // This is not strictly necessary, so we'll just log an error and download the image
+                                // again next time
+                                CTBMod.logger.error("Could not save image {} to {}. Stacktrace: ", cache.getName(), cache.getAbsolutePath());
+                                e.printStackTrace();
+                            }
                         }
 
                         final BufferedImage original = image;
@@ -228,7 +237,12 @@ public class DownloadableImage {
                         // Create a blank image with PoT size
                         final BufferedImage resized = new BufferedImage(targetDim, targetDim, image.getType());
                         // Write the downloaded image into the top left of the blank image
-                        resized.createGraphics().drawImage(image, 0, 0, null);
+                        Graphics2D graphics = resized.createGraphics();
+                        try {
+                            graphics.drawImage(image, 0, 0, null);
+                        } finally {
+                            graphics.dispose();
+                        }
 
                         // Do this on the main thread with GL context
                         Minecraft.getMinecraft().addScheduledTask(new Runnable() {
@@ -255,7 +269,7 @@ public class DownloadableImage {
 
     /**
      * Checks if the size for the given type has been initialized
-     *
+     * 
      * @param type
      *            The {@link ImageType} to check for.
      * @return True if the size for this type has been initialized. False otherwise.

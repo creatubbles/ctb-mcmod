@@ -1,7 +1,9 @@
 package com.creatubbles.ctbmod.common.http;
 
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.EnumMap;
 import java.util.Locale;
@@ -207,10 +209,16 @@ public class DownloadableImage {
 						} else {
 							image = ImageIO.read(new URL(url));
 							cache.getParentFile().mkdirs();
-							// Cache the original, not the resize, this way we do not lose original size data
-							ImageIO.write(image, "png", cache);
+							try {
+								// Cache the original, not the resize, this way we do not lose original size data
+								ImageIO.write(image, "png", cache);
+							} catch (IOException e) {
+								// This is not strictly necessary, so we'll just log an error and download the image again next time
+								CTBMod.logger.error("Could not save image {} to {}. Stacktrace: ", cache.getName(), cache.getAbsolutePath());
+								e.printStackTrace();
+							}
 						}
-						
+
 						final BufferedImage original = image;
 
 						// Find the biggest dimension of the image
@@ -225,7 +233,12 @@ public class DownloadableImage {
 						// Create a blank image with PoT size
 						final BufferedImage resized = new BufferedImage(targetDim, targetDim, image.getType());
 						// Write the downloaded image into the top left of the blank image
-						resized.createGraphics().drawImage(image, 0, 0, null);
+						Graphics2D graphics = resized.createGraphics();
+						try {
+							graphics.drawImage(image, 0, 0, null);
+						} finally {
+							graphics.dispose();
+						}
 
 						// Do this on the main thread with GL context
 						Minecraft.getMinecraft().func_152344_a(new Runnable() {

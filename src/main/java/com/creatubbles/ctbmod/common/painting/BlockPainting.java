@@ -233,6 +233,12 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
         return null;
     }
     
+    // WAILA pls
+    @Override
+    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
+    	return getPickBlock(target, world, x, y, z, null);
+    }
+    
     @Override
     public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z, EntityPlayer player) {
         TilePainting te = getDataPainting(world, new BlockCoord(x, y, z));

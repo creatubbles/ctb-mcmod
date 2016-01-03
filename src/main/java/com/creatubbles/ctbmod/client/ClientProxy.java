@@ -32,6 +32,8 @@ public class ClientProxy extends CommonProxy {
                 return ret;
             }
         });
+        RenderingRegistry.registerBlockHandler(new CTMRenderer(CTBMod.renderIdCreator = RenderingRegistry.getNextAvailableRenderId()));
+        
         RenderPainting rp = new RenderPainting();
         ClientRegistry.bindTileEntitySpecialRenderer(TilePainting.class, rp);
         MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(CTBMod.painting), rp);

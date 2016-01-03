@@ -52,6 +52,7 @@ public class CTBMod {
     public static DataCache cache;
 
     public static int renderIdPainting;
+    public static int renderIdCreator;
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {

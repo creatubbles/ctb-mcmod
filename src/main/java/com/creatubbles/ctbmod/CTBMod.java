@@ -34,23 +34,23 @@ import static com.creatubbles.ctbmod.CTBMod.*;
 @Mod(modid = MODID, name = NAME, version = VERSION)
 public class CTBMod {
 
-	public static final String MODID = "CTBMod";
-	public static final String NAME = "Creatubbles Mod";
-	public static final String DOMAIN = MODID.toLowerCase(Locale.US);
-	public static final String VERSION = "@VERSION@";
+    public static final String MODID = "CTBMod";
+    public static final String NAME = "Creatubbles Mod";
+    public static final String DOMAIN = MODID.toLowerCase(Locale.US);
+    public static final String VERSION = "@VERSION@";
 
-	@Instance
-	public static CTBMod instance;
+    @Instance
+    public static CTBMod instance;
 
-	@SidedProxy(clientSide = "com.creatubbles.ctbmod.client.ClientProxy", serverSide = "com.creatubbles.ctbmod.common.CommonProxy")
-	public static CommonProxy proxy;
-	public static Logger logger = LogManager.getLogger(MODID);
+    @SidedProxy(clientSide = "com.creatubbles.ctbmod.client.ClientProxy", serverSide = "com.creatubbles.ctbmod.common.CommonProxy")
+    public static CommonProxy proxy;
+    public static Logger logger = LogManager.getLogger(MODID);
 
-	public static BlockCreator creator;
-	public static BlockPainting painting;
-	
+    public static BlockCreator creator;
+    public static BlockPainting painting;
+
     public static DataCache cache;
-    
+
     public static int renderIdPainting;
 
     @EventHandler
@@ -69,7 +69,7 @@ public class CTBMod {
     public void init(FMLInitializationEvent event) {
         PacketHandler.init();
         cache = DataCache.loadCache();
-        
+
         if (event.getSide().isClient()) {
             registerCommands();
         }

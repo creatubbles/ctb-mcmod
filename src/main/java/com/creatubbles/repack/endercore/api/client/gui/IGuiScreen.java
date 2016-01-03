@@ -10,28 +10,28 @@ import com.creatubbles.repack.endercore.client.gui.widget.GuiToolTip;
 
 public interface IGuiScreen {
 
-	void addToolTip(GuiToolTip toolTip);
+    void addToolTip(GuiToolTip toolTip);
 
-	boolean removeToolTip(GuiToolTip toolTip);
+    boolean removeToolTip(GuiToolTip toolTip);
 
-	void clearToolTips();
-	
-	int getGuiLeft();
+    void clearToolTips();
 
-	int getGuiTop();
+    int getGuiLeft();
 
-	int getXSize();
+    int getGuiTop();
 
-	int getYSize();
+    int getXSize();
 
-	void addButton(GuiButton button);
+    int getYSize();
 
-	void removeButton(GuiButton button);
+    void addButton(GuiButton button);
 
-	int getOverlayOffsetX();
+    void removeButton(GuiButton button);
 
-	void doActionPerformed(GuiButton but) throws IOException;
+    int getOverlayOffsetX();
 
-	List<GhostSlot> getGhostSlots();
+    void doActionPerformed(GuiButton but) throws IOException;
+
+    List<GhostSlot> getGhostSlots();
 
 }

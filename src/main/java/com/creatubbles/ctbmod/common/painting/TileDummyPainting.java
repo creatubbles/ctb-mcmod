@@ -29,8 +29,8 @@ public class TileDummyPainting extends TileEntityBase {
 
     @Override
     protected void writeCustomNBT(NBTTagCompound root) {
-    	NBTTagCompound tag = new NBTTagCompound();
-    	main.writeToNBT(tag);
+        NBTTagCompound tag = new NBTTagCompound();
+        main.writeToNBT(tag);
         root.setTag("dataPainting", tag);
     }
 

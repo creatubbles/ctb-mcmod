@@ -17,9 +17,8 @@ import com.creatubbles.repack.endercore.common.TileEntityBase;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-
 public class TilePainting extends TileEntityBase {
-        
+
     @Getter
     @Setter
     private int width, height;
@@ -30,7 +29,7 @@ public class TilePainting extends TileEntityBase {
     @SideOnly(Side.CLIENT)
     @Getter(onMethod = @__({ @SideOnly(Side.CLIENT) }))
     private transient DownloadableImage image;
-    
+
     // Client flag to prevent rendering when a dummy TE has been removed on the client
     @Setter
     @Getter
@@ -38,7 +37,7 @@ public class TilePainting extends TileEntityBase {
     private boolean render = true;
 
     public void setCreation(Creation image) {
-        this.creation = image;
+        creation = image;
         if (worldObj.isRemote) {
             createImage();
         }
@@ -51,7 +50,7 @@ public class TilePainting extends TileEntityBase {
             createImage();
         }
     }
-    
+
     private void createImage() {
         image = new DownloadableImage(creation.image, creation);
         image.download(ImageType.ORIGINAL);
@@ -67,12 +66,12 @@ public class TilePainting extends TileEntityBase {
         NBTUtil.writeJsonToNBT(creation, root);
         root.setInteger("width", width);
         root.setInteger("height", height);
-	}
+    }
 
-	@Override
-	protected void readCustomNBT(NBTTagCompound root) {
-	    creation = NBTUtil.readJsonFromNBT(Creation.class, root);
-	    width = root.getInteger("width");
-	    height = root.getInteger("height");
-	}
+    @Override
+    protected void readCustomNBT(NBTTagCompound root) {
+        creation = NBTUtil.readJsonFromNBT(Creation.class, root);
+        width = root.getInteger("width");
+        height = root.getInteger("height");
+    }
 }

@@ -3,16 +3,15 @@ package com.creatubbles.ctbmod.client.gui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 
-
 public class GuiButtonHideable extends GuiButton implements IHideable {
 
-	public GuiButtonHideable(int buttonId, int x, int y, String buttonText) {
-		super(buttonId, x, y, buttonText);
-	}
+    public GuiButtonHideable(int buttonId, int x, int y, String buttonText) {
+        super(buttonId, x, y, buttonText);
+    }
 
-	public GuiButtonHideable(int buttonId, int x, int y, int widthIn, int heightIn, String buttonText) {
-		super(buttonId, x, y, widthIn, heightIn, buttonText);
-	}
+    public GuiButtonHideable(int buttonId, int x, int y, int widthIn, int heightIn, String buttonText) {
+        super(buttonId, x, y, widthIn, heightIn, buttonText);
+    }
 
     @Override
     public void setIsVisible(boolean visible) {
@@ -21,7 +20,7 @@ public class GuiButtonHideable extends GuiButton implements IHideable {
 
     @Override
     public boolean isVisible() {
-        return this.visible;
+        return visible;
     }
 
     public void setEnabled(boolean enabled) {
@@ -29,18 +28,18 @@ public class GuiButtonHideable extends GuiButton implements IHideable {
     }
 
     public boolean isEnabled() {
-        return this.enabled;
+        return enabled;
     }
 
     @Override
-	public int getHoverState(boolean mouseOver) {
+    public int getHoverState(boolean mouseOver) {
         int b = super.getHoverState(mouseOver);
         if (!isEnabled()) {
             b = 0;
         }
         return b;
     }
-    
+
     @Override
     public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
         return isEnabled() && super.mousePressed(mc, mouseX, mouseY);

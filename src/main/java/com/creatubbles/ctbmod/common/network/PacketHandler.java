@@ -16,9 +16,9 @@ import cpw.mods.fml.relauncher.Side;
 
 public class PacketHandler {
 
-	public static final SimpleNetworkWrapper INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel(CTBMod.MODID);
+    public static final SimpleNetworkWrapper INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel(CTBMod.MODID);
 
-	private static int ID = 0;
+    private static int ID = 0;
 
     public static int nextID() {
         return ID++;
@@ -32,15 +32,15 @@ public class PacketHandler {
         INSTANCE.registerMessage(MessageCreate.Handler.class, MessageCreate.class, nextID(), Side.SERVER);
     }
 
-	public static void sendToAllAround(IMessage message, TileEntity te, int range) {
-		INSTANCE.sendToAllAround(message, new TargetPoint(te.getWorldObj().provider.dimensionId, te.xCoord, te.yCoord, te.zCoord, range));
-	}
+    public static void sendToAllAround(IMessage message, TileEntity te, int range) {
+        INSTANCE.sendToAllAround(message, new TargetPoint(te.getWorldObj().provider.dimensionId, te.xCoord, te.yCoord, te.zCoord, range));
+    }
 
-	public static void sendToAllAround(IMessage message, TileEntity te) {
-		sendToAllAround(message, te, 64);
-	}
+    public static void sendToAllAround(IMessage message, TileEntity te) {
+        sendToAllAround(message, te, 64);
+    }
 
-	public static void sendTo(IMessage message, EntityPlayerMP player) {
-		INSTANCE.sendTo(message, player);
-	}
+    public static void sendTo(IMessage message, EntityPlayerMP player) {
+        INSTANCE.sendTo(message, player);
+    }
 }

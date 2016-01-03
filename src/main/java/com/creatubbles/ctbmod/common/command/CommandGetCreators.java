@@ -24,7 +24,7 @@ public class CommandGetCreators extends ClientCommandBase {
         if (resp.creators != null) {
             p_71515_1_.addChatMessage(ChatUtil.wrap("Found creators: " + resp.creators));
         } else {
-            ChatUtil.sendNoSpamClient("Error: " + resp.message  );
+            ChatUtil.sendNoSpamClient("Error: " + resp.message);
         }
     }
 }

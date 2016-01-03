@@ -10,7 +10,7 @@ public interface IProgressTile {
 
     /**
      * Client-only. Called to set clientside progress for syncing/rendering purposes.
-     * 
+     *
      * @param progress
      *            The % progress.
      */

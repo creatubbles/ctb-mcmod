@@ -33,16 +33,16 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlock<SubmapManagerCTM> {
-    
+
     public static BlockPainting create() {
         BlockPainting res = new BlockPainting();
         res.init();
         return res;
     }
-    
+
     @SideOnly(Side.CLIENT)
     private SubmapManagerPainting manager;
-    
+
     protected BlockPainting() {
         super("painting", TilePainting.class, Material.cloth);
         setHardness(0.25f);
@@ -70,15 +70,15 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
     public static Creation getCreation(ItemStack painting) {
         return NBTUtil.readJsonFromNBT(Creation.class, painting.getTagCompound());
     }
-    
+
     public static int getWidth(ItemStack painting) {
         return painting.getTagCompound().getInteger("pWidth");
     }
-    
+
     public static int getHeight(ItemStack painting) {
         return painting.getTagCompound().getInteger("pHeight");
     }
-    
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public void getSubBlocks(Item itemIn, CreativeTabs tab, List list) {
@@ -88,22 +88,22 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
             }
         }
     }
-    
+
     @SideOnly(Side.CLIENT)
     @Override
     public void registerBlockIcons(IIconRegister register) {
-    	manager = new SubmapManagerPainting(name);
-    	manager.registerIcons(CTBMod.DOMAIN, this, register);
+        manager = new SubmapManagerPainting(name);
+        manager.registerIcons(CTBMod.DOMAIN, this, register);
     }
 
     public static ForgeDirection getFacing(IBlockAccess world, int x, int y, int z) {
-    	return getFacing(world.getBlockMetadata(x, y, z));
+        return getFacing(world.getBlockMetadata(x, y, z));
     }
-    
+
     public static ForgeDirection getFacing(int meta) {
-    	return ForgeDirection.getOrientation((meta & 3) + 2);
+        return ForgeDirection.getOrientation((meta & 3) + 2);
     }
-    
+
     @Override
     public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase placer, ItemStack stack) {
         ItemStack placed = placer.getHeldItem();
@@ -116,12 +116,12 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
         }
         painting.setWidth(placed.getTagCompound().getInteger("pWidth"));
         painting.setHeight(placed.getTagCompound().getInteger("pHeight"));
-        
+
         ForgeDirection facing = getFacing(world, x, y, z);
         ForgeDirection ext = facing.getRotation(ForgeDirection.DOWN);
         for (int x2 = 0; x2 < painting.getWidth(); x2++) {
             for (int y2 = 0; y2 < painting.getHeight(); y2++) {
-            	BlockCoord pos2 = pos.add(x2 * ext.offsetX, y2, x2 * ext.offsetZ);
+                BlockCoord pos2 = pos.add(x2 * ext.offsetX, y2, x2 * ext.offsetZ);
                 if (pos2.isAirBlock(world)) {
                     world.setBlock(pos2.x, pos2.y, pos2.z, CTBMod.painting, pos.getMetadata(world) | 4, 3);
                     ((TileDummyPainting) pos2.getTileEntity(world)).setMain(pos);
@@ -167,61 +167,61 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
     public boolean canPlaceBlockOnSide(World worldIn, int x, int y, int z, int side) {
         return side > 1 && super.canPlaceBlockOnSide(worldIn, x, y, z, side);
     }
-    
+
     @Override
     public void setBlockBoundsBasedOnState(IBlockAccess worldIn, int x, int y, int z) {
         ForgeDirection facing = getFacing(worldIn, x, y, z);
         setBlockBoundsBasedOnFacing(facing);
     }
-    
+
     public void setBlockBoundsBasedOnFacing(ForgeDirection facing) {
         switch (facing) {
-        case EAST:
-            setBlockBounds(0, 0, 0, 1/16f, 1, 1);
-            break;
-        case NORTH:
-            setBlockBounds(0, 0, 15/16f, 1, 1, 1);
-            break;
-        case SOUTH:
-            setBlockBounds(0, 0, 0, 1, 1, 1/16f);
-            break;
-        case WEST:
-            setBlockBounds(15/16f, 0, 0, 1, 1, 1);
-            break;
-        default:
-            setBlockBounds(0, 0, 0, 1, 1, 1);
-            break;
+            case EAST:
+                setBlockBounds(0, 0, 0, 1 / 16f, 1, 1);
+                break;
+            case NORTH:
+                setBlockBounds(0, 0, 15 / 16f, 1, 1, 1);
+                break;
+            case SOUTH:
+                setBlockBounds(0, 0, 0, 1, 1, 1 / 16f);
+                break;
+            case WEST:
+                setBlockBounds(15 / 16f, 0, 0, 1, 1, 1);
+                break;
+            default:
+                setBlockBounds(0, 0, 0, 1, 1, 1);
+                break;
         }
     }
 
-	@Override
-	public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
-		setBlockBoundsBasedOnState(world, x, y, z);
-		return super.getCollisionBoundingBoxFromPool(world, x, y, z);
-	}
+    @Override
+    public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
+        setBlockBoundsBasedOnState(world, x, y, z);
+        return super.getCollisionBoundingBoxFromPool(world, x, y, z);
+    }
 
-	@Override
-	public AxisAlignedBB getSelectedBoundingBoxFromPool(World world, int x, int y, int z) {
-		return getCompleteBoundingBox(world, x, y, z);
-	}
+    @Override
+    public AxisAlignedBB getSelectedBoundingBoxFromPool(World world, int x, int y, int z) {
+        return getCompleteBoundingBox(world, x, y, z);
+    }
 
-	public static AxisAlignedBB getCompleteBoundingBox(World world, int x, int y, int z) {
-		ForgeDirection facing = getFacing(world, x, y, z);
-		ForgeDirection ext = facing.getRotation(ForgeDirection.DOWN);
-		BlockCoord pos = new BlockCoord(x, y, z);
-		TilePainting te = getDataPainting(world, pos);
-		if (te != null) {
-			pos = new BlockCoord(te);
-		}
-		BlockPainting painting = CTBMod.painting;
+    public static AxisAlignedBB getCompleteBoundingBox(World world, int x, int y, int z) {
+        ForgeDirection facing = getFacing(world, x, y, z);
+        ForgeDirection ext = facing.getRotation(ForgeDirection.DOWN);
+        BlockCoord pos = new BlockCoord(x, y, z);
+        TilePainting te = getDataPainting(world, pos);
+        if (te != null) {
+            pos = new BlockCoord(te);
+        }
+        BlockPainting painting = CTBMod.painting;
         painting.setBlockBoundsBasedOnState(world, x, y, z);
-		AxisAlignedBB bb = AxisAlignedBB.getBoundingBox(pos.x + painting.minX, pos.y + painting.minY, pos.z + painting.minZ, pos.x + painting.maxX, pos.y + painting.maxY, pos.z + painting.maxZ);
-		if (te == null) {
-			return bb;
-		}
-		AxisAlignedBB corner = bb.copy().offset(ext.offsetX * (te.getWidth() - 1), te.getHeight() - 1, ext.offsetZ * (te.getWidth() - 1));
-		return bb.func_111270_a(corner); // union
-	}
+        AxisAlignedBB bb = AxisAlignedBB.getBoundingBox(pos.x + painting.minX, pos.y + painting.minY, pos.z + painting.minZ, pos.x + painting.maxX, pos.y + painting.maxY, pos.z + painting.maxZ);
+        if (te == null) {
+            return bb;
+        }
+        AxisAlignedBB corner = bb.copy().offset(ext.offsetX * (te.getWidth() - 1), te.getHeight() - 1, ext.offsetZ * (te.getWidth() - 1));
+        return bb.func_111270_a(corner); // union
+    }
 
     private static TilePainting getDataPainting(IBlockAccess world, BlockCoord pos) {
         TileEntity te = pos.getTileEntity(world);
@@ -232,13 +232,13 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
         }
         return null;
     }
-    
+
     // WAILA pls
     @Override
     public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z) {
-    	return getPickBlock(target, world, x, y, z, null);
+        return getPickBlock(target, world, x, y, z, null);
     }
-    
+
     @Override
     public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z, EntityPlayer player) {
         TilePainting te = getDataPainting(world, new BlockCoord(x, y, z));
@@ -254,34 +254,34 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
     public boolean isOpaqueCube() {
         return false;
     }
-    
+
     @Override
     public boolean renderAsNormalBlock() {
-    	return false;
+        return false;
     }
 
     @Override
     public boolean isBlockSolid(IBlockAccess p_149747_1_, int p_149747_2_, int p_149747_3_, int p_149747_4_, int p_149747_5_) {
-    	return false;
+        return false;
     }
-    
+
     @Override
     public int getRenderType() {
-    	return CTBMod.renderIdPainting;
+        return CTBMod.renderIdPainting;
     }
-    
+
     @Override
     public IIcon getIcon(int side, int meta) {
-    	return manager.getIcon(side, meta);
+        return manager.getIcon(side, meta);
     }
-    
-	@Override
-	public SubmapManagerCTM getManager(IBlockAccess world, int x, int y, int z, int meta) {
-		return getManager(meta);
-	}
 
-	@Override
-	public SubmapManagerCTM getManager(int meta) {
-		return manager;
-	}
+    @Override
+    public SubmapManagerCTM getManager(IBlockAccess world, int x, int y, int z, int meta) {
+        return getManager(meta);
+    }
+
+    @Override
+    public SubmapManagerCTM getManager(int meta) {
+        return manager;
+    }
 }

@@ -21,21 +21,22 @@ public class ClientProxy extends CommonProxy {
 
     @Override
     public void registerRenderers() {
-    	RenderingRegistry.registerBlockHandler(new CTMRenderer(CTBMod.renderIdPainting = RenderingRegistry.getNextAvailableRenderId()) {
-    		@Override
-    		public boolean renderWorldBlock(IBlockAccess world, int x, int y, int z, Block block, int modelId, RenderBlocks rendererOld) {
-    			int ao = Minecraft.getMinecraft().gameSettings.ambientOcclusion;
-    			Minecraft.getMinecraft().gameSettings.ambientOcclusion = 0;
-    			boolean ret = super.renderWorldBlock(world, x, y, z, block, modelId, rendererOld);
-    			Minecraft.getMinecraft().gameSettings.ambientOcclusion = ao;
-    			return ret;
-    		}
-    	});
-    	RenderPainting rp = new RenderPainting();
+        RenderingRegistry.registerBlockHandler(new CTMRenderer(CTBMod.renderIdPainting = RenderingRegistry.getNextAvailableRenderId()) {
+
+            @Override
+            public boolean renderWorldBlock(IBlockAccess world, int x, int y, int z, Block block, int modelId, RenderBlocks rendererOld) {
+                int ao = Minecraft.getMinecraft().gameSettings.ambientOcclusion;
+                Minecraft.getMinecraft().gameSettings.ambientOcclusion = 0;
+                boolean ret = super.renderWorldBlock(world, x, y, z, block, modelId, rendererOld);
+                Minecraft.getMinecraft().gameSettings.ambientOcclusion = ao;
+                return ret;
+            }
+        });
+        RenderPainting rp = new RenderPainting();
         ClientRegistry.bindTileEntitySpecialRenderer(TilePainting.class, rp);
         MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(CTBMod.painting), rp);
     }
-    
+
     @Override
     public World getClientWorld() {
         return Minecraft.getMinecraft().theWorld;

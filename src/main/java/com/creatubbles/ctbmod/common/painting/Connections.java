@@ -9,7 +9,7 @@ public enum Connections {
     RIGHT(1, 0),
     DOWN(0, -1),
     LEFT(-1, 0);
-    
+
     private int offsetX, offsetY;
 
     public static Connections forOffset(int x, int y) {

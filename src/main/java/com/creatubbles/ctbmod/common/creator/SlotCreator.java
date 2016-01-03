@@ -7,14 +7,14 @@ import net.minecraft.item.ItemStack;
 public class SlotCreator extends Slot {
 
     @Getter
-    private ItemStack ghostStack;
+    private final ItemStack ghostStack;
 
-    private TileCreator te;
+    private final TileCreator te;
 
     public SlotCreator(ItemStack stack, TileCreator inventoryIn, int index, int xPosition, int yPosition) {
         super(inventoryIn, index, xPosition, yPosition);
-        this.ghostStack = stack;
-        this.te = inventoryIn;
+        ghostStack = stack;
+        te = inventoryIn;
     }
 
     @Override

@@ -1,7 +1,11 @@
 package com.creatubbles.ctbmod.common.creator;
 
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.PropertyDirection;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -14,6 +18,8 @@ import com.creatubbles.ctbmod.client.gui.GuiCreator;
 import com.creatubbles.repack.endercore.common.BlockEnder;
 
 public class BlockCreator extends BlockEnder<TileCreator> implements IGuiHandler {
+    
+    public static final PropertyDirection FACING = PropertyDirection.create("facing", EnumFacing.Plane.HORIZONTAL);
 
     public static BlockCreator create() {
         BlockCreator res = new BlockCreator();
@@ -23,6 +29,7 @@ public class BlockCreator extends BlockEnder<TileCreator> implements IGuiHandler
 
     public BlockCreator() {
         super("creator", TileCreator.class, Material.rock);
+        setDefaultState(getDefaultState().withProperty(FACING, EnumFacing.SOUTH));
     }
 
     @Override
@@ -32,6 +39,27 @@ public class BlockCreator extends BlockEnder<TileCreator> implements IGuiHandler
         setUnlocalizedName(CTBMod.DOMAIN + "." + name);
         NetworkRegistry.INSTANCE.registerGuiHandler(CTBMod.instance, this);
     }
+    
+    @Override
+    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
+        return getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite());
+    }
+
+    @Override
+    public IBlockState getStateFromMeta(int meta) {
+        return getDefaultState().withProperty(FACING, EnumFacing.getHorizontal(meta));
+    }
+
+    @Override
+    public int getMetaFromState(IBlockState state) {
+        return state.getValue(FACING).getHorizontalIndex();
+    }
+
+    @Override
+    protected BlockState createBlockState() {
+        return new BlockState(this, FACING);
+    }
+
 
     @Override
     protected boolean openGui(World world, BlockPos pos, EntityPlayer entityPlayer, EnumFacing side) {

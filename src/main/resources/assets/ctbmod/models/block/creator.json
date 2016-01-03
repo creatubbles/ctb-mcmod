@@ -1,6 +1,13 @@
 {
-	"parent": "block/cube_all",
-	"textures": {
-		"all": "ctbmod:blocks/creator"
-	}
+	"parent":"block/cube",
+    "textures": {
+    	"front":"ctbmod:blocks/creator_front",
+        "particle":"ctbmod:blocks/creator_front",
+        "down":"ctbmod:blocks/creator_bottom",
+        "up":"ctbmod:blocks/creator_top",
+        "north":"ctbmod:blocks/creator_back",
+        "east":"ctbmod:blocks/creator_left",
+        "south":"ctbmod:blocks/creator_front",
+        "west":"ctbmod:blocks/creator_right"
+    }
 }

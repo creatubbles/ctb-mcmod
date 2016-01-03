@@ -1,5 +1,8 @@
 {
 	"variants": {
-		"normal": { "model": "ctbmod:creator" }
-	}
+		"facing=south": { "model": "ctbmod:creator" },
+		"facing=west":  { "model": "ctbmod:creator", "y": 90  },
+        "facing=north": { "model": "ctbmod:creator", "y": 180 },
+        "facing=east":  { "model": "ctbmod:creator", "y": 270 }
+    }
 }

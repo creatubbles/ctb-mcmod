@@ -105,11 +105,6 @@ processResources {
     }
 }
 
-task deobfJar(type: Jar) {
-    from sourceSets.main.output
-    classifier = 'deobf'
-}
-
 if (JavaVersion.current().isJava8Compatible()) {
     allprojects {
         tasks.withType(Javadoc) {
@@ -117,8 +112,6 @@ if (JavaVersion.current().isJava8Compatible()) {
         }
     }
 }
-
-build.dependsOn deobfJar
 
 println('Changelog:\n' + getChangelogText())
 
@@ -163,10 +156,10 @@ curseforge {
         changelog = System.getenv('CHANGELOG') == null || System.getenv('CHANGELOG').equals('none') ? getChangelogText() : System.getenv('CHANGELOG')
         changelogType = 'html'
         releaseType = 'beta'
-        mainArtifact(jar) {
+        mainArtifact(shadowJar) {
             displayName = "Creatubbles - ${mod_version}-${buildnumber}"
         }
-        addArtifact deobfJar
+		addArtifact jar
     }
 }
 

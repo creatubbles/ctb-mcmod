@@ -8,8 +8,10 @@ buildscript {
 }
 
 plugins {
-    id 'net.franz-becker.gradle-lombok' version '1.5'
-    id 'com.matthewprenger.cursegradle' version '1.0.3'
+	id 'java'
+    id 'net.franz-becker.gradle-lombok'  version '1.5'
+    id 'com.matthewprenger.cursegradle'  version '1.0.3'
+	id 'com.github.johnrengelman.shadow' version '1.2.2'
 }
 
 apply plugin: 'net.minecraftforge.gradle.forge'
@@ -45,12 +47,6 @@ minecraft {
     replaceIn "CTBMod.java"
 }
 
-configurations {
-    shade
-    compile.extendsFrom shade
-    compile.extendsFrom exportedCompile
-}
-
 repositories {
     mavenCentral()
     maven {
@@ -59,8 +55,7 @@ repositories {
 }
 
 dependencies {
-    shade "com.creatubbles.api:creatubbles-wsapi:${wsapi_version}"
-    shade fileTree(dir: 'libs', include: '*.jar')
+    compile "com.creatubbles.api:creatubbles-wsapi:${wsapi_version}"
 }
 
 lombok {
@@ -77,15 +72,20 @@ task delombok(type: DelombokTask) {
 tasks.eclipse.dependsOn installLombok
 
 jar {
-    from { configurations.exportedCompile.collect { it.isDirectory() ? it : zipTree(it) } }
-    configurations.shade.each { dep ->
-        from(project.zipTree(dep)) {
-            exclude 'META-INF/*', 'META-INF/maven/**'
-        }
-    }
     manifest {
         attributes 'FMLAT': 'ctbmod_at.cfg'
     }
+	classifier = 'slim'
+}
+
+shadowJar {
+	dependsOn build
+	exclude 'META-INF/*', 'META-INF/maven/**'
+	dependencies {
+		exclude(dependency('org.projectlombok:lombok:.*'))
+	}
+	mergeServiceFiles()
+	classifier = ''
 }
 
 processResources {
@@ -107,8 +107,7 @@ processResources {
 
 task deobfJar(type: Jar) {
     from sourceSets.main.output
-    from { configurations.exportedCompile.collect { it.isDirectory() ? it : zipTree(it) } }
-    classifier = 'dev'
+    classifier = 'deobf'
 }
 
 if (JavaVersion.current().isJava8Compatible()) {

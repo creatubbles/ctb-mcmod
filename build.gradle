@@ -44,7 +44,7 @@ minecraft {
     runDir = 'run'
 
     replace '@VERSION@', project.version
-	replace '@MCVERSION', project.minecraft_version
+    replace '@MCVERSION@', project.minecraft_version
     replaceIn "CTBMod.java"
 }
 

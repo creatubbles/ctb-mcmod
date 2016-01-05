@@ -1,3 +1,15 @@
+0.2.0:
+New
+- Update to 1.8.8
+- New textures for the Creator
+Changes
+- Paintings are not much cheaper, they only require paper to create. You can enable the old recipe in the config.
+Fixes
+- Fix odd painting rendering when part of a painting is broken
+- Add some crash protections to paintings
+- Fix some misc rendering issues
+- Improve the image download algorithm to save some resources
+
 0.1.2:
 Fixes
 - Fix some crashes in the creator GUI

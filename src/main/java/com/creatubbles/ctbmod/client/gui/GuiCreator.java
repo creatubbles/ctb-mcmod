@@ -28,9 +28,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.Creator;
 import com.creatubbles.api.core.User;
-import com.creatubbles.api.request.auth.SignInRequest;
+import com.creatubbles.api.request.auth.OAuthAccessTokenRequest;
 import com.creatubbles.api.request.creation.GetCreationsRequest;
-import com.creatubbles.api.request.creator.UsersCreatorsRequest;
+import com.creatubbles.api.request.creator.GetCreatorsRequest;
 import com.creatubbles.api.request.user.UserProfileRequest;
 import com.creatubbles.api.response.creation.GetCreationsResponse;
 import com.creatubbles.ctbmod.CTBMod;
@@ -111,7 +111,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
                 if (getUser() == null) {
                     setState(State.LOGGING_IN, true);
-                    loginReq = new SignInRequest(tfEmail.getText(), tfActualPassword.getText());
+                    loginReq = new OAuthAccessTokenRequest(tfEmail.getText(), tfActualPassword.getText());
                     loginReq.execute();
                 }
 
@@ -123,7 +123,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                     logout();
                 } else {
                     if (getUser() == null) {
-                        userReq = new UserProfileRequest("me", loginReq.getResponse().access_token);
+                        userReq = new UserProfileRequest(loginReq.getResponse().access_token);
                         userReq.execute();
                         CTBMod.cache.activateUser(userReq.getResponse().user);
                         CTBMod.cache.getActiveUser().access_token = loginReq.getResponse().access_token;
@@ -134,7 +134,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
                     if (getCreator() == null) {
                         setState(State.LOGGING_IN, true);
-                        UsersCreatorsRequest creatorsReq = new UsersCreatorsRequest(Integer.toString(getUser().id));
+                        GetCreatorsRequest creatorsReq = new GetCreatorsRequest(getUser().id, getUser().access_token);
                         creatorsReq.execute();
                         CTBMod.cache.setCreators(creatorsReq.getResponse().creators.toArray(new Creator[0]));
                     }
@@ -145,16 +145,15 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                     if (creations == null) {
                         setState(State.LOGGING_IN, true);
                         for (Creator c : CTBMod.cache.getCreators()) {
-                            int page = 1;
-                            GetCreationsRequest creationsReq = new GetCreationsRequest(c.id);
+                            GetCreationsRequest creationsReq = new GetCreationsRequest(getUser().id, getUser().access_token);
                             creationsReq.execute();
                             GetCreationsResponse resp = creationsReq.getResponse();
-                            creations = ArrayUtils.addAll(creations, resp.creations);
-                            while (resp.page < resp.total_pages) {
-                                creationsReq = new GetCreationsRequest(c.id, ++page);
+                            creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[]{}));
+                            for (int i = 2; i <= resp.total_pages; i++) {
+                                creationsReq = new GetCreationsRequest(getUser().id, i, getUser().access_token);
                                 creationsReq.execute();
                                 resp = creationsReq.getResponse();
-                                creations = ArrayUtils.addAll(creations, resp.creations);
+                                creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[]{}));
                             }
                         }
                         creationList.setCreations(creations);
@@ -237,7 +236,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
     private Thread thread;
 
-    private SignInRequest loginReq;
+    private OAuthAccessTokenRequest loginReq;
     private UserProfileRequest userReq;
 
     private String header = DEFAULT_HEADER;
@@ -555,7 +554,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
     /**
      * Gray out the item that was just painted into a GhostSlot by overpainting it with 50% transparent background. This
-     * gives the illusion that the item was painted with 50% transparency. (100%*a ° 100%*b ° 50%*a == 100%*a ° 50%*b)
+     * gives the illusion that the item was painted with 50% transparency. (100%*a ï¿½ 100%*b ï¿½ 50%*a == 100%*a ï¿½ 50%*b)
      */
     protected void drawGhostSlotGrayout(ItemStack stack, Slot slot) {
         int x = guiLeft + slot.xDisplayPosition;

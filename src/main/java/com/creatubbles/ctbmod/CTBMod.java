@@ -32,7 +32,7 @@ import com.creatubbles.ctbmod.common.network.PacketHandler;
 import com.creatubbles.ctbmod.common.painting.BlockPainting;
 import com.creatubbles.repack.endercore.common.config.ConfigProcessor;
 
-@Mod(modid = MODID, name = NAME, version = VERSION)
+@Mod(modid = MODID, name = NAME, version = VERSION, acceptedMinecraftVersions = "[@MCVERSION@, 1.9)")
 public class CTBMod {
 
     public static final String MODID = "CTBMod";

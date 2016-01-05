@@ -43,7 +43,8 @@ minecraft {
     mappings = 'snapshot_20151202'
     runDir = 'run'
 
-    replace "@VERSION@", project.version
+    replace '@VERSION@', project.version
+	replace '@MCVERSION', project.mcversion
     replaceIn "CTBMod.java"
 }
 

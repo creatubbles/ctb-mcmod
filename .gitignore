@@ -7,6 +7,8 @@
 
 ## ForgeGradle
 /run
+/*.launch
+/src/api/resources
 
 ## eclipse
 /eclipse

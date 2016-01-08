@@ -26,11 +26,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.creatubbles.api.core.Creation;
-import com.creatubbles.api.core.Creator;
+import com.creatubbles.api.core.Image.ImageType;
 import com.creatubbles.api.core.User;
 import com.creatubbles.api.request.auth.OAuthAccessTokenRequest;
 import com.creatubbles.api.request.creation.GetCreationsRequest;
-import com.creatubbles.api.request.creator.GetCreatorsRequest;
 import com.creatubbles.api.request.user.UserProfileRequest;
 import com.creatubbles.api.response.creation.GetCreationsResponse;
 import com.creatubbles.ctbmod.CTBMod;
@@ -39,7 +38,6 @@ import com.creatubbles.ctbmod.common.creator.ContainerCreator;
 import com.creatubbles.ctbmod.common.creator.SlotCreator;
 import com.creatubbles.ctbmod.common.creator.TileCreator;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
-import com.creatubbles.ctbmod.common.http.DownloadableImage.ImageType;
 import com.creatubbles.ctbmod.common.network.MessageCreate;
 import com.creatubbles.ctbmod.common.network.PacketHandler;
 import com.creatubbles.repack.endercore.client.gui.GuiContainerBase;
@@ -132,30 +130,30 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
                     checkCancel();
 
-                    if (getCreator() == null) {
-                        setState(State.LOGGING_IN, true);
-                        GetCreatorsRequest creatorsReq = new GetCreatorsRequest(getUser().id, getUser().access_token);
-                        creatorsReq.execute();
-                        CTBMod.cache.setCreators(creatorsReq.getResponse().creators.toArray(new Creator[0]));
-                    }
+//                    if (getCreator() == null) {
+//                        setState(State.LOGGING_IN, true);
+//                        GetCreatorsRequest creatorsReq = new GetCreatorsRequest(getUser().id, getUser().access_token);
+//                        creatorsReq.execute();
+//                        CTBMod.cache.setCreators(creatorsReq.getResponse().creators.toArray(new Creator[0]));
+//                    }
 
                     checkCancel();
 
                     Creation[] creations = creationList.getCreations();
                     if (creations == null) {
                         setState(State.LOGGING_IN, true);
-                        for (Creator c : CTBMod.cache.getCreators()) {
-                            GetCreationsRequest creationsReq = new GetCreationsRequest(getUser().id, getUser().access_token);
+
+                        GetCreationsRequest creationsReq = new GetCreationsRequest(getUser().id, getUser().access_token);
+                        creationsReq.execute();
+                        GetCreationsResponse resp = creationsReq.getResponse();
+                        creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[] {}));
+                        for (int i = 2; i <= resp.total_pages; i++) {
+                            creationsReq = new GetCreationsRequest(getUser().id, i, getUser().access_token);
                             creationsReq.execute();
-                            GetCreationsResponse resp = creationsReq.getResponse();
-                            creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[]{}));
-                            for (int i = 2; i <= resp.total_pages; i++) {
-                                creationsReq = new GetCreationsRequest(getUser().id, i, getUser().access_token);
-                                creationsReq.execute();
-                                resp = creationsReq.getResponse();
-                                creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[]{}));
-                            }
+                            resp = creationsReq.getResponse();
+                            creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[] {}));
                         }
+                        
                         creationList.setCreations(creations);
                         CTBMod.cache.setCreationCache(creations);
                     }
@@ -167,7 +165,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                     for (Creation c : creations) {
                         DownloadableImage img = new DownloadableImage(c.image, c);
                         images.put(c, img);
-                        img.download(ImageType.LIST_VIEW);
+                        img.download(ImageType.list_view);
                         checkCancel();
                     }
                 }
@@ -321,7 +319,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
             @Override
             protected void updateText() {
                 User u = getUser();
-                setToolTipText(StringUtils.capitalize(u.role), getCreator().age, u.country);
+                setToolTipText(StringUtils.capitalize(u.role), u.age, u.country);
             }
         };
         addToolTip(userInfo);
@@ -626,9 +624,9 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
         return CTBMod.cache.getActiveUser();
     }
 
-    private Creator getCreator() {
-        return CTBMod.cache.getActiveCreator();
-    }
+//    private Creator getCreator() {
+//        return CTBMod.cache.getActiveCreator();
+//    }
 
     @Override
     protected void mouseClicked(int x, int y, int button) throws IOException {
@@ -694,7 +692,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
     private void logout() {
         setState(State.LOGGED_OUT, true);
         CTBMod.cache.activateUser(null);
-        CTBMod.cache.setCreators(null);
+//        CTBMod.cache.setCreators(null);
         CTBMod.cache.setCreationCache(null);
         creationList.setCreations(null);
     }

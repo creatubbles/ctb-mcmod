@@ -13,9 +13,9 @@ import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
 
+import com.creatubbles.api.core.Image.ImageType;
 import com.creatubbles.ctbmod.client.gui.OverlayCreationList;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
-import com.creatubbles.ctbmod.common.http.DownloadableImage.ImageType;
 import com.creatubbles.ctbmod.common.painting.BlockPainting;
 import com.creatubbles.ctbmod.common.painting.TilePainting;
 
@@ -29,11 +29,11 @@ public class RenderPainting extends TileEntitySpecialRenderer<TilePainting> {
 
             EnumFacing facing = te.getWorld().getBlockState(te.getPos()).getValue(BlockPainting.FACING);
 
-            int width = image.getWidth(ImageType.ORIGINAL);
-            int height = image.getHeight(ImageType.ORIGINAL);
-            double scaledSize = image.getScaledSize(ImageType.ORIGINAL);
+            int width = image.getWidth(ImageType.original);
+            int height = image.getHeight(ImageType.original);
+            double scaledSize = image.getScaledSize(ImageType.original);
 
-            ResourceLocation res = image.getResource(ImageType.ORIGINAL);
+            ResourceLocation res = image.getResource(ImageType.original);
             if (res == DownloadableImage.MISSING_TEXTURE) {
                 res = OverlayCreationList.LOADING_TEX;
                 width = 16;

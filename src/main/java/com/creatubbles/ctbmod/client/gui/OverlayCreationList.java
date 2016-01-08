@@ -18,10 +18,9 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.util.Dimension;
 
 import com.creatubbles.api.core.Creation;
-import com.creatubbles.api.core.Creator;
+import com.creatubbles.api.core.Image.ImageType;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
-import com.creatubbles.ctbmod.common.http.DownloadableImage.ImageType;
 import com.creatubbles.repack.endercore.api.client.gui.IGuiScreen;
 import com.creatubbles.repack.endercore.client.gui.widget.GuiToolTip;
 import com.google.common.collect.Lists;
@@ -44,10 +43,10 @@ public class OverlayCreationList extends OverlayBase {
             // TODO more localization here
             List<String> tt = Lists.newArrayList();
             tt.add(c.name);
-            tt.add(c.creators.length == 1 ? "Creator:" : "Creators:");
-            for (Creator creator : c.creators) {
-                tt.add("    " + creator.name);
-            }
+//            tt.add(c.creator_ids.length == 1 ? "Creator:" : "Creators:");
+//            for (Creator creator : c.creators) {
+//                tt.add("    " + creator.name);
+//            }
             tooltip = new GuiToolTip(bounds, tt);
         }
     }
@@ -209,7 +208,7 @@ public class OverlayCreationList extends OverlayBase {
                 int y = c.getLocation().y;
 
                 DownloadableImage img = getGui().images.get(c.creation);
-                ImageType type = ImageType.LIST_VIEW;
+                ImageType type = ImageType.list_view;
 
                 if (img == null) {
                     GlStateManager.popMatrix();

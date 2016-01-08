@@ -25,7 +25,7 @@ public class ItemBlockPainting extends ItemBlock {
         super.addInformation(stack, playerIn, tooltip, advanced);
         Creation c = BlockPainting.getCreation(stack);
         tooltip.add(EnumChatFormatting.ITALIC.toString().concat(c.name));
-        tooltip.add(c.creators[0].name);
+        tooltip.add(c.user_id);
         tooltip.add(BlockPainting.getWidth(stack) + "x" + BlockPainting.getHeight(stack));
     }
 

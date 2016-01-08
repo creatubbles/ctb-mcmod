@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.EnumMap;
-import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +27,7 @@ import org.lwjgl.util.Dimension;
 
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.Image;
+import com.creatubbles.api.core.Image.ImageType;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.config.DataCache;
 import com.creatubbles.ctbmod.common.util.JsonUtil;
@@ -38,16 +38,6 @@ import com.google.gson.reflect.TypeToken;
 
 @ToString
 public class DownloadableImage {
-
-    public enum ImageType {
-        ORIGINAL,
-        FULL_VIEW,
-        LIST_VIEW;
-
-        public String urlString() {
-            return name().toLowerCase(Locale.US);
-        }
-    }
 
     @Value
     private static class Size {
@@ -92,29 +82,24 @@ public class DownloadableImage {
     }
 
     @Getter
-    private final String fileName, urlBase;
-
-    @Getter
     private Creation owner;
 
     private transient final EnumMap<ImageType, ResourceLocation> locations = Maps.newEnumMap(ImageType.class);
     private transient EnumMap<ImageType, Size> sizes = Maps.newEnumMap(ImageType.class);
+    private transient Image parent;
 
     public DownloadableImage() {
-        fileName = "";
-        urlBase = "";
         initDefaults();
     }
 
     public DownloadableImage(Image image, Creation owner) {
-        fileName = image.url.substring(image.url.lastIndexOf("/") + 1, image.url.length());
-        urlBase = image.url.substring(0, image.url.indexOf("original"));
+        this.parent = image;
         this.owner = owner;
         initDefaults();
     }
 
     private void initDefaults() {
-        for (ImageType type : ImageType.values()) {
+        for (com.creatubbles.api.core.Image.ImageType type : com.creatubbles.api.core.Image.ImageType.values()) {
             locations.put(type, MISSING_TEXTURE);
             sizes.put(type, new Size());
         }
@@ -193,7 +178,7 @@ public class DownloadableImage {
     public void download(final ImageType type) {
         if (locations.get(type) == MISSING_TEXTURE) {
             TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
-            final String filepath = "creations/" + owner.user_id + "/" + type.urlString() + "/" + owner.id + ".jpg";
+            final String filepath = "creations/" + owner.user_id + "/" + type.name() + "/" + owner.id + ".jpg";
             final ResourceLocation res = new ResourceLocation(CTBMod.DOMAIN, filepath);
             ITextureObject texture = texturemanager.getTexture(res);
 
@@ -204,7 +189,7 @@ public class DownloadableImage {
                     @Override
                     @SneakyThrows
                     public void run() {
-                        String url = urlBase.concat(type.urlString()).concat("/").concat(fileName);
+                        String url = parent.links.get(type);
                         File cache = new File(DataCache.cacheFolder, filepath);
                         BufferedImage image = null;
                         if (cache.exists()) {

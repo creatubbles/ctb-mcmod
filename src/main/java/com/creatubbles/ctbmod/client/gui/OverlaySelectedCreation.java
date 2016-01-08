@@ -10,8 +10,8 @@ import org.lwjgl.util.Dimension;
 import org.lwjgl.util.Rectangle;
 
 import com.creatubbles.api.core.Creation;
+import com.creatubbles.api.core.Image.ImageType;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
-import com.creatubbles.ctbmod.common.http.DownloadableImage.ImageType;
 import com.creatubbles.repack.endercore.client.gui.button.IconButton;
 
 public class OverlaySelectedCreation extends OverlayBase implements ISelectionCallback {
@@ -42,14 +42,14 @@ public class OverlaySelectedCreation extends OverlayBase implements ISelectionCa
             ResourceLocation res;
             int imgWidth = 16, imgHeight = 16;
             int scaledSize = 16;
-            if (img.hasSize(ImageType.FULL_VIEW)) {
-                res = img.getResource(ImageType.FULL_VIEW);
-                imgWidth = img.getWidth(ImageType.FULL_VIEW);
-                imgHeight = img.getHeight(ImageType.FULL_VIEW);
-                scaledSize = img.getScaledSize(ImageType.FULL_VIEW);
+            if (img.hasSize(ImageType.full_view)) {
+                res = img.getResource(ImageType.full_view);
+                imgWidth = img.getWidth(ImageType.full_view);
+                imgHeight = img.getHeight(ImageType.full_view);
+                scaledSize = img.getScaledSize(ImageType.full_view);
             } else {
                 res = OverlayCreationList.LOADING_TEX;
-                img.download(ImageType.FULL_VIEW);
+                img.download(ImageType.full_view);
             }
 
             Minecraft.getMinecraft().getTextureManager().bindTexture(res);

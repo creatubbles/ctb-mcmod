@@ -16,10 +16,10 @@ import net.minecraftforge.common.util.ForgeDirection;
 import team.chisel.ctmlib.Drawing;
 
 import com.creatubbles.api.core.Creation;
+import com.creatubbles.api.core.Image.ImageType;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.client.gui.OverlayCreationList;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
-import com.creatubbles.ctbmod.common.http.DownloadableImage.ImageType;
 import com.creatubbles.ctbmod.common.painting.BlockPainting;
 import com.creatubbles.ctbmod.common.painting.TilePainting;
 
@@ -74,11 +74,11 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
 
     private void renderPainting(DownloadableImage image, int pheight, int pwidth, int color) {
 
-        int width = image.getWidth(ImageType.ORIGINAL);
-        int height = image.getHeight(ImageType.ORIGINAL);
-        double scaledSize = image.getScaledSize(ImageType.ORIGINAL);
+        int width = image.getWidth(ImageType.original);
+        int height = image.getHeight(ImageType.original);
+        double scaledSize = image.getScaledSize(ImageType.original);
 
-        ResourceLocation res = image.getResource(ImageType.ORIGINAL);
+        ResourceLocation res = image.getResource(ImageType.original);
         if (res == DownloadableImage.MISSING_TEXTURE) {
             res = OverlayCreationList.LOADING_TEX;
             width = 16;
@@ -149,7 +149,7 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
 
         Creation c = BlockPainting.getCreation(item);
         DownloadableImage img = new DownloadableImage(c.image, c);
-        img.download(ImageType.ORIGINAL);
+        img.download(ImageType.original);
 
         glPushMatrix();
         {

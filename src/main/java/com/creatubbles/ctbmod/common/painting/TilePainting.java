@@ -9,8 +9,8 @@ import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.util.AxisAlignedBB;
 
 import com.creatubbles.api.core.Creation;
+import com.creatubbles.api.core.Image.ImageType;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
-import com.creatubbles.ctbmod.common.http.DownloadableImage.ImageType;
 import com.creatubbles.ctbmod.common.util.NBTUtil;
 import com.creatubbles.repack.endercore.common.TileEntityBase;
 
@@ -53,7 +53,7 @@ public class TilePainting extends TileEntityBase {
 
     private void createImage() {
         image = new DownloadableImage(creation.image, creation);
-        image.download(ImageType.ORIGINAL);
+        image.download(ImageType.original);
     }
 
     @Override

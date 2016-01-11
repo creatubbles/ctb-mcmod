@@ -6,7 +6,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
-import net.minecraft.server.gui.IUpdatePlayerListBox;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
@@ -14,7 +13,7 @@ import com.creatubbles.ctbmod.common.network.PacketHandler;
 import com.creatubbles.repack.endercore.api.common.util.IProgressTile;
 import com.creatubbles.repack.endercore.common.network.PacketProgress;
 
-public abstract class TileEntityBase extends TileEntity implements IUpdatePlayerListBox {
+public abstract class TileEntityBase extends TileEntity {
 
     private final int checkOffset = (int) (Math.random() * 20);
     protected final boolean isProgressTile;
@@ -27,7 +26,7 @@ public abstract class TileEntityBase extends TileEntity implements IUpdatePlayer
     }
 
     @Override
-    public final void update() {
+    public final void updateEntity() {
         doUpdate();
         if (isProgressTile && !worldObj.isRemote) {
             int curScaled = getProgressScaled(16);

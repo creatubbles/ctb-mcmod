@@ -546,13 +546,8 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
     }
 
     /**
-<<<<<<< HEAD
      * Gray out the item that was just painted into a GhostSlot by overpainting it with 50% transparent background. This
      * gives the illusion that the item was painted with 50% transparency. (100%*a ° 100%*b ° 50%*a == 100%*a ° 50%*b)
-=======
-     * Gray out the item that was just painted into a GhostSlot by overpainting it with 50% transparent background. This gives the illusion that the item was painted with 50% transparency. (100%*a ï¿½
-     * 100%*b ï¿½ 50%*a == 100%*a ï¿½ 50%*b)
->>>>>>> 9157c69... api v2
      */
     protected void drawGhostSlotGrayout(ItemStack stack, Slot slot) {
         int x = guiLeft + slot.xDisplayPosition;

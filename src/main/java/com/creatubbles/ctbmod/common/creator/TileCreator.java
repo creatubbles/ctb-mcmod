@@ -8,7 +8,6 @@ import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.server.gui.IUpdatePlayerListBox;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.oredict.OreDictionary;
 
@@ -24,7 +23,7 @@ import com.creatubbles.repack.endercore.api.common.util.IProgressTile;
 import com.creatubbles.repack.endercore.common.TileEntityBase;
 import com.creatubbles.repack.endercore.common.util.Bound;
 
-public class TileCreator extends TileEntityBase implements ISidedInventory, IUpdatePlayerListBox, IProgressTile {
+public class TileCreator extends TileEntityBase implements ISidedInventory, IProgressTile {
 
     private static final Bound<Integer> DIMENSION_BOUND = Bound.of(1, 16);
 

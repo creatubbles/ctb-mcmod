@@ -181,6 +181,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                 userReq = null;
                 thread = null;
                 cancelButton.enabled = true;
+                setState(State.LOGGED_OUT, true);
             }
         }
 

@@ -60,7 +60,7 @@ repositories {
 
 dependencies {
     shade "com.creatubbles.api:creatubbles-wsapi:${wsapi_version}"
-	shade "team.chisel.ctmlib:CTMLib:${ctmlib_version}"
+    shade "team.chisel.ctmlib:CTMLib:${ctmlib_version}:deobf"
 }
 
 lombok {

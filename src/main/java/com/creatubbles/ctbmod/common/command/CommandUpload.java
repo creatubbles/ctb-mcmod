@@ -46,6 +46,7 @@ public class CommandUpload extends ClientCommandBase {
 
         // create creation
         CreateCreationRequest createCreation = new CreateCreationRequest(CommandLogin.accessToken);
+        createCreation.setData("{\"name\":\"" + args[0] + "\"}");
         CreateCreationResponse createCreationResponse = createCreation.execute().getResponse();
         System.out.println(createCreationResponse.creation.id);
 
@@ -72,6 +73,7 @@ public class CommandUpload extends ClientCommandBase {
         uploadS3Image.execute().getResponse();
 
         PingCreationsUploadsRequest pingCreationsUploads = new PingCreationsUploadsRequest(creationsUploadsResponse.id, CommandLogin.accessToken);
-        pingCreationsUploads.execute().getResponse();
+        pingCreationsUploads.setData(""); // fixes null PUT error
+        System.out.println(pingCreationsUploads.execute().getResponse().message);
     }
 }

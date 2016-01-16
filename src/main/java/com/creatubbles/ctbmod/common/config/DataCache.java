@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 
+import org.apache.commons.io.FileUtils;
+
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.User;
 import com.google.common.collect.ImmutableSet;
@@ -44,7 +46,7 @@ public class DataCache {
     @SneakyThrows
     public static DataCache loadCache() {
         if (cacheFolderv1.exists()) {
-            cacheFolderv1.delete();
+            FileUtils.deleteDirectory(cacheFolderv1);
         }
         
         cacheFolder.mkdir();

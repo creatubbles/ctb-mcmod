@@ -11,6 +11,8 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.Value;
 
+import org.apache.commons.io.FileUtils;
+
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.User;
 import com.creatubbles.api.response.auth.OAuthAccessTokenResponse;
@@ -60,7 +62,7 @@ public class DataCache {
     @SneakyThrows
     public static DataCache loadCache() {
         if (cacheFolderv1.exists()) {
-            cacheFolderv1.delete();
+            FileUtils.deleteDirectory(cacheFolderv1);
         }
         
         cacheFolder.mkdir();

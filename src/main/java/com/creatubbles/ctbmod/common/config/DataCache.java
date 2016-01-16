@@ -9,9 +9,11 @@ import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.Value;
 
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.User;
+import com.creatubbles.api.response.auth.OAuthAccessTokenResponse;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
@@ -20,6 +22,17 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 public class DataCache {
+    
+    @Value
+    public static class OAuth {
+        private String accessToken;
+        private long lifetime;
+        private long init;
+        
+        public boolean expired() {
+            return System.currentTimeMillis() - (lifetime * 1000) > init; 
+        }
+    }
 
     public static final File cacheFolderv1 = new File(".", "creatubbles");
     public static final File cacheFolder = new File(".", "creatubblesv2");
@@ -28,6 +41,9 @@ public class DataCache {
 
     private final Set<User> savedUsers = Sets.newHashSet();
 
+    @Getter
+    private transient OAuth OAuth;
+    
     @Getter
     private User activeUser;
     
@@ -68,6 +84,10 @@ public class DataCache {
         save();
     }
 
+    public void setOAuth(OAuthAccessTokenResponse response) {
+        this.OAuth = new OAuth(response.access_token, response.expires_in, System.currentTimeMillis());        
+    }
+    
     public Collection<User> getSavedUsers() {
         return ImmutableSet.copyOf(savedUsers);
     }

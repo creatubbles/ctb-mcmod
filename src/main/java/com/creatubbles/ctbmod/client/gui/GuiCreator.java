@@ -1,7 +1,6 @@
 package com.creatubbles.ctbmod.client.gui;
 
-import static net.minecraft.util.EnumChatFormatting.GREEN;
-import static net.minecraft.util.EnumChatFormatting.RED;
+import static net.minecraft.util.EnumChatFormatting.*;
 
 import java.awt.Rectangle;
 import java.io.IOException;
@@ -34,6 +33,7 @@ import com.creatubbles.api.request.user.UserProfileRequest;
 import com.creatubbles.api.response.creation.GetCreationsResponse;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.config.Configs;
+import com.creatubbles.ctbmod.common.config.DataCache.OAuth;
 import com.creatubbles.ctbmod.common.creator.ContainerCreator;
 import com.creatubbles.ctbmod.common.creator.SlotCreator;
 import com.creatubbles.ctbmod.common.creator.TileCreator;
@@ -107,7 +107,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
             try {
                 checkCancel();
 
-                if (getUser() == null) {
+                if (getAccessToken() == null) {
                     setState(State.LOGGING_IN, true);
                     loginReq = new OAuthAccessTokenRequest(tfEmail.getText(), tfActualPassword.getText());
                     loginReq.execute();
@@ -120,11 +120,13 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                     loginReq = null;
                     logout();
                 } else {
+                    
+                    CTBMod.cache.setOAuth(loginReq.getResponse());
+                    
                     if (getUser() == null) {
-                        userReq = new UserProfileRequest(loginReq.getResponse().access_token);
+                        userReq = new UserProfileRequest(getAccessToken());
                         userReq.execute();
                         CTBMod.cache.activateUser(userReq.getResponse().user);
-                        CTBMod.cache.getActiveUser().access_token = loginReq.getResponse().access_token;
                         CTBMod.cache.save();
                     }
 
@@ -143,12 +145,12 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                     if (creations == null) {
                         setState(State.LOGGING_IN, true);
 
-                        GetCreationsRequest creationsReq = new GetCreationsRequest(getUser().id, getUser().access_token);
+                        GetCreationsRequest creationsReq = new GetCreationsRequest(getUser().id, getAccessToken());
                         creationsReq.execute();
                         GetCreationsResponse resp = creationsReq.getResponse();
                         creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[] {}));
                         for (int i = 2; i <= resp.total_pages; i++) {
-                            creationsReq = new GetCreationsRequest(getUser().id, i, getUser().access_token);
+                            creationsReq = new GetCreationsRequest(getUser().id, i, getAccessToken());
                             creationsReq.execute();
                             resp = creationsReq.getResponse();
                             creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[] {}));
@@ -404,7 +406,11 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
         if (init) {
             init = false;
-            actionPerformed(loginButton);
+            if (CTBMod.cache.getOAuth().expired()) {
+                logout();
+            } else {
+                actionPerformed(loginButton);
+            }
         }
     }
 
@@ -622,6 +628,11 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
     private User getUser() {
         return CTBMod.cache.getActiveUser();
+    }
+    
+    private String getAccessToken() {
+        OAuth auth = CTBMod.cache.getOAuth();
+        return auth == null ? null : auth.getAccessToken();
     }
 
 //    private Creator getCreator() {

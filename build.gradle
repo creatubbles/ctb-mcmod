@@ -80,7 +80,6 @@ jar {
 }
 
 shadowJar {
-	dependsOn build
 	exclude 'META-INF/*', 'META-INF/maven/**'
 	dependencies {
 		exclude(dependency('org.projectlombok:lombok:.*'))
@@ -88,6 +87,12 @@ shadowJar {
 	mergeServiceFiles()
 	classifier = ''
 }
+
+reobf {
+	shadowJar { mappingType = 'SEARGE' }
+}
+
+tasks.build.dependsOn reobfShadowJar
 
 processResources {
     inputs.property "version", project.version

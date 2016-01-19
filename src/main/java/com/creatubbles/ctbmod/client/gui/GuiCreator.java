@@ -408,7 +408,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
         if (init) {
             init = false;
-            if (CTBMod.cache.getOAuth().expired()) {
+            if (CTBMod.cache.getOAuth() == null || CTBMod.cache.getOAuth().expired()) {
                 logout();
                 header = "Login expired! Please login again.";
             } else {

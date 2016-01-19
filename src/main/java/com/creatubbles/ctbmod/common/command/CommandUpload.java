@@ -17,12 +17,19 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.NumberInvalidException;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.event.ClickEvent;
+import net.minecraft.event.HoverEvent;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
 
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class CommandUpload extends ClientCommandBase {
 
+    public static final String URL_BASE = "https://www.creatubbles.com/creations/";
+    
     @Override
     public String getCommandName() {
         return "ctb-upload";
@@ -30,13 +37,13 @@ public class CommandUpload extends ClientCommandBase {
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/ctb-upload <name> <screenshot number>";
+        return "/ctb-upload <name> [screenshot number]";
     }
 
     @Override
     @SneakyThrows
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
-        if (args.length < 2) {
+        if (args.length < 1) {
             throw new WrongUsageException("Not enough arguments. Usage: %s", getCommandUsage(sender));
         }
         
@@ -47,22 +54,24 @@ public class CommandUpload extends ClientCommandBase {
         CreateCreationRequest createCreation = new CreateCreationRequest(CommandLogin.accessToken);
         createCreation.setData("{\"name\":\"" + args[0] + "\"}");
         CreateCreationResponse createCreationResponse = createCreation.execute().getResponse();
-        System.out.println(createCreationResponse.creation.id);
+        
+        String creationID = createCreationResponse.creation.id;
 
         // create url for upload
         CreationsUploadsRequest creationsUploads = new CreationsUploadsRequest(createCreationResponse.creation.id, CommandLogin.accessToken);
         CreationsUploadsResponse creationsUploadsResponse = creationsUploads.execute().getResponse();
-        System.out.println(creationsUploadsResponse.url);
 
         File screenshotsFolder = new File(Minecraft.getMinecraft().mcDataDir, "screenshots");
         File[] screenshots = screenshotsFolder.listFiles((FileFilter) FileFilterUtils.suffixFileFilter(".png"));
         ArrayUtils.reverse(screenshots);
 
-        int id;
+        int id = 0;
         try {
             id = Integer.valueOf(args[args.length - 1]);
-        } catch (Exception e) {
-            throw new NumberInvalidException("%s is not a valid ID number. Must be a number from 0 to %d", args[args.length - 1], screenshots.length - 1);
+        } catch (Exception e) {}
+        
+        if (id >= screenshots.length) {
+            throw new NumberInvalidException("ID %d is too high! You only have %d screenshots, so ID must be between 0 and %d", id, screenshots.length, screenshots.length - 1);
         }
 
         byte[] data = Files.readAllBytes(screenshots[id].toPath());
@@ -73,6 +82,10 @@ public class CommandUpload extends ClientCommandBase {
 
         PingCreationsUploadsRequest pingCreationsUploads = new PingCreationsUploadsRequest(creationsUploadsResponse.id, CommandLogin.accessToken);
         pingCreationsUploads.setData(""); // fixes null PUT error
-        System.out.println(pingCreationsUploads.execute().getResponse().message);
+        pingCreationsUploads.execute();
+        
+        sender.addChatMessage(new ChatComponentText(EnumChatFormatting.GREEN.toString().concat("[Creation upload successful! (Click to view)]")).setChatStyle(new ChatStyle()
+                .setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, URL_BASE + creationID))
+                .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText("Click to view creation on website.")))));
     }
 }

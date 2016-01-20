@@ -249,8 +249,6 @@ public class DownloadableImage {
                             graphics.dispose();
                         }
                         
-                        ImageIO.write(resized, "png", new File(cache.getParentFile(), cache.getName().replace(".", "-resized.")));
-                        
                         final RescaledTexture texture = new RescaledTexture(original, resized);
 
                         // Do this on the main thread with GL context

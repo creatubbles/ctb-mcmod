@@ -22,18 +22,16 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.google.gson.annotations.SerializedName;
 
 public class DataCache {
     
     @Value
     public static class OAuth {
+        @SerializedName("access_token")
         private String accessToken;
-        private long lifetime;
-        private long init;
-        
-        public boolean expired() {
-            return System.currentTimeMillis() - (lifetime * 1000) > init; 
-        }
+        @SerializedName("token_type")
+        private String tokenType;
     }
 
     public static final File cacheFolderv1 = new File(".", "creatubbles");
@@ -44,7 +42,7 @@ public class DataCache {
     private final Set<User> savedUsers = Sets.newHashSet();
 
     @Getter
-    private transient OAuth OAuth;
+    private OAuth OAuth;
     
     @Getter
     private User activeUser;
@@ -87,7 +85,8 @@ public class DataCache {
     }
 
     public void setOAuth(OAuthAccessTokenResponse response) {
-        this.OAuth = new OAuth(response.access_token, response.expires_in, System.currentTimeMillis());        
+        // copy data for immutable state
+        this.OAuth = new OAuth(response.access_token, response.token_type);        
     }
     
     public Collection<User> getSavedUsers() {

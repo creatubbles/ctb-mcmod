@@ -128,8 +128,15 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                     if (getUser() == null) {
                         userReq = new UserProfileRequest(getAccessToken());
                         userReq.execute();
-                        CTBMod.cache.activateUser(userReq.getResponse().user);
-                        CTBMod.cache.save();
+                        if (userReq.wasSuccessful()) {
+                            CTBMod.cache.activateUser(userReq.getResponse().user);
+                            CTBMod.cache.save();
+                        } else {
+                            if (userReq.getRawResponse().getStatus() == 401) {
+                                logout();
+                            }
+                            header = userReq.getResponse().message;
+                        }
                     }
 
                     checkCancel();
@@ -149,17 +156,24 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
                         GetCreationsRequest creationsReq = new GetCreationsRequest(getUser().id, getAccessToken());
                         creationsReq.execute();
-                        GetCreationsResponse resp = creationsReq.getResponse();
-                        creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[] {}));
-                        for (int i = 2; i <= resp.total_pages; i++) {
-                            creationsReq = new GetCreationsRequest(getUser().id, i, getAccessToken());
-                            creationsReq.execute();
-                            resp = creationsReq.getResponse();
+                        if (creationsReq.wasSuccessful()) {
+                            GetCreationsResponse resp = creationsReq.getResponse();
                             creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[] {}));
+                            for (int i = 2; i <= resp.total_pages; i++) {
+                                creationsReq = new GetCreationsRequest(getUser().id, i, getAccessToken());
+                                creationsReq.execute();
+                                resp = creationsReq.getResponse();
+                                creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[] {}));
+                            }
+
+                            creationList.setCreations(creations);
+                            CTBMod.cache.setCreationCache(creations);
+                        } else {
+                            if (creationsReq.getRawResponse().getStatus() == 401) {
+                                logout();
+                            }
+                            header = creationsReq.getResponse().message;
                         }
-                        
-                        creationList.setCreations(creations);
-                        CTBMod.cache.setCreationCache(creations);
                     }
 
                     checkCancel();
@@ -408,9 +422,8 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
         if (init) {
             init = false;
-            if (CTBMod.cache.getOAuth() == null || CTBMod.cache.getOAuth().expired()) {
+            if (getAccessToken() == null) {
                 logout();
-                header = "Login expired! Please login again.";
             } else {
                 actionPerformed(loginButton);
             }

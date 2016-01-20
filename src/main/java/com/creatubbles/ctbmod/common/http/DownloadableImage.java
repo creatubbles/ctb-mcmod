@@ -17,10 +17,11 @@ import lombok.SneakyThrows;
 import lombok.ToString;
 import lombok.Value;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.texture.TextureUtil;
+import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.util.Dimension;
@@ -62,14 +63,33 @@ public class DownloadableImage {
         }
     }
 
-    private static class RescaledTexture extends DynamicTexture {
+    private static class RescaledTexture extends AbstractTexture {
+
+        private final int[] textureData;
 
         @Getter
         private final Size size;
 
         public RescaledTexture(BufferedImage actual, BufferedImage rescale) {
-            super(rescale);
+            textureData = new int[rescale.getWidth() * rescale.getHeight()];
+            rescale.getRGB(0, 0, rescale.getWidth(), rescale.getHeight(), getTextureData(), 0, rescale.getWidth());
             size = Size.create(actual, rescale);
+        }
+        
+        void uploadTexture() {
+            TextureUtil.allocateTexture(this.getGlTextureId(), size.getScaled(), size.getScaled());
+            updateDynamicTexture();
+        }
+
+        @Override
+        public void loadTexture(IResourceManager resourceManager) throws IOException {}
+
+        public void updateDynamicTexture() {
+            TextureUtil.uploadTexture(this.getGlTextureId(), getTextureData(), size.getScaled(), size.getScaled());
+        }
+
+        public int[] getTextureData() {
+            return this.textureData;
         }
     }
 
@@ -228,13 +248,17 @@ public class DownloadableImage {
                         } finally {
                             graphics.dispose();
                         }
+                        
+                        ImageIO.write(resized, "png", new File(cache.getParentFile(), cache.getName().replace(".", "-resized.")));
+                        
+                        final RescaledTexture texture = new RescaledTexture(original, resized);
 
                         // Do this on the main thread with GL context
                         Minecraft.getMinecraft().addScheduledTask(new Runnable() {
 
                             @Override
                             public void run() {
-                                RescaledTexture texture = new RescaledTexture(original, resized);
+                                texture.uploadTexture();
                                 Minecraft.getMinecraft().getTextureManager().loadTexture(res, texture);
 
                                 // Don't populate size and location data until after the texture is loaded
@@ -247,8 +271,9 @@ public class DownloadableImage {
             } else if (texture instanceof RescaledTexture) {
                 // Grab cached size data
                 sizes.put(type, ((RescaledTexture) texture).getSize());
-                locations.put(type, res);
             }
+            
+            locations.put(type, res);
         }
     }
 

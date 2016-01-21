@@ -5,6 +5,7 @@ import static net.minecraft.util.EnumChatFormatting.*;
 import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -34,6 +35,7 @@ import com.creatubbles.api.response.creation.GetCreationsResponse;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.config.Configs;
 import com.creatubbles.ctbmod.common.config.DataCache.OAuth;
+import com.creatubbles.ctbmod.common.config.DataCache.UserAndAuth;
 import com.creatubbles.ctbmod.common.creator.ContainerCreator;
 import com.creatubbles.ctbmod.common.creator.SlotCreator;
 import com.creatubbles.ctbmod.common.creator.TileCreator;
@@ -129,13 +131,15 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                         userReq = new UserProfileRequest(getAccessToken());
                         userReq.execute();
                         if (userReq.wasSuccessful()) {
-                            CTBMod.cache.activateUser(userReq.getResponse().user);
+                            CTBMod.cache.activateUser(new UserAndAuth(userReq.getResponse().user, CTBMod.cache.getOAuth()));
                             CTBMod.cache.save();
                         } else {
                             if (userReq.getRawResponse().getStatus() == 401) {
                                 logout();
+                                header = "Invalid login token. Please log in again.";
+                            } else {
+                                header = userReq.getResponse().message;
                             }
-                            header = userReq.getResponse().message;
                             return;
                         }
                     }
@@ -160,7 +164,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                         if (creationsReq.wasSuccessful()) {
                             GetCreationsResponse resp = creationsReq.getResponse();
                             creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[] {}));
-                            for (int i = 2; i <= resp.total_pages; i++) {
+                            for (int i = 2; i <= resp.total_pages && i <= 10; i++) {
                                 creationsReq = new GetCreationsRequest(getUser().id, i, getAccessToken());
                                 creationsReq.execute();
                                 resp = creationsReq.getResponse();
@@ -172,8 +176,10 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                         } else {
                             if (creationsReq.getRawResponse().getStatus() == 401) {
                                 logout();
+                                header = "Invalid login token. Please log in again.";
+                            } else {
+                                header = creationsReq.getResponse().message;
                             }
-                            header = creationsReq.getResponse().message;
                             return;
                         }
                     }
@@ -227,9 +233,9 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
     private static final String DEFAULT_HEADER = "Please log in to Creatubbles:";
 
     static final ResourceLocation OVERLAY_TEX = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/creator_overlays.png");
-    static final User DUMMY_USER = new User();
+    static final UserAndAuth DUMMY_USER = new UserAndAuth(new User(), null);
     static {
-        DUMMY_USER.username = "No Users";
+        DUMMY_USER.getUser().username = "No Users";
     }
 
     private final Multimap<IHideable, State> visibleMap = MultimapBuilder.hashKeys().enumSetValues(State.class).build();
@@ -300,7 +306,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
             @Override
             public void mouseWheel(int x, int y, int delta) {
                 if (!isDragActive()) {
-                    scrollBy(-Integer.signum(delta) * 4);
+                    scrollBy(-delta / 10);
                 }
             }
         };
@@ -553,7 +559,15 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
             case LOGGED_OUT:
                 x += xSize / 2;
                 y += 5;
-                drawCenteredString(getFontRenderer(), header, x, y, 0xFFFFFF);
+                List<String> lines = getFontRenderer().listFormattedStringToWidth(header, xSize - 6);
+                if (lines.size() > 2) {
+                    String line = lines.get(0);
+                    lines.clear();
+                    lines.add(line.substring(line.length() - 3, line.length()) + "...");
+                }
+                for (int i = 0; i < lines.size(); i++) {
+                    drawCenteredString(getFontRenderer(), lines.get(i), x, y + i*8, 0xFFFFFF);
+                }
 
                 x = guiLeft + 13;
                 y = guiTop + 20;

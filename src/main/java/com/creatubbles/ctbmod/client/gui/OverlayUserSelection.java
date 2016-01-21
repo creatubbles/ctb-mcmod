@@ -11,8 +11,8 @@ import net.minecraft.client.gui.FontRenderer;
 
 import org.lwjgl.util.Dimension;
 
-import com.creatubbles.api.core.User;
 import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.ctbmod.common.config.DataCache.UserAndAuth;
 import com.creatubbles.repack.endercore.api.client.gui.IGuiScreen;
 import com.google.common.collect.Lists;
 
@@ -21,14 +21,14 @@ public class OverlayUserSelection extends OverlayBase {
     @Value
     private static class UserAndLocation {
 
-        private User user;
+        private UserAndAuth user;
         private Point location;
         private Rectangle bounds;
 
-        private UserAndLocation(User user, Point p) {
-            this.user = user;
+        private UserAndLocation(UserAndAuth u, Point p) {
+            this.user = u;
             location = p;
-            bounds = createBounds(user.username);
+            bounds = createBounds(u.getUser().username);
         }
 
         private Rectangle createBounds(String username) {
@@ -39,7 +39,7 @@ public class OverlayUserSelection extends OverlayBase {
         }
     }
 
-    private final List<User> users = Lists.newArrayList();
+    private final List<UserAndAuth> users = Lists.newArrayList();
 
     private final List<UserAndLocation> list = Lists.newArrayList();
 
@@ -53,12 +53,12 @@ public class OverlayUserSelection extends OverlayBase {
         rebuildList();
     }
 
-    public void add(User user) {
+    public void add(UserAndAuth user) {
         users.add(user);
         rebuildList();
     }
 
-    public void addAll(Collection<User> collection) {
+    public void addAll(Collection<UserAndAuth> collection) {
         users.addAll(collection);
         rebuildList();
     }
@@ -90,7 +90,7 @@ public class OverlayUserSelection extends OverlayBase {
         // maxHeight = (fr.FONT_HEIGHT * count) / cols;
         // }
 
-        for (User u : users) {
+        for (UserAndAuth u : users) {
             list.add(new UserAndLocation(u, new Point(x, y)));
             y += 12;
         }
@@ -101,7 +101,7 @@ public class OverlayUserSelection extends OverlayBase {
         for (UserAndLocation u : list) {
             Point p = u.getLocation();
             boolean hover = isMouseIn(mouseX, mouseY, u.getBounds());
-            drawCenteredString(Minecraft.getMinecraft().fontRendererObj, u.getUser().username, p.x, p.y, hover ? 0xFFFF00 : 0xFFFFFF);
+            drawCenteredString(Minecraft.getMinecraft().fontRendererObj, u.getUser().getUser().username, p.x, p.y, hover ? 0xFFFF00 : 0xFFFFFF);
         }
     }
 
@@ -113,7 +113,7 @@ public class OverlayUserSelection extends OverlayBase {
         if (b != 0) {
             return false;
         }
-        User found = null;
+        UserAndAuth found = null;
         for (UserAndLocation u : list) {
             if (isMouseIn(x, y, u.getBounds())) {
                 found = u.getUser();

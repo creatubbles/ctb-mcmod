@@ -3,9 +3,11 @@ package com.creatubbles.ctbmod.common.config;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Set;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -20,7 +22,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
 
@@ -33,13 +39,32 @@ public class DataCache {
         @SerializedName("token_type")
         private String tokenType;
     }
+ 
+    @Value
+    @EqualsAndHashCode(exclude = "auth")
+    public static class UserAndAuth {
+        private User user;
+        private OAuth auth;
+    }
+    
+    private static class UserAndAuthBackwardsCompat implements JsonDeserializer<UserAndAuth> {
+        @Override
+        public UserAndAuth deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            JsonObject obj = json.getAsJsonObject();
+            if (obj.has("user") || obj.has("auth")) {
+                return new UserAndAuth(context.<User>deserialize(obj.get("user"), User.class), context.<OAuth>deserialize(obj.get("auth"), OAuth.class));
+            } else {
+                return new UserAndAuth(context.<User>deserialize(obj, User.class), null);
+            }
+        }
+    }
 
     public static final File cacheFolderv1 = new File(".", "creatubbles");
     public static final File cacheFolder = new File(".", "creatubblesv2");
     private static final File cache = new File(cacheFolder, "usercache.json");
-    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private static final Gson gson = new GsonBuilder().registerTypeAdapter(UserAndAuth.class, new UserAndAuthBackwardsCompat()).setPrettyPrinting().create();
 
-    private final Set<User> savedUsers = Sets.newHashSet();
+    private final Set<UserAndAuth> savedUsers = Sets.newHashSet();
 
     @Getter
     private OAuth OAuth;
@@ -76,11 +101,15 @@ public class DataCache {
         return new DataCache();
     }
 
-    public void activateUser(User user) {
+    public void activateUser(UserAndAuth user) {
         if (user != null) {
+            savedUsers.remove(user);
             savedUsers.add(user);
+            activeUser = user.getUser();
+            OAuth = user.getAuth();
+        } else {
+            activeUser = null;
         }
-        activeUser = user;
         save();
     }
 
@@ -89,7 +118,7 @@ public class DataCache {
         this.OAuth = response == null ? null : new OAuth(response.access_token, response.token_type);        
     }
     
-    public Collection<User> getSavedUsers() {
+    public Collection<UserAndAuth> getSavedUsers() {
         return ImmutableSet.copyOf(savedUsers);
     }
 

@@ -86,7 +86,7 @@ public class DataCache {
 
     public void setOAuth(OAuthAccessTokenResponse response) {
         // copy data for immutable state
-        this.OAuth = new OAuth(response.access_token, response.token_type);        
+        this.OAuth = response == null ? null : new OAuth(response.access_token, response.token_type);        
     }
     
     public Collection<User> getSavedUsers() {

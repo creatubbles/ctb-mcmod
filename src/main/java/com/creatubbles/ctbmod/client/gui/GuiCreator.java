@@ -135,6 +135,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                                 logout();
                             }
                             header = userReq.getResponse().message;
+                            return;
                         }
                     }
 
@@ -172,6 +173,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                                 logout();
                             }
                             header = creationsReq.getResponse().message;
+                            return;
                         }
                     }
 
@@ -716,6 +718,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
     private void logout() {
         setState(State.LOGGED_OUT, true);
+        CTBMod.cache.setOAuth(null);
         CTBMod.cache.activateUser(null);
 //        CTBMod.cache.setCreators(null);
         CTBMod.cache.setCreationCache(null);

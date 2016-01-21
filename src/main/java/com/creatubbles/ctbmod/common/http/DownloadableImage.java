@@ -65,32 +65,26 @@ public class DownloadableImage {
 
     private static class RescaledTexture extends AbstractTexture {
 
-        private final int[] textureData;
+        private int[] textureData;
 
         @Getter
         private final Size size;
 
         public RescaledTexture(BufferedImage actual, BufferedImage rescale) {
             textureData = new int[rescale.getWidth() * rescale.getHeight()];
-            rescale.getRGB(0, 0, rescale.getWidth(), rescale.getHeight(), getTextureData(), 0, rescale.getWidth());
+            rescale.getRGB(0, 0, rescale.getWidth(), rescale.getHeight(), textureData, 0, rescale.getWidth());
             size = Size.create(actual, rescale);
         }
         
         void uploadTexture() {
             TextureUtil.allocateTexture(this.getGlTextureId(), size.getScaled(), size.getScaled());
-            updateDynamicTexture();
+            TextureUtil.uploadTexture(this.getGlTextureId(), textureData, size.getScaled(), size.getScaled());
+            // Dereference the texture data as it uses up a large amount of memory, and is not needed
+            textureData = null;
         }
 
         @Override
         public void loadTexture(IResourceManager resourceManager) throws IOException {}
-
-        public void updateDynamicTexture() {
-            TextureUtil.uploadTexture(this.getGlTextureId(), getTextureData(), size.getScaled(), size.getScaled());
-        }
-
-        public int[] getTextureData() {
-            return this.textureData;
-        }
     }
 
     public static final ResourceLocation MISSING_TEXTURE = new ResourceLocation("missingno");

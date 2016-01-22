@@ -345,7 +345,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
             @Override
             protected void updateText() {
                 User u = getUser();
-                setToolTipText(StringUtils.capitalize(u.role), u.age, u.country);
+                setToolTipText(StringUtils.capitalize(u.role), u.age, u.country_name);
             }
         };
         addToolTip(userInfo);

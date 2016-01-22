@@ -8,9 +8,11 @@ import com.creatubbles.api.request.amazon.UploadS3ImageRequest;
 import com.creatubbles.api.request.creation.CreateCreationRequest;
 import com.creatubbles.api.request.creation.CreationsUploadsRequest;
 import com.creatubbles.api.request.creation.PingCreationsUploadsRequest;
+import com.creatubbles.api.response.amazon.UploadS3ImageResponse;
 import com.creatubbles.api.response.creation.CreateCreationResponse;
 import com.creatubbles.api.response.creation.CreationsUploadsResponse;
 
+import com.creatubbles.repack.endercore.common.util.ChatUtil;
 import lombok.SneakyThrows;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandException;
@@ -78,8 +80,11 @@ public class CommandUpload extends ClientCommandBase {
 
         // upload image to s3
         UploadS3ImageRequest uploadS3Image = new UploadS3ImageRequest(data, creationsUploadsResponse.url);
-        uploadS3Image.execute().getResponse();
-
+        UploadS3ImageResponse uploadS3Response = uploadS3Image.execute().getResponse();
+        if (!uploadS3Response.success) {
+            ChatUtil.sendNoSpamClient("Upload failed!");
+            return;
+        }
         PingCreationsUploadsRequest pingCreationsUploads = new PingCreationsUploadsRequest(creationsUploadsResponse.id, CommandLogin.accessToken);
         pingCreationsUploads.setData(""); // fixes null PUT error
         pingCreationsUploads.execute();

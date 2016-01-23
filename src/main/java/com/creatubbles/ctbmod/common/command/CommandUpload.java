@@ -3,6 +3,8 @@ package com.creatubbles.ctbmod.common.command;
 import java.io.File;
 import java.io.FileFilter;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import com.creatubbles.api.request.amazon.UploadS3ImageRequest;
 import com.creatubbles.api.request.creation.CreateCreationRequest;
@@ -26,7 +28,6 @@ import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumChatFormatting;
 
 import org.apache.commons.io.filefilter.FileFilterUtils;
-import org.apache.commons.lang3.ArrayUtils;
 
 public class CommandUpload extends ClientCommandBase {
 
@@ -65,7 +66,6 @@ public class CommandUpload extends ClientCommandBase {
 
         File screenshotsFolder = new File(Minecraft.getMinecraft().mcDataDir, "screenshots");
         File[] screenshots = screenshotsFolder.listFiles((FileFilter) FileFilterUtils.suffixFileFilter(".png"));
-        ArrayUtils.reverse(screenshots);
 
         int id = 0;
         try {
@@ -75,6 +75,7 @@ public class CommandUpload extends ClientCommandBase {
         if (id >= screenshots.length) {
             throw new NumberInvalidException("ID %d is too high! You only have %d screenshots, so ID must be between 0 and %d", id, screenshots.length, screenshots.length - 1);
         }
+        sortScreenshots(screenshots);
 
         byte[] data = Files.readAllBytes(screenshots[id].toPath());
 
@@ -92,5 +93,13 @@ public class CommandUpload extends ClientCommandBase {
         sender.addChatMessage(new ChatComponentText(EnumChatFormatting.GREEN.toString().concat("[Creation upload successful! (Click to view)]")).setChatStyle(new ChatStyle()
                 .setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, URL_BASE + creationID))
                 .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText("Click to view creation on website.")))));
+    }
+
+    private void sortScreenshots(File[] screenshots) {
+        Arrays.sort(screenshots, new Comparator<File>() {
+            public int compare(File f1, File f2) {
+                return Long.compare(f2.lastModified(), f1.lastModified());
+            }
+        });
     }
 }

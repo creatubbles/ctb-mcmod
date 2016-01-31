@@ -1,13 +1,11 @@
 package com.creatubbles.ctbmod.common.command;
 
-import com.creatubbles.api.request.amazon.UploadS3ImageRequest;
-import com.creatubbles.api.request.creation.CreateCreationRequest;
-import com.creatubbles.api.request.creation.CreationsUploadsRequest;
-import com.creatubbles.api.request.creation.PingCreationsUploadsRequest;
-import com.creatubbles.api.response.amazon.UploadS3ImageResponse;
-import com.creatubbles.api.response.creation.CreateCreationResponse;
-import com.creatubbles.api.response.creation.CreationsUploadsResponse;
-import com.creatubbles.repack.endercore.common.util.ChatUtil;
+import java.io.File;
+import java.io.FileFilter;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Comparator;
+
 import lombok.SneakyThrows;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandException;
@@ -19,14 +17,18 @@ import net.minecraft.event.HoverEvent;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumChatFormatting;
-import org.apache.commons.io.filefilter.FileFilterUtils;
-import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Comparator;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+
+import com.creatubbles.api.request.amazon.UploadS3ImageRequest;
+import com.creatubbles.api.request.creation.CreateCreationRequest;
+import com.creatubbles.api.request.creation.CreationsUploadsRequest;
+import com.creatubbles.api.request.creation.PingCreationsUploadsRequest;
+import com.creatubbles.api.response.amazon.UploadS3ImageResponse;
+import com.creatubbles.api.response.creation.CreateCreationResponse;
+import com.creatubbles.api.response.creation.CreationsUploadsResponse;
+import com.creatubbles.repack.endercore.common.util.ChatUtil;
+import com.google.common.base.Joiner;
 
 public class CommandUpload extends ClientCommandBase {
 
@@ -89,9 +91,10 @@ public class CommandUpload extends ClientCommandBase {
         UploadS3ImageRequest uploadS3Image = new UploadS3ImageRequest(data, creationsUploadsResponse.url);
         UploadS3ImageResponse uploadS3Response = uploadS3Image.execute().getResponse();
         if (!uploadS3Response.success) {
-            ChatUtil.sendNoSpamClient("Upload failed!");
+            ChatUtil.sendNoSpamClient("Upload failed: " + uploadS3Response.message);
             return;
         }
+        
         PingCreationsUploadsRequest pingCreationsUploads = new PingCreationsUploadsRequest(creationsUploadsResponse.id, CommandLogin.accessToken);
         pingCreationsUploads.setData(""); // fixes null PUT error
         pingCreationsUploads.execute();
@@ -102,50 +105,17 @@ public class CommandUpload extends ClientCommandBase {
     }
 
     private int getScreenshotId(String[] args) {
-        if (args.length == 1) {
+        try {
+            return Integer.parseInt(args[args.length - 1]);
+        } catch (NumberFormatException e) {
             return 0;
-        } else if (args[args.length - 1].endsWith("\"")) {
-            return 0;
-        } else if (args.length > 2 && args[args.length - 2].endsWith("\"") || args.length == 2) {
-            return Integer.valueOf(args[args.length - 1]);
         }
-        return 0;
     }
 
     private String getCreationName(String[] args) {
-        String name;
-        if (args.length == 1) {
-            if (args[0].startsWith("\"") && args[0].endsWith("\"") && args[0].length() > 2) {
-                name = args[0].substring(1, args[0].length() - 1);
-            } else {
-                name = args[0];
-            }
-        } else {
-            if (args[0].startsWith("\"") && args[args.length - 1].endsWith("\"")) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(args[0].substring(1));
-                sb.append(StringUtils.SPACE);
-                if (args.length > 2) {
-                    sb.append(StringUtils.join(Arrays.copyOfRange(args, 1, args.length - 1), StringUtils.SPACE));
-                    sb.append(StringUtils.SPACE);
-                }
-                sb.append(args[args.length - 1].substring(0, args[args.length - 1].length() - 1));
-                name = sb.toString();
-            } else if (args[0].startsWith("\"") && args.length > 2 && args[args.length - 2].endsWith("\"")) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(args[0].substring(1));
-                sb.append(StringUtils.SPACE);
-                if (args.length > 3) {
-                    sb.append(StringUtils.join(Arrays.copyOfRange(args, 1, args.length - 2), StringUtils.SPACE));
-                    sb.append(StringUtils.SPACE);
-                }
-                sb.append(args[args.length - 2].substring(0, args[args.length - 2].length() - 1));
-                name = sb.toString();
-            } else {
-                name = args[0];
-            }
-        }
-        return name;
+        String s = Joiner.on(' ').join(args);
+        // If no quotes, assume one-word name
+        return s.contains("\"") ? s.substring(s.indexOf('"') + 1, s.lastIndexOf('"')) : args[1];
     }
 
     private void sortScreenshots(File[] screenshots) {

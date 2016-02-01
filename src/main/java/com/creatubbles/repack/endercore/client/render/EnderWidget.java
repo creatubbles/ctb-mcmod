@@ -25,6 +25,7 @@ public enum EnderWidget implements IWidgetIcon {
     TICK(0, 192),
     MINUS(16, 192),
     CROSS(64, 192),
+    PLUS(80, 192),
 
     VSCROLL_THUMB_OFF(234, 80, 11, 8),
     VSCROLL_THUMB_HOVER_OFF(234, 88, 11, 8),

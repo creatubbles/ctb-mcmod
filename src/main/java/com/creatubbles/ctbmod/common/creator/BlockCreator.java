@@ -13,7 +13,7 @@ import net.minecraft.world.World;
 import team.chisel.ctmlib.ICTMBlock;
 
 import com.creatubbles.ctbmod.CTBMod;
-import com.creatubbles.ctbmod.client.gui.GuiCreator;
+import com.creatubbles.ctbmod.client.gui.creator.GuiCreator;
 import com.creatubbles.repack.endercore.common.BlockEnder;
 
 import cpw.mods.fml.common.network.IGuiHandler;

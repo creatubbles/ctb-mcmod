@@ -1,26 +1,28 @@
-package com.creatubbles.ctbmod.client.gui;
+package com.creatubbles.ctbmod.client.gui.creator;
 
+import java.awt.Dimension;
 import java.awt.Rectangle;
 
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.client.gui.Gui;
-
-import org.lwjgl.util.Dimension;
 
 import com.creatubbles.repack.endercore.api.client.gui.IGuiOverlay;
 import com.creatubbles.repack.endercore.api.client.gui.IGuiScreen;
+import com.creatubbles.repack.endercore.client.gui.GuiContainerBase;
 
-public abstract class OverlayBase extends Gui implements IGuiOverlay {
+public abstract class OverlayBase<T extends GuiContainerBase> extends Gui implements IGuiOverlay {
 
     protected final int xRel, yRel;
 
     @Getter
-    private final Dimension size;
+    @Setter
+    private Dimension size;
 
     private int xAbs, yAbs;
 
     @Getter
-    private GuiCreator gui;
+    private T gui;
 
     @Getter
     private boolean visible;
@@ -31,10 +33,11 @@ public abstract class OverlayBase extends Gui implements IGuiOverlay {
         size = dimension;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void init(IGuiScreen screen) {
         // Hack for now
-        gui = (GuiCreator) screen;
+        gui = (T) screen;
         xAbs = xRel + screen.getGuiLeft();
         yAbs = yRel + screen.getGuiTop();
     }
@@ -50,7 +53,7 @@ public abstract class OverlayBase extends Gui implements IGuiOverlay {
 
     @Override
     public Rectangle getBounds() {
-        return new Rectangle(getX(), getY(), getSize().getWidth(), getSize().getHeight());
+        return new Rectangle(getX(), getY(), getWidth(), getHeight());
     }
 
     @Override
@@ -61,6 +64,10 @@ public abstract class OverlayBase extends Gui implements IGuiOverlay {
     @Override
     public boolean isMouseInBounds(int mouseX, int mouseY) {
         return getBounds().contains(mouseX, mouseY);
+    }
+    
+    @Override
+    public void guiClosed() {
     }
 
     /**
@@ -76,11 +83,11 @@ public abstract class OverlayBase extends Gui implements IGuiOverlay {
     }
 
     public int getWidth() {
-        return getSize().getWidth();
+        return getSize().width;
     }
 
     public int getHeight() {
-        return getSize().getHeight();
+        return getSize().height;
     }
 
     public int getX() {

@@ -2,6 +2,7 @@ package com.creatubbles.repack.endercore.client.gui.widget;
 
 import java.lang.reflect.Field;
 
+import lombok.Setter;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiTextField;
 
@@ -42,8 +43,10 @@ public class TextFieldEnder extends GuiTextField implements IHideable {
         }
     };
 
-    private final int xOrigin;
-    private final int yOrigin;
+    @Setter
+    private int xOrigin;
+    @Setter
+    private int yOrigin;
     private ICharFilter filter;
 
     private static Field canLoseFocus;

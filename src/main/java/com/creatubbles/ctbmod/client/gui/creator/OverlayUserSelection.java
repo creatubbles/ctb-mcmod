@@ -1,5 +1,6 @@
-package com.creatubbles.ctbmod.client.gui;
+package com.creatubbles.ctbmod.client.gui.creator;
 
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.Collection;
@@ -9,14 +10,12 @@ import lombok.Value;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 
-import org.lwjgl.util.Dimension;
-
 import com.creatubbles.api.core.User;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.repack.endercore.api.client.gui.IGuiScreen;
 import com.google.common.collect.Lists;
 
-public class OverlayUserSelection extends OverlayBase {
+public class OverlayUserSelection extends OverlayBase<GuiCreator> {
 
     @Value
     private static class UserAndLocation {

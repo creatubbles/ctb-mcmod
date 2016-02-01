@@ -1,4 +1,4 @@
-package com.creatubbles.ctbmod.client.gui;
+package com.creatubbles.ctbmod.client.gui.creator;
 
 import javax.annotation.Nullable;
 

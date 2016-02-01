@@ -18,7 +18,7 @@ import team.chisel.ctmlib.Drawing;
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.Image.ImageType;
 import com.creatubbles.ctbmod.CTBMod;
-import com.creatubbles.ctbmod.client.gui.OverlayCreationList;
+import com.creatubbles.ctbmod.client.gui.GuiUtil;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
 import com.creatubbles.ctbmod.common.painting.BlockPainting;
 import com.creatubbles.ctbmod.common.painting.TilePainting;
@@ -80,7 +80,7 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
 
         ResourceLocation res = image.getResource(ImageType.original);
         if (res == DownloadableImage.MISSING_TEXTURE) {
-            res = OverlayCreationList.LOADING_TEX;
+            res = GuiUtil.LOADING_TEX_FULL;
             width = 16;
             height = 16;
             scaledSize = 16;

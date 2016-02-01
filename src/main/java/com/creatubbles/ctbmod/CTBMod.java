@@ -1,9 +1,5 @@
 package com.creatubbles.ctbmod;
 
-import static com.creatubbles.ctbmod.CTBMod.MODID;
-import static com.creatubbles.ctbmod.CTBMod.NAME;
-import static com.creatubbles.ctbmod.CTBMod.VERSION;
-
 import java.util.Locale;
 
 import net.minecraft.init.Blocks;
@@ -31,6 +27,8 @@ import com.creatubbles.ctbmod.common.creator.BlockCreator;
 import com.creatubbles.ctbmod.common.network.PacketHandler;
 import com.creatubbles.ctbmod.common.painting.BlockPainting;
 import com.creatubbles.repack.endercore.common.config.ConfigProcessor;
+
+import static com.creatubbles.ctbmod.CTBMod.*;
 
 @Mod(modid = MODID, name = NAME, version = VERSION, acceptedMinecraftVersions = "[@MCVERSION@, 1.9)")
 public class CTBMod {

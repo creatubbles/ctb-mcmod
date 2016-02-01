@@ -618,4 +618,11 @@ public abstract class GuiContainerBase extends GuiContainer implements ToolTipRe
     public void doActionPerformed(GuiButton guiButton) throws IOException {
         actionPerformed(guiButton);
     }
+    
+    @Override
+    public void onGuiClosed() {
+        for (IGuiOverlay overlay : overlays) {
+            overlay.guiClosed();
+        }
+    }
 }

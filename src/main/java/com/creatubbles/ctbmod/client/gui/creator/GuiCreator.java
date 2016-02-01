@@ -1,4 +1,4 @@
-package com.creatubbles.ctbmod.client.gui;
+package com.creatubbles.ctbmod.client.gui.creator;
 
 import static net.minecraft.util.EnumChatFormatting.*;
 
@@ -33,6 +33,9 @@ import com.creatubbles.api.request.creation.GetCreationsRequest;
 import com.creatubbles.api.request.user.UserProfileRequest;
 import com.creatubbles.api.response.creation.GetCreationsResponse;
 import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.ctbmod.client.gui.GuiButtonHideable;
+import com.creatubbles.ctbmod.client.gui.IHideable;
+import com.creatubbles.ctbmod.client.gui.upload.GuiScreenshotList;
 import com.creatubbles.ctbmod.common.config.Configs;
 import com.creatubbles.ctbmod.common.config.DataCache.OAuth;
 import com.creatubbles.ctbmod.common.config.DataCache.UserAndAuth;
@@ -109,6 +112,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
             try {
                 checkCancel();
 
+                loadStep = "Authenticating";
                 if (getAccessToken() == null) {
                     setState(State.LOGGING_IN, true);
                     loginReq = new OAuthAccessTokenRequest(tfEmail.getText(), tfActualPassword.getText());
@@ -128,6 +132,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                     }
                     
                     if (getUser() == null) {
+                        loadStep = "Retrieving Profile";
                         userReq = new UserProfileRequest(getAccessToken());
                         userReq.execute();
                         if (userReq.wasSuccessful()) {
@@ -157,6 +162,8 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
                     Creation[] creations = creationList.getCreations();
                     if (creations == null) {
+                        String template = "Loading Creations: Page %d of %s";
+                        loadStep = String.format(template, 1, "?");
                         setState(State.LOGGING_IN, true);
 
                         GetCreationsRequest creationsReq = new GetCreationsRequest(getUser().id, getAccessToken());
@@ -165,6 +172,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                             GetCreationsResponse resp = creationsReq.getResponse();
                             creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[] {}));
                             for (int i = 2; i <= resp.total_pages && i <= 10; i++) {
+                                loadStep = String.format(template, i, "" + resp.total_pages);
                                 creationsReq = new GetCreationsRequest(getUser().id, i, getAccessToken());
                                 creationsReq.execute();
                                 resp = creationsReq.getResponse();
@@ -227,7 +235,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
     }
 
     private static final int XSIZE_DEFAULT = 176, XSIZE_SIDEBAR = 270;
-    private static final int ID_LOGIN = 0, ID_USER = 1, ID_CANCEL = 2, ID_LOGOUT = 3, ID_CREATE = 4;
+    private static final int ID_LOGIN = 0, ID_USER = 1, ID_CANCEL = 2, ID_LOGOUT = 3, ID_CREATE = 4, ID_UPLOAD = 9;
     private static final int ID_H_PLUS = 5, ID_H_MINUS = 6, ID_W_PLUS = 7, ID_W_MINUS = 8;
     private static final ResourceLocation BG_TEX = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/creator.png");
     private static final String DEFAULT_HEADER = "Please log in to Creatubbles:";
@@ -248,7 +256,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
     private VScrollbar scrollbar;
     private PasswordTextField tfVisualPassword;
     private GuiButtonHideable loginButton, userButton, cancelButton;
-    private IconButton logoutButton, createButton;
+    private IconButton logoutButton, createButton, uploadButton;
     private MultiIconButton heightUpButton, heightDownButton, widthUpButton, widthDownButton;
     private GuiToolTip userInfo, resourceInfo, creationInfo;
     private OverlayCreationList creationList;
@@ -264,6 +272,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
     private UserProfileRequest userReq;
 
     private String header = DEFAULT_HEADER;
+    private String loadStep = "";
 
     private TileCreator te;
 
@@ -330,6 +339,9 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
         creationList.addCallback(selectedCreation);
         creationList.addCallback(this);
         addOverlay(selectedCreation);
+        
+        uploadButton = new IconButton(this, ID_UPLOAD, 152, 106, EnderWidget.PLUS);
+        uploadButton.setToolTip("Upload Screenshot");
 
         userInfo = new GuiToolTip(new Rectangle()) {
 
@@ -395,6 +407,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
         addButton(cancelButton = new GuiButtonHideable(ID_CANCEL, guiLeft + xSize / 2 - 50, guiTop + 90, 100, 20, "Cancel"));
         logoutButton.onGuiInit();
         createButton.onGuiInit();
+        uploadButton.onGuiInit();
         heightUpButton.onGuiInit();
         heightDownButton.onGuiInit();
         widthUpButton.onGuiInit();
@@ -417,6 +430,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
             visibleMap.putAll(cancelButton, Lists.newArrayList(State.USER_SELECT, State.LOGGING_IN));
             visibleMap.put(logoutButton, State.LOGGED_IN);
             visibleMap.put(createButton, State.LOGGED_IN);
+            visibleMap.put(uploadButton, State.LOGGED_IN);
             visibleMap.put(heightUpButton, State.LOGGED_IN);
             visibleMap.put(heightDownButton, State.LOGGED_IN);
             visibleMap.put(widthUpButton, State.LOGGED_IN);
@@ -583,6 +597,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                 y += 25;
                 String s = thread.isInterrupted() ? "Canceling..." : "Logging in...";
                 drawCenteredString(getFontRenderer(), s, x, y, 0xFFFFFF);
+                drawCenteredString(getFontRenderer(), loadStep, x, y + 14, 0xFFFFFF);
                 break;
         }
         super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
@@ -709,6 +724,9 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                     thread.interrupt();
                 }
                 logout();
+                break;
+            case ID_UPLOAD:
+                Minecraft.getMinecraft().displayGuiScreen(new GuiScreenshotList(this));
                 break;
             case ID_W_MINUS:
                 te.setWidth(te.getWidth() - 1);

@@ -1,5 +1,6 @@
-package com.creatubbles.ctbmod.client.gui;
+package com.creatubbles.ctbmod.client.gui.creator;
 
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.Arrays;
@@ -15,17 +16,17 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.lwjgl.util.Dimension;
 
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.Image.ImageType;
 import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.ctbmod.client.gui.GuiUtil;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
 import com.creatubbles.repack.endercore.api.client.gui.IGuiScreen;
 import com.creatubbles.repack.endercore.client.gui.widget.GuiToolTip;
 import com.google.common.collect.Lists;
 
-public class OverlayCreationList extends OverlayBase {
+public class OverlayCreationList extends OverlayBase<GuiCreator> {
 
     @Value
     private class CreationAndLocation {
@@ -51,7 +52,6 @@ public class OverlayCreationList extends OverlayBase {
         }
     }
 
-    public static final ResourceLocation LOADING_TEX = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/bubble_outline.png");
 
     @Getter
     private Creation[] creations;
@@ -118,7 +118,7 @@ public class OverlayCreationList extends OverlayBase {
         int col = 0;
 
         // This is the dimensions we have to work with for thumbnails
-        int usableWidth = getSize().getWidth() - paddingX * 2;
+        int usableWidth = getSize().width - paddingX * 2;
 
         // The minimum size a thumbnail can take up
         int widthPerThumbnail = thumbnailSize + minSpacing;
@@ -220,7 +220,7 @@ public class OverlayCreationList extends OverlayBase {
                 int w = 16, h = 16, scaledSize = 16;
                 if (!img.hasSize(type)) {
                     GlStateManager.enableBlend();
-                    res = LOADING_TEX;
+                    res = null;
                 } else {
                     w = img.getWidth(type);
                     h = img.getHeight(type);
@@ -228,11 +228,8 @@ public class OverlayCreationList extends OverlayBase {
                 }
 
                 if (res != null) {
-                    if (res != LOADING_TEX) {
-                        // Draw selection box
-                        if (isMouseInBounds(mouseX, mouseY) && c.getBounds().contains(mouseX - getGui().getGuiLeft(), mouseY - getGui().getGuiTop())) {
-                            drawBoundingBox(c, 0xFFFFFFFF);
-                        }
+                    if (isMouseInBounds(mouseX, mouseY) && c.getBounds().contains(mouseX - getGui().getGuiLeft(), mouseY - getGui().getGuiTop())) {
+                        drawBoundingBox(c, 0xFFFFFFFF);
                     }
                     mc.getTextureManager().bindTexture(res);
                 }
@@ -252,7 +249,16 @@ public class OverlayCreationList extends OverlayBase {
                 if (clipV) {
                     v = h - (float) heightRatio * h;
                 }
-                drawScaledCustomSizeModalRect(x, y + Math.max(0, pastTop), 0, v, w, (int) (h * heightRatio), thumbnailSize, height, scaledSize, scaledSize);
+                
+                h *= heightRatio;
+
+                if (res == null) {
+                    if (heightRatio == 1) {
+                        GuiUtil.drawLoadingTex(x, y, w, h);
+                    }
+                } else {
+                    drawScaledCustomSizeModalRect(x, y + Math.max(0, pastTop), 0, v, w, (int) (h * heightRatio), thumbnailSize, height, scaledSize, scaledSize);
+                }
                 GlStateManager.popMatrix();
             }
         }

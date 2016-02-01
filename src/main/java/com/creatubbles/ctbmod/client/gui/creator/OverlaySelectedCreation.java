@@ -1,4 +1,7 @@
-package com.creatubbles.ctbmod.client.gui;
+package com.creatubbles.ctbmod.client.gui.creator;
+
+import java.awt.Dimension;
+import java.awt.Rectangle;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -6,15 +9,14 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 
-import org.lwjgl.util.Dimension;
-import org.lwjgl.util.Rectangle;
-
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.Image.ImageType;
+import com.creatubbles.ctbmod.client.gui.GuiUtil;
+import com.creatubbles.ctbmod.client.gui.TextUtil;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
 import com.creatubbles.repack.endercore.client.gui.button.IconButton;
 
-public class OverlaySelectedCreation extends OverlayBase implements ISelectionCallback {
+public class OverlaySelectedCreation extends OverlayBase<GuiCreator> implements ISelectionCallback {
 
     private final IconButton createButton;
 
@@ -48,28 +50,26 @@ public class OverlaySelectedCreation extends OverlayBase implements ISelectionCa
                 imgHeight = img.getHeight(ImageType.full_view);
                 scaledSize = img.getScaledSize(ImageType.full_view);
             } else {
-                res = OverlayCreationList.LOADING_TEX;
+                res = null;
                 img.download(ImageType.full_view);
             }
 
-            Minecraft.getMinecraft().getTextureManager().bindTexture(res);
-
-            Rectangle bounds = new Rectangle(x, y, 48, 48);
-            if (imgWidth > imgHeight) {
-                bounds.setHeight((int) (bounds.getHeight() * ((double) imgHeight / (double) imgWidth)));
-                bounds.translate(0, (48 - bounds.getHeight()) / 2);
+            if (res != null) {
+                Minecraft.getMinecraft().getTextureManager().bindTexture(res);
             } else {
-                bounds.setWidth((int) (bounds.getWidth() * ((double) imgWidth / (double) imgHeight)));
-                bounds.translate((48 - bounds.getWidth()) / 2, 0);
+                GuiUtil.drawLoadingTex(x, y, 48, 48);
+                return;
             }
 
-            drawScaledCustomSizeModalRect(bounds.getX(), bounds.getY(), 0, 0, imgWidth, imgHeight, bounds.getWidth(), bounds.getHeight(), scaledSize, scaledSize);
+            Rectangle bounds = new Rectangle(x, y, 48, 48);
+            Rectangle area = new Rectangle(0, 0, imgWidth, imgHeight);
+            GuiUtil.drawRectInscribed(area, bounds, scaledSize, scaledSize);
 
             x += 24;
             y += 56;
             TextUtil.drawCenteredSplitString(fr, EnumChatFormatting.ITALIC + selected.name, x, y, 54, 0xFFFFFF);
         } else {
-            Minecraft.getMinecraft().getTextureManager().bindTexture(OverlayCreationList.LOADING_TEX);
+            Minecraft.getMinecraft().getTextureManager().bindTexture(GuiUtil.LOADING_TEX_FULL);
             drawScaledCustomSizeModalRect(x, y, 0, 0, 16, 16, 48, 48, 16, 16);
             x += 24;
             y += 56;

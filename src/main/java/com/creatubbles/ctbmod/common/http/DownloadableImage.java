@@ -30,6 +30,8 @@ import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.Image;
 import com.creatubbles.api.core.Image.ImageType;
 import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.ctbmod.client.gui.GuiUtil;
+import com.creatubbles.ctbmod.client.gui.LazyLoadedTexture;
 import com.creatubbles.ctbmod.common.config.DataCache;
 import com.creatubbles.ctbmod.common.util.JsonUtil;
 import com.google.common.collect.Maps;
@@ -63,24 +65,14 @@ public class DownloadableImage {
         }
     }
 
-    private static class RescaledTexture extends AbstractTexture {
-
-        private int[] textureData;
+    private static class RescaledTexture extends LazyLoadedTexture {
 
         @Getter
         private final Size size;
 
         public RescaledTexture(BufferedImage actual, BufferedImage rescale) {
-            textureData = new int[rescale.getWidth() * rescale.getHeight()];
-            rescale.getRGB(0, 0, rescale.getWidth(), rescale.getHeight(), textureData, 0, rescale.getWidth());
+            super(rescale);
             size = Size.create(actual, rescale);
-        }
-        
-        void uploadTexture() {
-            TextureUtil.allocateTexture(this.getGlTextureId(), size.getScaled(), size.getScaled());
-            TextureUtil.uploadTexture(this.getGlTextureId(), textureData, size.getScaled(), size.getScaled());
-            // Dereference the texture data as it uses up a large amount of memory, and is not needed
-            textureData = null;
         }
 
         @Override
@@ -89,7 +81,7 @@ public class DownloadableImage {
 
     public static final ResourceLocation MISSING_TEXTURE = new ResourceLocation("missingno");
 
-    private static Executor downloadExecutor = new ThreadPoolExecutor(0, 3, 20, TimeUnit.SECONDS, Queues.<Runnable> newLinkedBlockingQueue());
+    private static Executor downloadExecutor = new ThreadPoolExecutor(0, 1, 20, TimeUnit.SECONDS, Queues.<Runnable> newLinkedBlockingQueue());
 
     static {
         Minecraft.getMinecraft().getTextureManager().loadTexture(MISSING_TEXTURE, TextureUtil.missingTexture);
@@ -223,25 +215,7 @@ public class DownloadableImage {
                         }
 
                         final BufferedImage original = image;
-
-                        // Find the biggest dimension of the image
-                        int maxDim = Math.max(image.getWidth(), image.getHeight());
-
-                        // Find nearest PoT which can contain the downloaded/read image
-                        int targetDim = 2;
-                        while (targetDim < maxDim) {
-                            targetDim *= 2;
-                        }
-
-                        // Create a blank image with PoT size
-                        final BufferedImage resized = new BufferedImage(targetDim, targetDim, image.getType());
-                        // Write the downloaded image into the top left of the blank image
-                        Graphics2D graphics = resized.createGraphics();
-                        try {
-                            graphics.drawImage(image, 0, 0, null);
-                        } finally {
-                            graphics.dispose();
-                        }
+                        final BufferedImage resized = GuiUtil.upsize(original, true);
                         
                         final RescaledTexture texture = new RescaledTexture(original, resized);
 

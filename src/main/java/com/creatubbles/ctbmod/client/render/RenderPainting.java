@@ -35,7 +35,7 @@ public class RenderPainting extends TileEntitySpecialRenderer<TilePainting> {
 
             ResourceLocation res = image.getResource(ImageType.original);
             if (res == DownloadableImage.MISSING_TEXTURE) {
-                res = GuiUtil.LOADING_TEX_FULL;
+                res = GuiUtil.Bubbles.TEXTURE;
                 width = 16;
                 height = 16;
                 scaledSize = 16;

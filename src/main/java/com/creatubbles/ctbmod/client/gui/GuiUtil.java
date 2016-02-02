@@ -3,10 +3,11 @@ package com.creatubbles.ctbmod.client.gui;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
@@ -20,33 +21,68 @@ import net.minecraft.inventory.Container;
 import net.minecraft.util.ResourceLocation;
 
 import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.repack.endercore.client.render.IWidgetIcon;
+import com.creatubbles.repack.endercore.client.render.IWidgetMap;
 
 public class GuiUtil extends Gui {
     
-    private static final GuiUtil INSTANCE = new GuiUtil();
+    @AllArgsConstructor
+    @Getter
+    public enum Bubbles implements IWidgetIcon {
+        
+        BLUE(0, 0),
+        GREEN(16, 0),
+        CLEAR(32, 0),
+        
+        OUTER(0, 16),
+        INNER(16, 16);
+        
+        public static final ResourceLocation TEXTURE = new ResourceLocation(CTBMod.MODID, "textures/gui/bubbles.png");
 
-    public static final ResourceLocation LOADING_TEX_FULL = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/bubble_outline.png");
-    public static final ResourceLocation LOADING_TEX_BG = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/bubble_outer.png");
-    public static final ResourceLocation LOADING_TEX_ANIM = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/bubble_inner.png");
+        public static final IWidgetMap map = new IWidgetMap.WidgetMapImpl(64, TEXTURE);
+
+        public final int x;
+        public final int y;
+        public final int width;
+        public final int height;
+        public final IWidgetIcon overlay;
+
+        Bubbles(int x, int y) {
+            this(x, y, null);
+        }
+
+        Bubbles(int x, int y, IWidgetIcon overlay) {
+            this(x, y, 16, 16, overlay);
+        }
+
+        Bubbles(int x, int y, int width, int height) {
+            this(x, y, width, height, null);
+        }
+
+        @Override
+        public IWidgetMap getMap() {
+            return map;
+        }
+    }
+    
+    private static final GuiUtil INSTANCE = new GuiUtil();
 
     public static void drawLoadingTex(int x, int y, int width, int height) {
         long millis = System.currentTimeMillis();
         float rot = (float) (((double) millis / 10) % 360f);
 
         TextureManager engine = Minecraft.getMinecraft().getTextureManager();
-        engine.bindTexture(LOADING_TEX_BG);
-        ITextureObject tex = engine.getTexture(LOADING_TEX_BG);
+        engine.bindTexture(Bubbles.TEXTURE);
 
         GlStateManager.pushMatrix();
         {
             GlStateManager.translate(x, y, 0);
 
             rotateAroundCenter(-rot, width, height);
-            drawScaledCustomSizeModalRect(0, 0, 0, 0, 16, 16, width, height, 16, 16);
+            Bubbles.map.render(Bubbles.OUTER, 0, 0, width, height, 0, true);
 
-            engine.bindTexture(LOADING_TEX_ANIM);
             rotateAroundCenter(rot * 2, width, height);
-            drawScaledCustomSizeModalRect(0, 0, 0, 0, 16, 16, width, height, 16, 16);
+            Bubbles.map.render(Bubbles.INNER, 0, 0, width, height, 0, true);
         }
         GlStateManager.popMatrix();
     }

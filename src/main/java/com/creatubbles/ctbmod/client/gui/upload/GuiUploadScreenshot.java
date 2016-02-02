@@ -44,37 +44,41 @@ public class GuiUploadScreenshot extends GuiContainerBase {
     private static final String URL_BASE = "https://www.creatubbles.com/creations/";
 
     private final GuiScreenshotList parent;
-    private final File file;
+    private final File[] files;
+    private final int index;
 
     private Thread thread;
     private ListenableFuture<?> uploadTask;
     private LazyLoadedTexture tex;
     private Dimension size;
     
-    private GuiButton buttonUpload, buttonBack;
+    private GuiButton buttonUpload, buttonBack, buttonNext, buttonPrev;
 
     private final TextFieldEnder tfName;
 
     @SneakyThrows
-    public GuiUploadScreenshot(GuiScreenshotList parent, File file) {
+    public GuiUploadScreenshot(GuiScreenshotList parent, final File[] files, final int index) {
         super(GuiUtil.dummyContainer());
         this.parent = parent;
-        this.file = file;
+        this.files = files;
+        this.index = index;
 
         thread = new Thread(new Runnable() {
 
             @Override
             @SneakyThrows
             public void run() {
-                BufferedImage original = ImageIO.read(GuiUploadScreenshot.this.file);
+                BufferedImage original = ImageIO.read(files[index]);
                 size = new Dimension(original.getWidth(), original.getHeight());
-                tex = new LazyLoadedTexture(GuiUtil.upsize(ImageIO.read(GuiUploadScreenshot.this.file), false));
+                tex = new LazyLoadedTexture(GuiUtil.upsize(ImageIO.read(files[index]), false));
                 uploadTask = Minecraft.getMinecraft().addScheduledTask(new Runnable() {
 
                     @Override
                     public void run() {
-                        tex.uploadTexture();
-                        Minecraft.getMinecraft().getTextureManager().loadTexture(SCREENSHOT_RES, tex);
+                        if (Minecraft.getMinecraft().currentScreen == GuiUploadScreenshot.this) {
+                            tex.uploadTexture();
+                            Minecraft.getMinecraft().getTextureManager().loadTexture(SCREENSHOT_RES, tex);
+                        }
                     }
                 });
             }
@@ -99,12 +103,19 @@ public class GuiUploadScreenshot extends GuiContainerBase {
         int x = (width / 2) + (width / 4);
         int w = width / 5;
         addButton(buttonUpload = new GuiButton(0, x - (w / 10) - w, height - 30, w, 20, "Upload!"));
-        addButton(buttonBack = new GuiButton(-1, x + (w / 10), height - 30, w, 20, "Back"));
+        addButton(buttonBack = new GuiButton(-99, x + (w / 10), height - 30, w, 20, "Back"));
+        
+        x = width / 2;
+        w = (width - 150) / 4;
+        addButton(buttonPrev = new GuiButton(-1, x - w - 10, height - 75, w, 20, "<< Prev"));
+        addButton(buttonNext = new GuiButton(1, x + 10, height - 75, w, 20, "Next >> "));
     }
 
     @Override
     public void onGuiClosed() {
-        GL11.glDeleteTextures(tex.getGlTextureId());
+        if (tex != null) { // Someone is spamming next/prev
+            GL11.glDeleteTextures(tex.getGlTextureId());
+        }
     }
 
     @Override
@@ -116,6 +127,8 @@ public class GuiUploadScreenshot extends GuiContainerBase {
     protected void drawGuiContainerBackgroundLayer(float par1, int mouseX, int mouseY) {
         this.drawBackground(0);
         buttonUpload.enabled = !tfName.getText().isEmpty();
+        buttonNext.enabled = index != files.length - 1;
+        buttonPrev.enabled = index != 0;
         super.drawGuiContainerBackgroundLayer(par1, mouseX, mouseY);
         GuiUtil.drawSlotBackground(0, 20, width, height - 60);
     }
@@ -124,11 +137,11 @@ public class GuiUploadScreenshot extends GuiContainerBase {
     protected void drawForegroundImpl(int mouseX, int mouseY) {
         super.drawForegroundImpl(mouseX, mouseY);
 
-        drawCenteredString(fontRendererObj, file.getName(), width / 2, 10 - (fontRendererObj.FONT_HEIGHT / 2), 0xFFFFFF);
+        drawCenteredString(fontRendererObj, files[index].getName(), width / 2, 10 - (fontRendererObj.FONT_HEIGHT / 2), 0xFFFFFF);
 
         if (uploadTask != null && uploadTask.isDone()) {
             Minecraft.getMinecraft().getTextureManager().bindTexture(SCREENSHOT_RES);
-            GuiUtil.drawRectInscribed(new Rectangle(size), new Rectangle(50, 40, width - 100, height - 100), tex.getWidth(), tex.getHeight());
+            GuiUtil.drawRectInscribed(new Rectangle(size), new Rectangle(50, 40, width - 100, height - 120), tex.getWidth(), tex.getHeight());
         } else {
             GlStateManager.enableBlend();
             GuiUtil.drawLoadingTex(width / 2 - 32, height / 2 - 25 - 32, 64, 64);
@@ -139,9 +152,7 @@ public class GuiUploadScreenshot extends GuiContainerBase {
     protected void actionPerformed(GuiButton button) throws IOException {
         super.actionPerformed(button);
 
-        if (button.id < 0) {
-            Minecraft.getMinecraft().displayGuiScreen(parent);
-        } else {
+        if (button.id == 0) {
 
             final String accessToken = CTBMod.cache.getOAuth().getAccessToken();
             final String name = tfName.getText();
@@ -174,7 +185,7 @@ public class GuiUploadScreenshot extends GuiContainerBase {
                         CreationsUploadsRequest creationsUploads = new CreationsUploadsRequest(createCreationResponse.creation.id, accessToken);
                         CreationsUploadsResponse creationsUploadsResponse = creationsUploads.execute().getResponse();
 
-                        byte[] data = FileUtils.readFileToByteArray(file);
+                        byte[] data = FileUtils.readFileToByteArray(files[index]);
 
                         // upload image to s3
                         UploadS3ImageRequest uploadS3Image = new UploadS3ImageRequest(data, creationsUploadsResponse.url);
@@ -217,6 +228,13 @@ public class GuiUploadScreenshot extends GuiContainerBase {
                 }
             }).start();
           
+        } else if (button.id == -99) {
+            Minecraft.getMinecraft().displayGuiScreen(parent);
+        } else {
+            int newIndex = index + button.id;
+            if (newIndex >= 0 && newIndex < files.length) {
+                Minecraft.getMinecraft().displayGuiScreen(new GuiUploadScreenshot(parent, files, newIndex));
+            }
         }
     }
 }

@@ -27,6 +27,7 @@ import com.creatubbles.ctbmod.client.gui.creator.OverlayBase;
 import com.creatubbles.ctbmod.client.gui.upload.ThumbnailStitcher.Progress;
 import com.creatubbles.repack.endercore.api.client.gui.IGuiScreen;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -57,6 +58,15 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
         super(x, y, dimension);
 
         final File[] files = new File(Minecraft.getMinecraft().mcDataDir, "screenshots").listFiles((FilenameFilter) FileFilterUtils.suffixFileFilter(".png"));
+        
+        if (files == null) {
+            screenshots = Lists.newArrayList();
+            stitcher = new ThumbnailStitcher();
+            stitcher.loadFiles();
+            stitchTask = Futures.immediateFuture(null);
+            return;
+        }
+        
         if (Arrays.equals(files, prevFiles)) {
             stitcher = prevStitcher;
         } else {
@@ -116,7 +126,7 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
                     int perRow = (getWidth() - padding) / (padding + thumbSize);
                     int perCol = (getHeight() - padding) / (padding + thumbSize);
 
-                    pages = (int) Math.ceil(((double) screenshots.size() / (perRow * perCol)));
+                    pages = Math.max(1, (int) Math.ceil(((double) screenshots.size() / (perRow * perCol))));
                     page = MathHelper.clamp_int(page, 0, pages - 1);
 
                     int xOff = (getWidth() - (padding + ((thumbSize + padding) * perRow))) / 2;

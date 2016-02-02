@@ -2,6 +2,7 @@ package com.creatubbles.repack.endercore.client.gui.button;
 
 import java.awt.Rectangle;
 
+import lombok.Setter;
 import net.minecraft.client.Minecraft;
 
 import org.lwjgl.opengl.GL11;
@@ -18,7 +19,9 @@ public class IconButton extends GuiButtonHideable {
     public static final int DEFAULT_HEIGHT = 16;
 
     protected IWidgetIcon icon;
+    @Setter
     private int xOrigin;
+    @Setter
     private int yOrigin;
 
     protected IGuiScreen gui;

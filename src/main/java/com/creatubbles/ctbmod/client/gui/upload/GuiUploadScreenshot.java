@@ -20,6 +20,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.opengl.GL11;
 
 import com.creatubbles.api.request.amazon.UploadS3ImageRequest;
@@ -34,7 +35,9 @@ import com.creatubbles.ctbmod.client.gui.GuiUtil;
 import com.creatubbles.ctbmod.client.gui.LazyLoadedTexture;
 import com.creatubbles.ctbmod.common.command.CommandLogin;
 import com.creatubbles.repack.endercore.client.gui.GuiContainerBase;
+import com.creatubbles.repack.endercore.client.gui.button.IconButton;
 import com.creatubbles.repack.endercore.client.gui.widget.TextFieldEnder;
+import com.creatubbles.repack.endercore.client.render.EnderWidget;
 import com.creatubbles.repack.endercore.common.util.ChatUtil;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -53,9 +56,18 @@ public class GuiUploadScreenshot extends GuiContainerBase {
     private Dimension size;
     
     private GuiButton buttonUpload, buttonBack, buttonNext, buttonPrev;
+    
+    private IconButton buttonDelete;
+    private int confirm;
+    private boolean parentInvalid;
 
     private final TextFieldEnder tfName;
 
+    private GuiUploadScreenshot(GuiUploadScreenshot old, File[] files, int index) {
+        this(old.parent, files, index);
+        this.parentInvalid = old.parentInvalid;
+    }
+    
     @SneakyThrows
     public GuiUploadScreenshot(GuiScreenshotList parent, final File[] files, final int index) {
         super(GuiUtil.dummyContainer());
@@ -88,6 +100,9 @@ public class GuiUploadScreenshot extends GuiContainerBase {
         tfName = new TextFieldEnder(Minecraft.getMinecraft().fontRendererObj, 20, 0, 300, 20);
         tfName.setFocused(true);
         textFields.add(tfName);
+        
+        buttonDelete = new IconButton(this, -98, 0, 2, EnderWidget.CROSS);
+        buttonDelete.setToolTip("Delete");
     }
 
     @Override
@@ -97,8 +112,13 @@ public class GuiUploadScreenshot extends GuiContainerBase {
 
         tfName.setYOrigin(height - 30);
         tfName.width = width / 2 - tfName.xPosition;
+        
+        buttonDelete.setXOrigin((width / 2) + (fontRendererObj.getStringWidth(files[index].getName()) / 2) - 14);
+        buttonDelete.getToolTip().setBounds(buttonDelete.getBounds());
 
         super.initGui();
+        
+        buttonDelete.onGuiInit();
 
         int x = (width / 2) + (width / 4);
         int w = width / 5;
@@ -124,11 +144,27 @@ public class GuiUploadScreenshot extends GuiContainerBase {
     }
 
     @Override
+    public void updateScreen() {
+        super.updateScreen();
+        if (confirm > 0 && confirm < Integer.MAX_VALUE) {
+            confirm++;
+        }
+    }
+
+    @Override
     protected void drawGuiContainerBackgroundLayer(float par1, int mouseX, int mouseY) {
         this.drawBackground(0);
         buttonUpload.enabled = !tfName.getText().isEmpty();
         buttonNext.enabled = index != files.length - 1;
         buttonPrev.enabled = index != 0;
+
+        if (confirm > 0) {
+            buttonDelete.enabled = confirm > 20;
+            if (confirm > 20) {
+                buttonDelete.setIcon(EnderWidget.TICK);
+            }
+        }
+
         super.drawGuiContainerBackgroundLayer(par1, mouseX, mouseY);
         GuiUtil.drawSlotBackground(0, 20, width, height - 60);
     }
@@ -137,7 +173,13 @@ public class GuiUploadScreenshot extends GuiContainerBase {
     protected void drawForegroundImpl(int mouseX, int mouseY) {
         super.drawForegroundImpl(mouseX, mouseY);
 
-        drawCenteredString(fontRendererObj, files[index].getName(), width / 2, 10 - (fontRendererObj.FONT_HEIGHT / 2), 0xFFFFFF);
+        String name = files[index].getName();
+        int x = width / 2 - 16;
+        int y = 10 - (fontRendererObj.FONT_HEIGHT / 2);
+        drawCenteredString(fontRendererObj, name, x, y, 0xFFFFFF);
+        if (confirm > 0) {
+            drawString(fontRendererObj, "Confirm?", x + (fontRendererObj.getStringWidth(name) / 2) + 16 + 4, y, 0xFFFFFF);
+        }
 
         if (uploadTask != null && uploadTask.isDone()) {
             Minecraft.getMinecraft().getTextureManager().bindTexture(SCREENSHOT_RES);
@@ -227,13 +269,22 @@ public class GuiUploadScreenshot extends GuiContainerBase {
                     });
                 }
             }).start();
-          
+
         } else if (button.id == -99) {
-            Minecraft.getMinecraft().displayGuiScreen(parent);
+            Minecraft.getMinecraft().displayGuiScreen(parentInvalid ? new GuiScreenshotList(parent.parent) : parent);
+        } else if (button.id == -98) {
+            if (confirm > 20) {
+                files[index].delete();
+                File[] newFiles = ArrayUtils.remove(files, index);
+                parentInvalid = true;
+                Minecraft.getMinecraft().displayGuiScreen(new GuiUploadScreenshot(this, newFiles, index));
+            } else {
+                confirm++;
+            }
         } else {
             int newIndex = index + button.id;
             if (newIndex >= 0 && newIndex < files.length) {
-                Minecraft.getMinecraft().displayGuiScreen(new GuiUploadScreenshot(parent, files, newIndex));
+                Minecraft.getMinecraft().displayGuiScreen(new GuiUploadScreenshot(this, files, newIndex));
             }
         }
     }

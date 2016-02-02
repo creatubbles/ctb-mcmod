@@ -15,7 +15,7 @@ import com.creatubbles.repack.endercore.client.gui.GuiContainerBase;
 
 public class GuiScreenshotList extends GuiContainerBase {
    
-    private final GuiContainer parent;
+    final GuiContainer parent;
     
     private final OverlayScreenshotThumbs thumbs;
     

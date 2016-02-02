@@ -75,6 +75,11 @@ public class ToolTipManager {
             }
             mouseX -= maxWidth + 18;
         }
+        
+        if (mouseY < 16) {
+            mouseY += 16 - mouseY;
+        }
+        
         renderer.drawHoveringText(formatted, mouseX, mouseY, renderer.getFontRenderer());
     }
 

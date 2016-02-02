@@ -68,7 +68,7 @@ public class ThumbnailStitcher {
         
         double sqrt = Math.sqrt(images.size());
         int width = (int) sqrt;
-        if (sqrt != width) {
+        if (sqrt != width || width == 0) {
             width++;
         }
         width *= thumbWidth;
@@ -122,7 +122,7 @@ public class ThumbnailStitcher {
             @Override
             public void run() {
                 tex.uploadTexture();
-                ResourceLocation loc = new ResourceLocation("ctbmod", files[0].getParentFile().getName());
+                ResourceLocation loc = new ResourceLocation("ctbmod", toString());
                 Minecraft.getMinecraft().getTextureManager().loadTexture(loc, tex);
                 progress.current = 1;
                 res = loc;

@@ -30,7 +30,7 @@ public class ThumbnailStitcher {
         private String desc;
     }
 
-    private static final int MAX_SIZE = 1024;//Minecraft.getGLMaximumTextureSize();
+    private static final int MAX_SIZE = Minecraft.getGLMaximumTextureSize();
 
     private BufferedImage map;
     
@@ -48,8 +48,9 @@ public class ThumbnailStitcher {
     @SneakyThrows
     public void loadFiles(final File... files) {
         Map<File, Image> images = Maps.newHashMap();
-        progress.desc = "Reading images";
+        progress.desc = "Resizing images to " + thumbWidth + "x" + thumbHeight;
         progress.max = files.length;
+        progress.current = 0; // Could be a recursive call
         for (File f : files) {
             progress.current++;
             BufferedImage img = ImageIO.read(f);

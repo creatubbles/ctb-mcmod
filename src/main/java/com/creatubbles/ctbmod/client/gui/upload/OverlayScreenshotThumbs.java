@@ -271,7 +271,7 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
             Progress prog = stitcher.getProgress();
             
             y += 42;
-            drawCenteredString(getGui().getFontRenderer(), prog.getDesc() + "...", x, y, 0xFFFFFF);
+            drawCenteredString(getGui().getFontRenderer(), prog.getDesc(), x, y, 0xFFFFFF);
             
             y += 20;
             int w = 70, h = 7, b = 1;

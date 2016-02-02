@@ -18,7 +18,6 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import com.creatubbles.ctbmod.CTBMod;
-import com.creatubbles.ctbmod.client.gui.GuiUtil;
 import com.creatubbles.ctbmod.client.gui.LazyLoadedTexture;
 import com.google.common.collect.Maps;
 
@@ -31,7 +30,7 @@ public class ThumbnailStitcher {
         private String desc;
     }
 
-    private static final int MAX_SIZE = Minecraft.getGLMaximumTextureSize();
+    private static final int MAX_SIZE = 1024;//Minecraft.getGLMaximumTextureSize();
 
     private BufferedImage map;
     
@@ -39,7 +38,7 @@ public class ThumbnailStitcher {
     private int thumbWidth = 128, thumbHeight = thumbWidth;
 
     @Getter
-    private ResourceLocation res = GuiUtil.LOADING_TEX_FULL;
+    private ResourceLocation res = null;
     
     @Getter
     private final Progress progress = new Progress();

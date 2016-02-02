@@ -181,7 +181,7 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
         GL11.glDisable(GL11.GL_LIGHTING);
         GL11.glPushMatrix();
 
-        if (listTask == null || listTask.isDone()) {
+        if ((listTask == null || listTask.isDone()) && stitcher.getRes() != null) {
             Minecraft.getMinecraft().getTextureManager().bindTexture(stitcher.getRes());
             for (ThumbnailAndLocation thumb : thumbnails) {
                 if (thumb.getPage() == page) {
@@ -225,7 +225,7 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
         if (b == 0 && Mouse.getEventButtonState() /* ignore releases */) {
             for (ThumbnailAndLocation thumb : thumbnails) {
                 if (thumb.getPage() == page && thumb.getBounds().contains(x, y)) {
-                    Minecraft.getMinecraft().displayGuiScreen(new GuiUploadScreenshot(getGui(), thumb.getFile()));
+                    Minecraft.getMinecraft().displayGuiScreen(new GuiUploadScreenshot(getGui(), screenshots.toArray(new File[0]), screenshots.indexOf(thumb.getFile())));
                 }
             }
         }

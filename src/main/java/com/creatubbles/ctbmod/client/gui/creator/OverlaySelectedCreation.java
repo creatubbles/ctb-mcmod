@@ -14,6 +14,7 @@ import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.Image.ImageType;
 import com.creatubbles.ctbmod.client.gui.GuiUtil;
 import com.creatubbles.ctbmod.client.gui.TextUtil;
+import com.creatubbles.ctbmod.client.gui.GuiUtil.Bubbles;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
 import com.creatubbles.repack.endercore.client.gui.button.IconButton;
 
@@ -70,8 +71,7 @@ public class OverlaySelectedCreation extends OverlayBase<GuiCreator> implements 
             y += 56;
             TextUtil.drawCenteredSplitString(fr, EnumChatFormatting.ITALIC + selected.name, x, y, 54, 0xFFFFFF);
         } else {
-            Minecraft.getMinecraft().getTextureManager().bindTexture(GuiUtil.LOADING_TEX_FULL);
-            func_152125_a(x, y, 0, 0, 16, 16, 48, 48, 16, 16);
+            Bubbles.CLEAR.getMap().render(Bubbles.CLEAR, x, y, 48, 48, 0, true);
             x += 24;
             y += 56;
             TextUtil.drawCenteredSplitString(fr, "No Selection", x, y, 54, 0xFFFFFF);

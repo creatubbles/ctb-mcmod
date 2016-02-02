@@ -210,6 +210,7 @@ public class GuiUploadScreenshot extends GuiContainerBase {
                             }
                             
                             Minecraft.getMinecraft().displayGuiScreen(null);
+                            GuiUtil.toggleNEI(true);
                         }
                     });
                 }

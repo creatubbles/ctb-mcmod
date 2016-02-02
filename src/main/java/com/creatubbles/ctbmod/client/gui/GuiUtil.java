@@ -5,7 +5,9 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.Method;
 
+import lombok.SneakyThrows;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.Tessellator;
@@ -135,5 +137,28 @@ public class GuiUtil extends Gui {
 
         INSTANCE.drawGradientRect(left, top, width, top + 5, 0xFF000000, 0);
         INSTANCE.drawGradientRect(left, top + height - 5, width, top + height, 0, 0xFF000000);
+    }
+    
+    private static Method method;
+    private static boolean neiPresent = true;
+    
+    @SneakyThrows
+    public static void toggleNEI(boolean toggle) {
+        // This is me being tired of NEI
+        // ༼ つ ◕_◕ ༽つ  JEI ༼ つ ◕_◕ ༽つ
+        if (!neiPresent) {
+            return;
+        }
+        
+        if (method == null) {
+            try {
+                Class<?> c = Class.forName("codechicken.nei.NEIClientConfig");
+                method = c.getDeclaredMethod("setInternalEnabled", boolean.class);
+            } catch (Exception e) {
+                neiPresent = false;
+            }
+        }
+        
+        method.invoke(null, toggle);
     }
 }

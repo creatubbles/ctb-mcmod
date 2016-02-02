@@ -1,7 +1,6 @@
 package com.creatubbles.ctbmod.client.gui.upload;
 
 import java.awt.Dimension;
-import java.io.IOException;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -10,6 +9,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 
 import com.creatubbles.ctbmod.client.gui.GuiButtonHideable;
+import com.creatubbles.ctbmod.client.gui.GuiUtil;
 import com.creatubbles.repack.endercore.client.gui.GuiContainerBase;
 
 
@@ -30,7 +30,9 @@ public class GuiScreenshotList extends GuiContainerBase {
                 return true;
             }
         });
-        
+
+        GuiUtil.toggleNEI(false);
+
         this.parent = parent;
         
         thumbs = new OverlayScreenshotThumbs(0, 30, new Dimension());
@@ -92,6 +94,7 @@ public class GuiScreenshotList extends GuiContainerBase {
 
         if (button.id == cancel.id) {
             Minecraft.getMinecraft().displayGuiScreen(parent);
+            GuiUtil.toggleNEI(true);
             return;
         }
 

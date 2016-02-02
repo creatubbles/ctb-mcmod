@@ -47,7 +47,7 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
     private ListenableFuture<?> listTask;
 
     private int thumbSize = 64;
-    private int padding = 16;
+    private int padding = 10;
 
     @Getter
     private int pages;

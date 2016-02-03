@@ -31,7 +31,6 @@ import com.creatubbles.api.response.creation.CreationsUploadsResponse;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.client.gui.GuiUtil;
 import com.creatubbles.ctbmod.client.gui.LazyLoadedTexture;
-import com.creatubbles.ctbmod.common.command.CommandLogin;
 import com.creatubbles.repack.endercore.client.gui.GuiContainerBase;
 import com.creatubbles.repack.endercore.client.gui.button.IconButton;
 import com.creatubbles.repack.endercore.client.gui.widget.TextFieldEnder;
@@ -236,7 +235,7 @@ public class GuiUploadScreenshot extends GuiContainerBase {
                         }
 
                         buttonUpload.displayString = "Finalizing...";
-                        PingCreationsUploadsRequest pingCreationsUploads = new PingCreationsUploadsRequest(creationsUploadsResponse.id, CommandLogin.accessToken);
+                        PingCreationsUploadsRequest pingCreationsUploads = new PingCreationsUploadsRequest(creationsUploadsResponse.id, accessToken);
                         pingCreationsUploads.setData(""); // fixes null PUT error
                         pingCreationsUploads.execute();
                     } catch (Exception e2) {

@@ -156,6 +156,7 @@ public class GuiUtil extends Gui {
                 method = c.getDeclaredMethod("setInternalEnabled", boolean.class);
             } catch (Exception e) {
                 neiPresent = false;
+                return;
             }
         }
         

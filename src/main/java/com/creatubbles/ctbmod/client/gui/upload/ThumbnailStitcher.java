@@ -110,6 +110,8 @@ public class ThumbnailStitcher {
         } finally {
             out.dispose();
         }
+        
+//        ImageIO.write(map, "png", new File(files[0].getParent(), "map.png"));
 
         progress.desc = "Loading";
         progress.current = 0;

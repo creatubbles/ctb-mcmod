@@ -11,7 +11,6 @@ import java.io.FilenameFilter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -34,6 +33,8 @@ import com.creatubbles.ctbmod.client.gui.GuiUtil;
 import com.creatubbles.ctbmod.client.gui.creator.OverlayBase;
 import com.creatubbles.ctbmod.client.gui.upload.ThumbnailStitcher.Progress;
 import com.creatubbles.repack.endercore.api.client.gui.IGuiScreen;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -48,8 +49,8 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
     private static File[] prevFiles = null;
     private static ScaledResolution prevSize;
 
-    private TIntObjectMap<ThumbnailStitcher> stitchers = new TIntObjectHashMap<>();
-    private TIntObjectMap<ListenableFuture<?>> stitchTasks = new TIntObjectHashMap<>();
+    private TIntObjectMap<ThumbnailStitcher> stitchers = new TIntObjectHashMap<ThumbnailStitcher>();
+    private TIntObjectMap<ListenableFuture<?>> stitchTasks = new TIntObjectHashMap<ListenableFuture<?>>();
 
     private List<File> screenshots;
     private List<ThumbnailAndLocation> thumbnails = Lists.newArrayList();
@@ -75,7 +76,11 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
         
         if (!Arrays.equals(files, prevFiles)) {
             prevFiles = files;
-            Arrays.stream(prevStitchers).filter(Objects::nonNull).forEach(ThumbnailStitcher::dispose);
+            for (int i = 0; i < prevStitchers.length; i++) {
+                if (prevStitchers[i] != null) {
+                    prevStitchers[i].dispose();
+                }
+            }
             Arrays.fill(prevStitchers, null);
         }
 
@@ -106,9 +111,20 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
 
                 @Override
                 public void run() {
-                    Iterable<ThumbnailAndLocation> iter = FluentIterable.from(thumbnails).filter(t -> t.page == i);
+                    Iterable<ThumbnailAndLocation> iter = FluentIterable.from(thumbnails).filter(new Predicate<ThumbnailAndLocation>() {
+
+                        @Override
+                        public boolean apply(ThumbnailAndLocation input) {
+                            return input.page == page;
+                        }
+                    });
                     if (!stitcher.isValid()) {
-                        stitcher.loadFiles(FluentIterable.from(iter).transform(t -> t.file).toArray(File.class));
+                        stitcher.loadFiles(FluentIterable.from(iter).transform(new Function<ThumbnailAndLocation, File>() {
+
+                            public File apply(ThumbnailAndLocation t) {
+                                return t.file;
+                            }
+                        }).toArray(File.class));
                     }
                     for (ThumbnailAndLocation thumb : iter) {
                         thumb.slot = new Rectangle(stitcher.getRect(thumb.file));
@@ -183,11 +199,10 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
         ScaledResolution size = new ScaledResolution(Minecraft.getMinecraft());
         if (prevStitchers[0] == null || size.getScaledHeight() != prevSize.getScaledHeight() || size.getScaledWidth() != prevSize.getScaledWidth()) {
 
-            stitchers.forEachValue(v -> {
-                v.dispose();
-                return true;
-            });
-
+            for (ThumbnailStitcher s : stitchers.valueCollection()) {
+                s.dispose();
+            }
+        
             stitchers.clear();
             stitchTasks.clear();
             
@@ -290,12 +305,11 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
     public void guiClosed() {
         super.guiClosed();
         executor.shutdown();
-        stitchers.forEachKey(i -> {
+        for (int i : stitchers.keys()) {
             if (i > 2) {
                 stitchers.get(i).dispose();
             }
-            return true;
-        });
+        }
     }
 
     public void page(int delta) {

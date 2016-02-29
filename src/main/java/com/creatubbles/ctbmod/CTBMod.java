@@ -64,6 +64,10 @@ public class CTBMod {
         proxy.registerRenderers();
 
         GameRegistry.addRecipe(new ShapedOreRecipe(creator, "ibi", "wpw", "iwi", 'i', "ingotIron", 'b', Items.bucket, 'w', "plankWood", 'p', Blocks.piston));
+
+        if (Configs.noIceMelt) {
+            Blocks.ice.setTickRandomly(false);
+        }
     }
 
     @EventHandler

@@ -13,4 +13,8 @@ public class Configs {
     @Comment("Setting this to true will cause paintings to require dye to make.")
     public static boolean harderPaintings = false;
 
+    @Config
+    @Comment("If true, ice will not melt in the presence of light sources. Used for the creatubbles competition map.")
+    public static boolean noIceMelt = false;
+
 }

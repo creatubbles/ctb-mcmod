@@ -166,8 +166,10 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
     public void init(IGuiScreen screen) {
         super.init(screen);
 
+        Minecraft mc = Minecraft.getMinecraft();
+
         if (prevSize == null) {
-            prevSize = new ScaledResolution(Minecraft.getMinecraft());
+            prevSize = new ScaledResolution(mc, mc.displayWidth, mc.displayHeight);
         }
         
         thumbnails.clear();
@@ -196,7 +198,7 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
             }
         }
 
-        ScaledResolution size = new ScaledResolution(Minecraft.getMinecraft());
+        ScaledResolution size = new ScaledResolution(mc, mc.displayWidth, mc.displayHeight);
         if (prevStitchers[0] == null || size.getScaledHeight() != prevSize.getScaledHeight() || size.getScaledWidth() != prevSize.getScaledWidth()) {
 
             for (ThumbnailStitcher s : stitchers.valueCollection()) {

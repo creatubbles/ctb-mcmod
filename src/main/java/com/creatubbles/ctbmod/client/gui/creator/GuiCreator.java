@@ -112,7 +112,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
             try {
                 checkCancel();
 
-                loadStep = "Authenticating";
+                loadStep = CTBMod.lang.localize("gui.creator.step.auth");
                 if (getAccessToken() == null) {
                     setState(State.LOGGING_IN, true);
                     loginReq = new OAuthAccessTokenRequest(tfEmail.getText(), tfActualPassword.getText());
@@ -132,7 +132,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                     }
                     
                     if (getUser() == null) {
-                        loadStep = "Retrieving Profile";
+                        loadStep = CTBMod.lang.localize("gui.creator.step.profile");
                         userReq = new UserProfileRequest(getAccessToken());
                         userReq.execute();
                         if (userReq.wasSuccessful()) {
@@ -141,7 +141,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                         } else {
                             if (userReq.getRawResponse().getStatus() == 401) {
                                 logout();
-                                header = "Invalid login token. Please log in again.";
+                                header = CTBMod.lang.localize("gui.creator.header.invalid");
                             } else {
                                 header = userReq.getResponse().message;
                             }
@@ -162,8 +162,8 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
                     Creation[] creations = creationList.getCreations();
                     if (creations == null) {
-                        String template = "Loading Creations: Page %d of %s";
-                        loadStep = String.format(template, 1, "?");
+                        String stepUnloc = "gui.creator.step.creations";
+                        loadStep = CTBMod.lang.localize(stepUnloc, 1, "?");
                         setState(State.LOGGING_IN, true);
 
                         GetCreationsRequest creationsReq = new GetCreationsRequest(getUser().id, getAccessToken());
@@ -174,7 +174,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                             GetCreationsResponse resp = creationsReq.getResponse();
                             creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[0]));
                             for (int i = 2; i <= resp.total_pages && i <= 10; i++) {
-                                loadStep = String.format(template, i, "" + resp.total_pages);
+                                loadStep = CTBMod.lang.localize(stepUnloc, i, "" + resp.total_pages);
                                 creationsReq = new GetCreationsRequest(getUser().id, i, getAccessToken());
                                 creationsReq.execute();
                                 resp = creationsReq.getResponse();
@@ -194,7 +194,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                         } else {
                             if (creationsReq.getRawResponse().getStatus() == 401) {
                                 logout();
-                                header = "Invalid login token. Please log in again.";
+                                header = CTBMod.lang.localize("gui.creator.header.invalid");
                             } else {
                                 header = creationsReq.getResponse().message;
                             }
@@ -249,7 +249,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
     private static final int ID_LOGIN = 0, ID_USER = 1, ID_CANCEL = 2, ID_LOGOUT = 3, ID_CREATE = 4, ID_UPLOAD = 9;
     private static final int ID_H_PLUS = 5, ID_H_MINUS = 6, ID_W_PLUS = 7, ID_W_MINUS = 8;
     private static final ResourceLocation BG_TEX = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/creator.png");
-    private static final String DEFAULT_HEADER = "Please log in to Creatubbles:";
+    private static final String DEFAULT_HEADER = CTBMod.lang.localize("gui.creator.header.default"); // TODO caching is bad
 
     static final ResourceLocation OVERLAY_TEX = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/creator_overlays.png");
     static final UserAndAuth DUMMY_USER = new UserAndAuth(new User(), null);
@@ -511,8 +511,6 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
         int y = guiTop;
         drawTexturedModalRect(x, y, 0, 0, XSIZE_DEFAULT, ySize);
 
-        // TODO localize all the things
-
         switch (state) {
             case LOGGED_IN:
                 if (getUser() == null) {
@@ -566,16 +564,16 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
                 x = guiLeft + 70;
                 y = guiTop + 65;
-                drawString(getFontRenderer(), "W: " + te.getWidth(), x, y, 0xFFFFFF);
-                drawString(getFontRenderer(), "H: " + te.getHeight(), x + 50, y, 0xFFFFFF);
+                drawString(getFontRenderer(), CTBMod.lang.localize("gui.creator.width", te.getWidth()), x, y, 0xFFFFFF);
+                drawString(getFontRenderer(), CTBMod.lang.localize("gui.creator.height", te.getHeight()), x + 50, y, 0xFFFFFF);
 
                 y += 18;
                 EnumChatFormatting color = te.getRequiredPaper() > te.getPaperCount() ? RED : GREEN;
-                drawString(getFontRenderer(), "Paper: " + color + te.getRequiredPaper(), x, y, 0xFFFFFF);
+                drawString(getFontRenderer(), CTBMod.lang.localize("gui.creator.paper", color.toString() + te.getRequiredPaper()), x, y, 0xFFFFFF);
                 if (Configs.harderPaintings) {
                     y += 10;
                     color = te.getRequiredDye() > te.getLowestDyeCount() ? RED : GREEN;
-                    drawString(getFontRenderer(), "Dye: " + color + te.getRequiredDye(), x, y, 0xFFFFFF);
+                    drawString(getFontRenderer(), CTBMod.lang.localize("gui.creator.dye", color.toString() + te.getRequiredDye()), x, y, 0xFFFFFF);
                 }
                 break;
             case LOGGED_OUT:
@@ -593,18 +591,18 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
                 x = guiLeft + 13;
                 y = guiTop + 20;
-                drawString(getFontRenderer(), "Email/Username:", tfEmail.xPosition, tfEmail.yPosition - 10, 0xFFFFFF);
+                drawString(getFontRenderer(), CTBMod.lang.localize("gui.creator.username"), tfEmail.xPosition, tfEmail.yPosition - 10, 0xFFFFFF);
 
                 y += 25;
-                drawString(getFontRenderer(), "Password:", tfVisualPassword.xPosition, tfVisualPassword.yPosition - 10, 0xFFFFFF);
+                drawString(getFontRenderer(), CTBMod.lang.localize("gui.creator.password"), tfVisualPassword.xPosition, tfVisualPassword.yPosition - 10, 0xFFFFFF);
                 break;
             case USER_SELECT:
                 break;
             case LOGGING_IN:
                 x += xSize / 2;
                 y += 25;
-                String s = thread.isInterrupted() ? "Canceling..." : "Logging in...";
-                drawCenteredString(getFontRenderer(), s, x, y, 0xFFFFFF);
+                String s = "gui.creator." + (thread.isInterrupted() ? "canceling" : "logging");
+                drawCenteredString(getFontRenderer(), CTBMod.lang.localize(s), x, y, 0xFFFFFF);
                 drawCenteredString(getFontRenderer(), loadStep, x, y + 14, 0xFFFFFF);
                 break;
         }

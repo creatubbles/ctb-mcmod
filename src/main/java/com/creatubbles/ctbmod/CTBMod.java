@@ -20,6 +20,7 @@ import com.creatubbles.ctbmod.common.config.DataCache;
 import com.creatubbles.ctbmod.common.creator.BlockCreator;
 import com.creatubbles.ctbmod.common.network.PacketHandler;
 import com.creatubbles.ctbmod.common.painting.BlockPainting;
+import com.creatubbles.repack.endercore.common.Lang;
 import com.creatubbles.repack.endercore.common.config.ConfigProcessor;
 
 import cpw.mods.fml.common.Mod;
@@ -51,6 +52,8 @@ public class CTBMod {
     public static BlockPainting painting;
 
     public static DataCache cache;
+    
+    public static final Lang lang = new Lang("ctb");
 
     public static int renderIdPainting;
     public static int renderIdCreator;

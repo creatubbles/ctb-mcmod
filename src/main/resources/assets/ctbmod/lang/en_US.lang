@@ -1,2 +1,24 @@
 tile.ctbmod.creator.name=Creator
 tile.ctbmod.painting.name=Custom Painting
+
+# Creator GUI
+
+ctb.gui.creator.username=Email/Username:
+ctb.gui.creator.password=Password:
+
+ctb.gui.creator.canceling=Canceling...
+ctb.gui.creator.logging=Logging In...
+
+ctb.gui.creator.step.auth=Authenticating
+ctb.gui.creator.step.profile=Retrieving Profile
+ctb.gui.creator.step.creations=Loading Creations: Page %d of %s
+
+ctb.gui.creator.header.default=Please log in to Creatubbles:
+ctb.gui.creator.header.invalid=Invalid login token. Please log in again.
+
+ctb.gui.creator.width=W: %d
+ctb.gui.creator.height=H: %d
+
+ctb.gui.creator.paper=Paper: %s
+ctb.gui.creator.dye=Dye: %s
+

@@ -12,5 +12,9 @@ public class Configs {
     @Config
     @Comment("Setting this to true will cause paintings to require dye to make.")
     public static boolean harderPaintings = false;
+    
+    @Config
+    @Comment("The blocks that the painting item can be placed on in adventure mode")
+    public static String[] canPlacePaintingOn;
 
 }

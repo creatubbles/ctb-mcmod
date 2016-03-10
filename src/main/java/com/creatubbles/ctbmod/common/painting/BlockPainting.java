@@ -16,6 +16,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -29,6 +31,7 @@ import org.apache.commons.lang3.BooleanUtils;
 
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.ctbmod.common.config.Configs;
 import com.creatubbles.ctbmod.common.util.NBTUtil;
 import com.creatubbles.repack.endercore.common.BlockEnder;
 import com.creatubbles.repack.endercore.common.TileEntityBase;
@@ -67,6 +70,13 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         NBTUtil.writeJsonToNBT(creation, stack.getTagCompound());
         stack.getTagCompound().setInteger("pWidth", width);
         stack.getTagCompound().setInteger("pHeight", height);
+        if (Configs.canPlacePaintingOn.length > 0) {
+            NBTTagList blocks = new NBTTagList();
+            for (String s : Configs.canPlacePaintingOn) {
+                blocks.appendTag(new NBTTagString(s));
+            }
+            stack.getTagCompound().setTag("CanPlaceOn", blocks);
+        }
         return stack;
     }
 

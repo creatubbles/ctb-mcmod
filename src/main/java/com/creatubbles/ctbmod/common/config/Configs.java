@@ -15,6 +15,6 @@ public class Configs {
     
     @Config
     @Comment("The blocks that the painting item can be placed on in adventure mode")
-    public static String[] canPlacePaintingOn;
+    public static String[] canPlacePaintingOn = {};
 
 }

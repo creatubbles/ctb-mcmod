@@ -14,6 +14,7 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import com.creatubbles.api.core.Image.ImageType;
+import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.client.gui.GuiUtil;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
 import com.creatubbles.ctbmod.common.painting.BlockPainting;
@@ -23,7 +24,7 @@ public class RenderPainting extends TileEntitySpecialRenderer<TilePainting> {
 
     @Override
     public void renderTileEntityAt(TilePainting te, double x, double y, double z, float partialTicks, int destroyStage) {
-        if (te instanceof TilePainting && te.getImage() != null && te.render()) {
+        if (te.getWorld().getBlockState(te.getPos()).getBlock() == CTBMod.painting && te instanceof TilePainting && te.getImage() != null && te.render()) {
             TilePainting painting = te;
             DownloadableImage image = painting.getImage();
 

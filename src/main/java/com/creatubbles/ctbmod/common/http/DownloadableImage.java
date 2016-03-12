@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.EnumMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -34,6 +36,7 @@ import com.creatubbles.ctbmod.common.config.DataCache;
 import com.creatubbles.ctbmod.common.util.JsonUtil;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
+import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
@@ -79,7 +82,9 @@ public class DownloadableImage {
 
     public static final ResourceLocation MISSING_TEXTURE = new ResourceLocation("missingno");
 
-    private static Executor downloadExecutor = new ThreadPoolExecutor(0, 1, 20, TimeUnit.SECONDS, Queues.<Runnable> newLinkedBlockingQueue());
+    private static Executor downloadExecutor = new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 20, TimeUnit.SECONDS, Queues.<Runnable> newLinkedBlockingQueue());
+    
+    private static Map<DownloadableImage, Set<ImageType>> inProgress = Maps.newConcurrentMap();
 
     static {
         Minecraft.getMinecraft().getTextureManager().loadTexture(MISSING_TEXTURE, TextureUtil.missingTexture);
@@ -180,7 +185,8 @@ public class DownloadableImage {
      */
     @SneakyThrows
     public void download(final ImageType type) {
-        if (locations.get(type) == MISSING_TEXTURE) {
+        Set<ImageType> prog = inProgress.get(this);
+        if (locations.get(type) == MISSING_TEXTURE && (prog == null || !prog.contains(type))) {
             TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
             final String filepath = "creations/" + owner.user_id + "/" + type.name() + "/" + owner.id + ".jpg";
             final ResourceLocation res = new ResourceLocation(CTBMod.DOMAIN, filepath);
@@ -188,6 +194,11 @@ public class DownloadableImage {
 
             if (texture == null) {
 
+                if (!inProgress.containsKey(this)) {
+                    inProgress.put(this, Sets.<ImageType>newConcurrentHashSet());
+                }
+                inProgress.get(this).add(type);
+                
                 downloadExecutor.execute(new Runnable() {
 
                     @Override
@@ -228,6 +239,11 @@ public class DownloadableImage {
                                 // Don't populate size and location data until after the texture is loaded
                                 sizes.put(type, Size.create(original, resized));
                                 locations.put(type, res);
+                                Set<ImageType> prog = inProgress.get(DownloadableImage.this);
+                                prog.remove(type);
+                                if (prog.isEmpty()) {
+                                    inProgress.remove(DownloadableImage.this);
+                                }
                             }
                         });
                     }
@@ -235,9 +251,8 @@ public class DownloadableImage {
             } else if (texture instanceof RescaledTexture) {
                 // Grab cached size data
                 sizes.put(type, ((RescaledTexture) texture).getSize());
+                locations.put(type, res);
             }
-            
-            locations.put(type, res);
         }
     }
 

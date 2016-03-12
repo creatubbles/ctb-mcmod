@@ -30,11 +30,12 @@ public class RenderPainting extends TileEntitySpecialRenderer<TilePainting> {
 
             EnumFacing facing = te.getWorld().getBlockState(te.getPos()).getValue(BlockPainting.FACING);
 
-            int width = image.getWidth(ImageType.original);
-            int height = image.getHeight(ImageType.original);
-            double scaledSize = image.getScaledSize(ImageType.original);
-
-            ResourceLocation res = image.getResource(ImageType.original);
+            ImageType type = te.getType();
+            int width = image.getWidth(type);
+            int height = image.getHeight(type);
+            double scaledSize = image.getScaledSize(type);
+            ResourceLocation res = image.getResource(type);
+            
             if (res == DownloadableImage.MISSING_TEXTURE) {
                 res = GuiUtil.Bubbles.TEXTURE;
                 width = 16;

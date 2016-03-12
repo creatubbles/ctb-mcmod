@@ -200,8 +200,9 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                 CTBMod.logger.info("Logging in canceled!");
                 // Clear the cache
                 logout();
-            } catch (Throwable t) {
-                CTBMod.logger.error("Logging in uncountered an unknown error.", t);
+            } catch (Exception e) {
+                CTBMod.logger.error("Logging in uncountered an unknown error.", e);
+                header = "Error: " + e.getLocalizedMessage();
                 logout();
             } finally {
                 // Thread cleanup, erase all evidence we were here

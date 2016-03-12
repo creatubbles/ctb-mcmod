@@ -62,7 +62,7 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
                 glEnable(GL_POLYGON_OFFSET_FILL);
                 glDisable(GL_LIGHTING);
 
-                renderPainting(image, painting.getHeight(), painting.getWidth(), c);
+                renderPainting(image, painting.getType(), painting.getHeight(), painting.getWidth(), c);
 
                 glPolygonOffset(0, 0);
                 glDisable(GL_POLYGON_OFFSET_FILL);
@@ -72,13 +72,13 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
         }
     }
 
-    private void renderPainting(DownloadableImage image, int pheight, int pwidth, int color) {
+    private void renderPainting(DownloadableImage image, ImageType type, int pheight, int pwidth, int color) {
 
-        int width = image.getWidth(ImageType.original);
-        int height = image.getHeight(ImageType.original);
-        double scaledSize = image.getScaledSize(ImageType.original);
+        int width = image.getWidth(type);
+        int height = image.getHeight(type);
+        double scaledSize = image.getScaledSize(type);
+        ResourceLocation res = image.getResource(type);
         
-        ResourceLocation res = image.getResource(ImageType.original);
         if (res == DownloadableImage.MISSING_TEXTURE) {
             res = GuiUtil.Bubbles.TEXTURE;
             width = 16;
@@ -178,7 +178,7 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
                     glTranslatef(0, 1, 1);
                     glRotatef(180, 0, 1, 0);
                     glRotatef(180, 0, 0, 1);
-                    renderPainting(img, 1, 1, 0xFFFFFF);
+                    renderPainting(img, ImageType.full_view, 1, 1, 0xFFFFFF);
                     glPopMatrix();
                     glPopMatrix(); // pop switch matrix
                     return;
@@ -200,7 +200,7 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
             if (type == ItemRenderType.EQUIPPED) {
                 glTranslatef(-1, 0, 1 / 16f);
             }
-            renderPainting(img, 1, 1, 0xFFFFFF);
+            renderPainting(img, ImageType.full_view, 1, 1, 0xFFFFFF);
         }
         glPopMatrix();
     }

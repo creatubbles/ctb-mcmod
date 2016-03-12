@@ -29,6 +29,9 @@ public class TilePainting extends TileEntityBase {
     @SideOnly(Side.CLIENT)
     @Getter(onMethod = @__({ @SideOnly(Side.CLIENT) }))
     private transient DownloadableImage image;
+    
+    @Getter
+    private transient ImageType type;
 
     // Client flag to prevent rendering when a dummy TE has been removed on the client
     @Setter
@@ -38,9 +41,6 @@ public class TilePainting extends TileEntityBase {
 
     public void setCreation(Creation image) {
         creation = image;
-        if (worldObj.isRemote) {
-            createImage();
-        }
     }
 
     @Override
@@ -53,7 +53,8 @@ public class TilePainting extends TileEntityBase {
 
     private void createImage() {
         image = new DownloadableImage(creation.image, creation);
-        image.download(ImageType.original);
+        type = width <= 4 || height <= 4 ? ImageType.full_view : ImageType.original;
+        image.download(type);
     }
 
     @Override

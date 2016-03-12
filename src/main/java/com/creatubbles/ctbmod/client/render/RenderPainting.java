@@ -22,6 +22,7 @@ import com.creatubbles.ctbmod.client.gui.GuiUtil;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
 import com.creatubbles.ctbmod.common.painting.BlockPainting;
 import com.creatubbles.ctbmod.common.painting.TilePainting;
+import com.creatubbles.repack.endercore.client.render.IWidgetIcon;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -104,8 +105,18 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
             bounds.x += (w - bounds.getWidth()) / 2;
         }
 
+        double minU = 0, minV = 0;
         double maxU = width / scaledSize;
         double maxV = height / scaledSize;
+
+        // FIXME Bit of a hack for now
+        if (res == GuiUtil.Bubbles.TEXTURE) {
+            IWidgetIcon icon = GuiUtil.Bubbles.CLEAR;
+            minU = (float) icon.getX() / icon.getMap().getSize();
+            minV = (float) icon.getY() / icon.getMap().getSize();
+            maxU = minU + ((float) icon.getWidth() / icon.getMap().getSize());
+            maxV = minV + ((float) icon.getHeight() / icon.getMap().getSize());
+        }
 
         glPushMatrix();
         {
@@ -116,10 +127,10 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
             renderer.startDrawingQuads();
             renderer.setColorOpaque_I(color);
 
-            renderer.addVertexWithUV(bounds.getX(), bounds.getY() + bounds.getHeight(), depth, 0, 0);
-            renderer.addVertexWithUV(bounds.getX(), bounds.getY(), depth, 0, maxV);
+            renderer.addVertexWithUV(bounds.getX(), bounds.getY() + bounds.getHeight(), depth, minU, minV);
+            renderer.addVertexWithUV(bounds.getX(), bounds.getY(), depth, minU, maxV);
             renderer.addVertexWithUV(bounds.getX() + bounds.getWidth(), bounds.getY(), depth, maxU, maxV);
-            renderer.addVertexWithUV(bounds.getX() + bounds.getWidth(), bounds.getY() + bounds.getHeight(), depth, maxU, 0);
+            renderer.addVertexWithUV(bounds.getX() + bounds.getWidth(), bounds.getY() + bounds.getHeight(), depth, maxU, minV);
 
             renderer.draw();
             renderer.setTranslation(0, 0, 0);

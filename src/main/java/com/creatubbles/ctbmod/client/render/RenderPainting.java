@@ -19,6 +19,7 @@ import com.creatubbles.ctbmod.client.gui.GuiUtil;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
 import com.creatubbles.ctbmod.common.painting.BlockPainting;
 import com.creatubbles.ctbmod.common.painting.TilePainting;
+import com.creatubbles.repack.endercore.client.render.IWidgetIcon;
 
 public class RenderPainting extends TileEntitySpecialRenderer<TilePainting> {
 
@@ -61,9 +62,19 @@ public class RenderPainting extends TileEntitySpecialRenderer<TilePainting> {
                 bounds.x += (w - bounds.getWidth()) / 2;
             }
 
+            double minU = 0, minV = 0;
             double maxU = width / scaledSize;
             double maxV = height / scaledSize;
 
+            // FIXME Bit of a hack for now
+            if (res == GuiUtil.Bubbles.TEXTURE) {
+                IWidgetIcon icon = GuiUtil.Bubbles.CLEAR;
+                minU = (float) icon.getX() / icon.getMap().getSize();
+                minV = (float) icon.getY() / icon.getMap().getSize();
+                maxU = minU + ((float) icon.getWidth() / icon.getMap().getSize());
+                maxV = minV + ((float) icon.getHeight() / icon.getMap().getSize());
+            }
+            
             GlStateManager.pushMatrix();
             GlStateManager.translate(x, y, z);
 
@@ -93,10 +104,10 @@ public class RenderPainting extends TileEntitySpecialRenderer<TilePainting> {
             float c = getColorMultiplierForFace(facing);
             double depth = 1 / 16d;
 
-            renderer.pos(bounds.getX(), bounds.getY() + bounds.getHeight(), depth).tex(0, 0).color(c, c, c, 1).endVertex();
-            renderer.pos(bounds.getX(), bounds.getY(), depth).tex(0, maxV).color(c, c, c, 1).endVertex();
+            renderer.pos(bounds.getX(), bounds.getY() + bounds.getHeight(), depth).tex(minU, minV).color(c, c, c, 1).endVertex();
+            renderer.pos(bounds.getX(), bounds.getY(), depth).tex(minU, maxV).color(c, c, c, 1).endVertex();
             renderer.pos(bounds.getX() + bounds.getWidth(), bounds.getY(), depth).tex(maxU, maxV).color(c, c, c, 1).endVertex();
-            renderer.pos(bounds.getX() + bounds.getWidth(), bounds.getY() + bounds.getHeight(), depth).tex(maxU, 0).color(c, c, c, 1).endVertex();
+            renderer.pos(bounds.getX() + bounds.getWidth(), bounds.getY() + bounds.getHeight(), depth).tex(maxU, minV).color(c, c, c, 1).endVertex();
 
             Tessellator.getInstance().draw();
             renderer.setTranslation(0, 0, 0);

@@ -10,6 +10,7 @@ import net.minecraftforge.oredict.ShapedOreRecipe;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.creatubbles.api.CreatubblesAPI;
 import com.creatubbles.ctbmod.common.CommonProxy;
 import com.creatubbles.ctbmod.common.command.CommandGetCreators;
 import com.creatubbles.ctbmod.common.command.CommandLogin;
@@ -56,6 +57,8 @@ public class CTBMod {
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+        CreatubblesAPI.setStagingMode(Configs.staging);
+        
         new ConfigProcessor(Configs.class, event.getSuggestedConfigurationFile(), MODID).process(true);
 
         creator = BlockCreator.create();

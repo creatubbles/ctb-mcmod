@@ -17,4 +17,8 @@ public class Configs {
     @Comment("If true, ice will not melt in the presence of light sources. Used for the creatubbles competition map.")
     public static boolean noIceMelt = false;
 
+    @Config
+    @Comment("Developers only. Tells the mod to use the creatubbles staging server for testing purposes.")
+    public static boolean staging = false;
+
 }

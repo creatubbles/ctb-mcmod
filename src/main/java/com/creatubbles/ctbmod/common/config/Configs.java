@@ -16,5 +16,9 @@ public class Configs {
     @Config
     @Comment("The blocks that the painting item can be placed on in adventure mode")
     public static String[] canPlacePaintingOn = {};
+    
+    @Config
+    @Comment("Developers only. Tells the mod to use the creatubbles staging server for testing purposes.")
+    public static boolean staging = false;
 
 }

@@ -3,6 +3,7 @@ package com.creatubbles.ctbmod.common.painting;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.IBlockAccess;
@@ -120,6 +121,16 @@ public class SubmapManagerPainting extends SubmapManagerCTM {
             rb = new RenderBlocksPainting();
             rb.ctm = new CTM() {
 
+                private int cx, cy, cz;
+                
+                @Override
+                public void buildConnectionMap(IBlockAccess world, int x, int y, int z, int side, Block block, int meta) {
+                    this.cx = x;
+                    this.cy = y;
+                    this.cz = z;
+                    super.buildConnectionMap(world, x, y, z, side, block, meta);
+                }
+                
                 @Override
                 public int getBlockOrFacadeMetadata(IBlockAccess world, int x, int y, int z, int side) {
                     return super.getBlockOrFacadeMetadata(world, x, y, z, side) & 3;
@@ -127,7 +138,18 @@ public class SubmapManagerPainting extends SubmapManagerCTM {
 
                 @Override
                 public boolean isConnected(IBlockAccess world, int x, int y, int z, ForgeDirection dir, Block block, int meta) {
-                    return super.isConnected(world, x, y, z, dir, block, meta & 3);
+                    TileEntity p1 = world.getTileEntity(cx, cy, cz);
+                    TileEntity p2 = world.getTileEntity(x, y, z);
+                    if (p1 != null && p1 instanceof TileDummyPainting) {
+                        p1 = ((TileDummyPainting)p1).getDataTile();
+                    }
+                    if (p2 != null && p2 instanceof TileDummyPainting) {
+                        p2 = ((TileDummyPainting)p2).getDataTile();
+                    }
+                    if (p1 == p2) {
+                        return super.isConnected(world, x, y, z, dir, block, meta & 3);
+                    }
+                    return false;
                 }
             };
             rb.ctm.disableObscuredFaceCheck = Optional.of(true);

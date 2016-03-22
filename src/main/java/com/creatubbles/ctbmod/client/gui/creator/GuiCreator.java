@@ -168,6 +168,8 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
                         GetCreationsRequest creationsReq = new GetCreationsRequest(getUser().id, getAccessToken());
                         creationsReq.execute();
+                        checkCancel();
+                        
                         if (creationsReq.wasSuccessful()) {
                             GetCreationsResponse resp = creationsReq.getResponse();
                             creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[] {}));
@@ -177,6 +179,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                                 creationsReq.execute();
                                 resp = creationsReq.getResponse();
                                 creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[] {}));
+                                checkCancel();
                             }
 
                             creationList.setCreations(creations);

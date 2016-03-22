@@ -1,9 +1,12 @@
 0.2.0:
 New
-- Update to 1.8.8
+- Update to 1.8.9
 - New textures for the Creator
+- Add uploading system. Click the new "plus" button in the creator GUI to use.
+    - Can upload any screenshot in the current screenshot folder
+    - Also allows deleting of local screenshots
 Changes
-- Paintings are not much cheaper, they only require paper to create. You can enable the old recipe in the config.
+- Paintings are now much cheaper, they only require paper to create. You can enable the old recipe in the config.
 Fixes
 - Fix odd painting rendering when part of a painting is broken
 - Add some crash protections to paintings

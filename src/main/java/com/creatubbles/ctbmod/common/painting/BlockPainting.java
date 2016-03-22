@@ -61,14 +61,14 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
     public static ItemStack create(Creation creation, int width, int height) {
         ItemStack stack = new ItemStack(CTBMod.painting);
         stack.setTagCompound(new NBTTagCompound());
-        NBTUtil.writeJsonToNBT(creation, stack.getTagCompound());
+        NBTUtil.writeJsonToNBT(creation, NBTUtil.getTag(stack));
         stack.getTagCompound().setInteger("pWidth", width);
         stack.getTagCompound().setInteger("pHeight", height);
         return stack;
     }
 
     public static Creation getCreation(ItemStack painting) {
-        return NBTUtil.readJsonFromNBT(Creation.class, painting.getTagCompound());
+        return NBTUtil.readJsonFromNBT(Creation.class, NBTUtil.getTag(painting));
     }
 
     public static int getWidth(ItemStack painting) {
@@ -107,7 +107,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
     @Override
     public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase placer, ItemStack stack) {
         ItemStack placed = placer.getHeldItem();
-        Creation c = NBTUtil.readJsonFromNBT(Creation.class, placed.getTagCompound());
+        Creation c = NBTUtil.readJsonFromNBT(Creation.class, NBTUtil.getTag(placed));
         BlockCoord pos = new BlockCoord(x, y, z);
 
         TilePainting painting = getDataPainting(world, pos);

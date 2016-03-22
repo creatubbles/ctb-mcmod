@@ -159,14 +159,19 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
         IIcon frontIcon = CTBMod.painting.getIcon(3, 0);
 
         Creation c = BlockPainting.getCreation(item);
-        DownloadableImage img = new DownloadableImage(c.image, c);
-        img.download(ImageType.original);
+        
+        DownloadableImage img = null;
+
+        if (c != null) {
+            img = new DownloadableImage(c.image, c);
+            img.download(ImageType.full_view);
+        }
 
         glPushMatrix();
         {
             switch (type) {
                 case ENTITY:
-                    glTranslatef(-1, 0, -0.5f);
+                    glTranslatef(0, 0, -0.5f);
                     break;
                 case EQUIPPED:
                     glRotatef(-45, 0, 1, 0);
@@ -189,7 +194,9 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
                     glTranslatef(0, 1, 1);
                     glRotatef(180, 0, 1, 0);
                     glRotatef(180, 0, 0, 1);
-                    renderPainting(img, ImageType.full_view, 1, 1, 0xFFFFFF);
+                    if (img != null) {
+                        renderPainting(img, ImageType.full_view, 1, 1, 0xFFFFFF);
+                    }
                     glPopMatrix();
                     glPopMatrix(); // pop switch matrix
                     return;
@@ -200,18 +207,21 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
             CTBMod.painting.setBlockBoundsBasedOnFacing(ForgeDirection.EAST);
             rb.setRenderBoundsFromBlock(CTBMod.painting);
             Drawing.drawBlock(CTBMod.painting, frontIcon, rb);
+            
+            if (img != null) {
 
-            glDisable(GL_CULL_FACE);
-            if (type == ItemRenderType.EQUIPPED_FIRST_PERSON) {
-                glRotatef(-90, 0, 1, 0);
-            } else {
-                glRotatef(90, 0, 1, 0);
+                glDisable(GL_CULL_FACE);
+                if (type == ItemRenderType.EQUIPPED_FIRST_PERSON) {
+                    glRotatef(-90, 0, 1, 0);
+                } else {
+                    glRotatef(90, 0, 1, 0);
+                }
+                glTranslatef(0, 0, -0.06f);
+                if (type == ItemRenderType.EQUIPPED || type == ItemRenderType.ENTITY) {
+                    glTranslatef(-1, 0, 1 / 16f);
+                }
+                renderPainting(img, ImageType.full_view, 1, 1, 0xFFFFFF);
             }
-            glTranslatef(0, 0, -0.06f);
-            if (type == ItemRenderType.EQUIPPED) {
-                glTranslatef(-1, 0, 1 / 16f);
-            }
-            renderPainting(img, ImageType.full_view, 1, 1, 0xFFFFFF);
         }
         glPopMatrix();
     }

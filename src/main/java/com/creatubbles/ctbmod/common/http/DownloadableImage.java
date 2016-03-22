@@ -206,7 +206,7 @@ public class DownloadableImage {
                     @Override
                     @SneakyThrows
                     public void run() {
-                        String url = parent.links.get(type);
+                        String url = parent.links == null ? parent.url : parent.links.get(type);
                         File cache = new File(DataCache.cacheFolder, filepath);
                         BufferedImage image = null;
                         if (cache.exists()) {

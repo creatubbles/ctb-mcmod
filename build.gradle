@@ -164,7 +164,7 @@ curseforge {
         id = project.projectId
         changelog = System.getenv('CHANGELOG') == null || System.getenv('CHANGELOG').equals('none') ? getChangelogText() : System.getenv('CHANGELOG')
         changelogType = 'html'
-        releaseType = 'beta'
+        releaseType = project.hasProperty('mod_appendix') ? project.mod_appendix : 'release'
         mainArtifact(jar) {
             displayName = "Creatubbles - ${mod_version}-${buildnumber}"
         }

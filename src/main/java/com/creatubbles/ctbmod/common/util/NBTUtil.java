@@ -1,6 +1,7 @@
 package com.creatubbles.ctbmod.common.util;
 
 import lombok.experimental.UtilityClass;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 import com.creatubbles.api.CreatubblesAPI;
@@ -8,6 +9,14 @@ import com.google.gson.Gson;
 
 @UtilityClass
 public class NBTUtil {
+    
+    public static NBTTagCompound getTag(ItemStack stack) {
+        if (stack.hasTagCompound()) {
+            return stack.getTagCompound();
+        }
+        stack.setTagCompound(new NBTTagCompound());
+        return getTag(stack);
+    }
 
     public static void writeJsonToNBT(Object response, NBTTagCompound tag) {
         writeJsonToNBT(response, tag, CreatubblesAPI.GSON);

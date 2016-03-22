@@ -24,9 +24,11 @@ public class ItemBlockPainting extends ItemBlock {
     public void addInformation(ItemStack stack, EntityPlayer playerIn, List tooltip, boolean advanced) {
         super.addInformation(stack, playerIn, tooltip, advanced);
         Creation c = BlockPainting.getCreation(stack);
-        tooltip.add(EnumChatFormatting.ITALIC.toString().concat(c.name));
-        tooltip.add(c.user_id);
-        tooltip.add(BlockPainting.getWidth(stack) + "x" + BlockPainting.getHeight(stack));
+        if (c != null) {
+            tooltip.add(EnumChatFormatting.ITALIC.toString().concat(c.name));
+            tooltip.add(c.user_id);
+            tooltip.add(BlockPainting.getWidth(stack) + "x" + BlockPainting.getHeight(stack));
+        }
     }
 
     @Override

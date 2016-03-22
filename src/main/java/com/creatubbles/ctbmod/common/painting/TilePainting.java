@@ -45,7 +45,7 @@ public class TilePainting extends TileEntityBase {
     @Override
     public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
         super.onDataPacket(net, pkt);
-        if (image == null) {
+        if (image == null && creation != null) {
             createImage();
         }
     }

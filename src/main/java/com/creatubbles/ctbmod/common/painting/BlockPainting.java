@@ -67,7 +67,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
     public static ItemStack create(Creation creation, int width, int height) {
         ItemStack stack = new ItemStack(CTBMod.painting);
         stack.setTagCompound(new NBTTagCompound());
-        NBTUtil.writeJsonToNBT(creation, stack.getTagCompound());
+        NBTUtil.writeJsonToNBT(creation, NBTUtil.getTag(stack));
         stack.getTagCompound().setInteger("pWidth", width);
         stack.getTagCompound().setInteger("pHeight", height);
         if (Configs.canPlacePaintingOn.length > 0) {
@@ -81,7 +81,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
     }
 
     public static Creation getCreation(ItemStack painting) {
-        return NBTUtil.readJsonFromNBT(Creation.class, painting.getTagCompound());
+        return NBTUtil.readJsonFromNBT(Creation.class, NBTUtil.getTag(painting));
     }
 
     public static int getWidth(ItemStack painting) {
@@ -105,7 +105,8 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
     @Override
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
         ItemStack placed = placer.getHeldItem();
-        Creation c = NBTUtil.readJsonFromNBT(Creation.class, placed.getTagCompound());
+        Creation c = NBTUtil.readJsonFromNBT(Creation.class, NBTUtil.getTag(placed));
+        
         TilePainting painting = getDataPainting(worldIn, pos);
         if (painting != null) {
             painting.setCreation(c);

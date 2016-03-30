@@ -43,6 +43,7 @@ minecraft {
     replace "@VERSION@", project.version
     replaceIn "CTBMod.java"
 
+    srgExtra "PK: team/chisel com/creatubbles"
 }
 
 configurations {

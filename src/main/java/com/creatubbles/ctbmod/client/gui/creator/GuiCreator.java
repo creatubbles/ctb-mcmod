@@ -47,6 +47,8 @@ import com.creatubbles.repack.endercore.client.gui.widget.GuiToolTip;
 import com.creatubbles.repack.endercore.client.gui.widget.TextFieldEnder;
 import com.creatubbles.repack.endercore.client.gui.widget.VScrollbar;
 import com.creatubbles.repack.endercore.client.render.EnderWidget;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -167,15 +169,22 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                         
                         if (creationsReq.wasSuccessful()) {
                             GetCreationsResponse resp = creationsReq.getResponse();
-                            creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[] {}));
+                            creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[0]));
                             for (int i = 2; i <= resp.total_pages && i <= 10; i++) {
                                 loadStep = String.format(template, i, "" + resp.total_pages);
                                 creationsReq = new GetCreationsRequest(getUser().id, i, getAccessToken());
                                 creationsReq.execute();
                                 resp = creationsReq.getResponse();
-                                creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[] {}));
+                                creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[0]));
                                 checkCancel();
                             }
+                            
+                            creations = FluentIterable.from(Lists.newArrayList(creations)).filter(new Predicate<Creation>() {
+                                @Override
+                                public boolean apply(Creation input) {
+                                    return input.approved;
+                                }
+                            }).toArray(Creation.class);
 
                             creationList.setCreations(creations);
                             CTBMod.cache.setCreationCache(creations);

@@ -18,13 +18,14 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumChatFormatting;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 
-import com.creatubbles.api.request.amazon.UploadS3ImageRequest;
+import com.creatubbles.api.request.amazon.UploadS3FileRequest;
 import com.creatubbles.api.request.creation.CreateCreationRequest;
 import com.creatubbles.api.request.creation.CreationsUploadsRequest;
 import com.creatubbles.api.request.creation.PingCreationsUploadsRequest;
-import com.creatubbles.api.response.amazon.UploadS3ImageResponse;
+import com.creatubbles.api.response.amazon.UploadS3FileResponse;
 import com.creatubbles.api.response.creation.CreateCreationResponse;
 import com.creatubbles.api.response.creation.CreationsUploadsResponse;
 import com.creatubbles.repack.endercore.common.util.ChatUtil;
@@ -69,10 +70,6 @@ public class CommandUpload extends ClientCommandBase {
 
         String creationID = createCreationResponse.creation.id;
 
-        // create url for upload
-        CreationsUploadsRequest creationsUploads = new CreationsUploadsRequest(createCreationResponse.creation.id, CommandLogin.accessToken);
-        CreationsUploadsResponse creationsUploadsResponse = creationsUploads.execute().getResponse();
-
         File screenshotsFolder = new File(Minecraft.getMinecraft().mcDataDir, "screenshots");
         File[] screenshots = screenshotsFolder.listFiles((FileFilter) FileFilterUtils.suffixFileFilter(".png"));
 
@@ -86,17 +83,21 @@ public class CommandUpload extends ClientCommandBase {
         }
         sortScreenshots(screenshots);
 
+        // create url for upload
+        CreationsUploadsRequest creationsUploads = new CreationsUploadsRequest(createCreationResponse.creation.id, FilenameUtils.getExtension(screenshots[id].getName()), CommandLogin.accessToken);
+        CreationsUploadsResponse creationsUploadsResponse = creationsUploads.execute().getResponse();
+
         byte[] data = Files.readAllBytes(screenshots[id].toPath());
 
         // upload image to s3
-        UploadS3ImageRequest uploadS3Image = new UploadS3ImageRequest(data, creationsUploadsResponse.url);
-        UploadS3ImageResponse uploadS3Response = uploadS3Image.execute().getResponse();
+        UploadS3FileRequest uploadS3Image = new UploadS3FileRequest(data, creationsUploadsResponse.url, creationsUploadsResponse.content_type);
+        UploadS3FileResponse uploadS3Response = uploadS3Image.execute().getResponse();
         if (!uploadS3Response.success) {
             ChatUtil.sendNoSpamClient("Upload failed: " + uploadS3Response.message);
             return;
         }
         
-        PingCreationsUploadsRequest pingCreationsUploads = new PingCreationsUploadsRequest(creationsUploadsResponse.id, CommandLogin.accessToken);
+        PingCreationsUploadsRequest pingCreationsUploads = new PingCreationsUploadsRequest(creationsUploadsResponse.ping_url, CommandLogin.accessToken);
         pingCreationsUploads.setData(""); // fixes null PUT error
         pingCreationsUploads.execute();
 

@@ -18,14 +18,16 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.opengl.GL11;
 
-import com.creatubbles.api.request.amazon.UploadS3ImageRequest;
+import com.creatubbles.api.request.amazon.UploadS3FileRequest;
 import com.creatubbles.api.request.creation.CreateCreationRequest;
 import com.creatubbles.api.request.creation.CreationsUploadsRequest;
 import com.creatubbles.api.request.creation.PingCreationsUploadsRequest;
-import com.creatubbles.api.response.amazon.UploadS3ImageResponse;
+import com.creatubbles.api.request.landingurls.GetCreationLandingUrlRequest;
+import com.creatubbles.api.response.amazon.UploadS3FileResponse;
 import com.creatubbles.api.response.creation.CreateCreationResponse;
 import com.creatubbles.api.response.creation.CreationsUploadsResponse;
 import com.creatubbles.ctbmod.CTBMod;
@@ -41,7 +43,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class GuiUploadScreenshot extends GuiContainerBase {
 
     private static final ResourceLocation SCREENSHOT_RES = new ResourceLocation(CTBMod.DOMAIN, "screenshotprev");
-    private static final String URL_BASE = "https://www.creatubbles.com/creations/";
 
     private final GuiScreenshotList parent;
     private final File[] files;
@@ -206,7 +207,7 @@ public class GuiUploadScreenshot extends GuiContainerBase {
                 public void run() {
 
                     Exception e = null;
-                    String creationID = null;
+                    String landingUrl = null;
                     
                     try {
                         // create creation
@@ -217,33 +218,36 @@ public class GuiUploadScreenshot extends GuiContainerBase {
                         buttonUpload.displayString = "Creating...";
                         CreateCreationResponse createCreationResponse = createCreation.execute().getResponse();
 
-                        creationID = createCreationResponse.creation.id;
-
                         // create url for upload
                         buttonUpload.displayString = "Uploading...";
-                        CreationsUploadsRequest creationsUploads = new CreationsUploadsRequest(createCreationResponse.creation.id, accessToken);
+                        CreationsUploadsRequest creationsUploads = new CreationsUploadsRequest(createCreationResponse.creation.id, FilenameUtils.getExtension(files[index].getName()), accessToken);
                         CreationsUploadsResponse creationsUploadsResponse = creationsUploads.execute().getResponse();
 
                         byte[] data = FileUtils.readFileToByteArray(files[index]);
 
                         // upload image to s3
-                        UploadS3ImageRequest uploadS3Image = new UploadS3ImageRequest(data, creationsUploadsResponse.url);
-                        UploadS3ImageResponse uploadS3Response = uploadS3Image.execute().getResponse();
+                        UploadS3FileRequest uploadS3Image = new UploadS3FileRequest(data, creationsUploadsResponse.url, creationsUploadsResponse.content_type);
+                        UploadS3FileResponse uploadS3Response = uploadS3Image.execute().getResponse();
 
                         if (!uploadS3Response.success) {
                             throw new RuntimeException("Upload Failed: " + uploadS3Response.message);
                         }
 
                         buttonUpload.displayString = "Finalizing...";
-                        PingCreationsUploadsRequest pingCreationsUploads = new PingCreationsUploadsRequest(creationsUploadsResponse.id, accessToken);
+                        PingCreationsUploadsRequest pingCreationsUploads = new PingCreationsUploadsRequest(creationsUploadsResponse.ping_url, accessToken);
                         pingCreationsUploads.setData(""); // fixes null PUT error
                         pingCreationsUploads.execute();
+                        
+                        GetCreationLandingUrlRequest landingReq = new GetCreationLandingUrlRequest(createCreationResponse.creation.id, accessToken);
+                        landingUrl = landingReq.execute().getResponse().url;
+                        
+                        
                     } catch (Exception e2) {
                         e = e2;
                     }
                     
                     final Exception error = e;
-                    final String creation = creationID;
+                    final String landingUrlf = landingUrl;
                     
                     Minecraft.getMinecraft().func_152344_a(new Runnable() {
 
@@ -252,13 +256,12 @@ public class GuiUploadScreenshot extends GuiContainerBase {
 
                             if (error == null) {
                                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.GREEN.toString().concat("[Creation upload successful! (Click to view \"" + name + "\")]")).setChatStyle(new ChatStyle().setChatClickEvent(
-                                        new ClickEvent(ClickEvent.Action.OPEN_URL, URL_BASE + creation)).setChatHoverEvent(
+                                        new ClickEvent(ClickEvent.Action.OPEN_URL, landingUrlf)).setChatHoverEvent(
                                         new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText("Click to view creation on website.")))));
 
                             } else {
                                 ChatUtil.sendNoSpamClient("Upload failed: " + error.getMessage());
                                 error.printStackTrace();
-                                return;
                             }
                             
                             Minecraft.getMinecraft().displayGuiScreen(null);

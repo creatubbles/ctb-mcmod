@@ -1,5 +1,4 @@
 {
-	"ambientocclusion": false,	
 	"textures": {
         "base": "ctbmod:blocks/painting_none",
         "edges": "ctbmod:blocks/painting_edges",

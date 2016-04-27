@@ -16,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.ToString;
 import lombok.Value;
@@ -53,23 +52,24 @@ public class DownloadableImage {
     @Value
     private static class Size {
 
-        private int width, height, scaled;
+        private int width, height, scaledWidth, scaledHeight;
 
         private Dimension dimension;
 
         private Size() {
-            this(0, 0, 0);
+            this(0, 0, 0, 0);
         }
 
-        public Size(int width, int height, int scaled) {
+        public Size(int width, int height, int scaledW, int scaledH) {
             this.width = width;
             this.height = height;
-            this.scaled = scaled;
+            this.scaledWidth = scaledW;
+            this.scaledHeight = scaledH;
             dimension = new Dimension(width, height);
         }
 
         public static Size create(BufferedImage actual, BufferedImage rescale) {
-            return new Size(actual.getWidth(), actual.getHeight(), rescale.getWidth());
+            return new Size(actual.getWidth(), actual.getHeight(), rescale.getWidth(), rescale.getHeight());
         }
     }
 
@@ -128,7 +128,7 @@ public class DownloadableImage {
             }
 
             final BufferedImage original = image;
-            final BufferedImage resized = GuiUtil.upsize(original, true);
+            final BufferedImage resized = GuiUtil.upsize(original, false);
             
             final RescaledTexture texture = new RescaledTexture(original, resized);
 
@@ -279,15 +279,27 @@ public class DownloadableImage {
     }
 
     /**
-     * To avoid issues with certain GPUs, the in-memory image is scaled up to the nearest power of two square dimension.
-     * This method returns that value for use in rendering.
+     * To avoid issues with certain GPUs, the in-memory image is scaled up to the nearest power of two rectangular dimensions.
+     * This method returns that scaled width for use in rendering.
      * 
      * @param type
-     *            The {@link ImageType} to get the size for.
-     * @return The scaled size of this image.
+     *            The {@link ImageType} to get the width for.
+     * @return The scaled width of this image.
      */
-    public int getScaledSize(ImageType type) {
-        return getSize(type).getScaled();
+    public int getScaledWidth(ImageType type) {
+        return getSize(type).getScaledWidth();
+    }
+    
+    /**
+     * To avoid issues with certain GPUs, the in-memory image is scaled up to the nearest power of two rectangular dimensions.
+     * This method returns that scaled height for use in rendering.
+     * 
+     * @param type
+     *            The {@link ImageType} to get the height for.
+     * @return The scaled height of this image.
+     */
+    public int getScaledHeight(ImageType type) {
+        return getSize(type).getScaledHeight();
     }
 
     /**

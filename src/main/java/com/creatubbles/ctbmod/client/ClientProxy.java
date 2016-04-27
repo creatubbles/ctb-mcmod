@@ -8,6 +8,7 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 
 import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.ctbmod.client.gui.GuiUtil;
 import com.creatubbles.ctbmod.client.render.RenderPainting;
 import com.creatubbles.ctbmod.common.CommonProxy;
 import com.creatubbles.ctbmod.common.painting.PaintingStateMapper;
@@ -17,6 +18,8 @@ public class ClientProxy extends CommonProxy {
 
     @Override
     public void registerRenderers() {
+        GuiUtil.init();
+        
         ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(CTBMod.creator), 0, new ModelResourceLocation(CTBMod.DOMAIN + ":creator", "inventory"));
         ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(CTBMod.painting), 0, new ModelResourceLocation(CTBMod.DOMAIN + ":painting", "inventory"));
 

@@ -2,7 +2,6 @@ package com.creatubbles.ctbmod.client.gui;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
@@ -13,23 +12,33 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.util.ResourceLocation;
 
+import org.lwjgl.opengl.GL11;
+
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.repack.endercore.client.render.IWidgetIcon;
 import com.creatubbles.repack.endercore.client.render.IWidgetMap;
 
 public class GuiUtil extends Gui {
-    
+
+    public static final boolean NON_POT_SUPPORTED;
+
+    static {
+        String s = GL11.glGetString(GL11.GL_EXTENSIONS);
+        NON_POT_SUPPORTED = s.contains("GL_ARB_texture_non_power_of_two");
+    }
+
+    public static void init() {}
+
     @AllArgsConstructor
     @Getter
     public enum Bubbles implements IWidgetIcon {
-        
+
         BLUE(0, 0),
         GREEN(16, 0),
         CLEAR(32, 0),
@@ -112,12 +121,16 @@ public class GuiUtil extends Gui {
         return upsize(img, square, type);
     }
 
-    public static BufferedImage upsize(Image img, boolean square, int type) {
+    public static BufferedImage upsize(BufferedImage img, boolean square, int type) {
         Color fill = Color.BLACK;
         return upsize(img, square, type, fill);
     }
 
-    public static BufferedImage upsize(Image img, boolean square, int type, Color fill) {
+    public static BufferedImage upsize(BufferedImage img, boolean square, int type, Color fill) {
+        if (NON_POT_SUPPORTED) {
+            return img;
+        }
+        
         int scaledW = nextPoT(img.getWidth(null));
         int scaledH = nextPoT(img.getHeight(null));
         if (square) {

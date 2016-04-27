@@ -7,6 +7,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.Vec3;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -51,9 +52,10 @@ public class TilePainting extends TileEntityBase {
     }
 
     private void createImage() {
+        AxisAlignedBB bb = BlockPainting.getCompleteBoundingBox(getWorld(), getPos());
         image = new DownloadableImage(creation.image, creation);
         type = width <= 4 || height <= 4 ? ImageType.full_view : ImageType.original;
-        image.download(type);
+        image.download(type, new Vec3(bb.minX + ((bb.maxX - bb.minX) / 2), bb.minY + ((bb.maxY - bb.minY) / 2), bb.minZ + ((bb.maxZ - bb.minZ) / 2)));
     }
 
     @Override

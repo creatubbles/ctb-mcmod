@@ -45,12 +45,13 @@ public class OverlaySelectedCreation extends OverlayBase<GuiCreator> implements 
             DownloadableImage img = getGui().images.get(selected);
             ResourceLocation res;
             int imgWidth = 16, imgHeight = 16;
-            int scaledSize = 16;
+            int scaledW = 16, scaledH = 16;
             if (img.hasSize(ImageType.full_view)) {
                 res = img.getResource(ImageType.full_view);
                 imgWidth = img.getWidth(ImageType.full_view);
                 imgHeight = img.getHeight(ImageType.full_view);
-                scaledSize = img.getScaledSize(ImageType.full_view);
+                scaledW = img.getScaledWidth(ImageType.full_view);
+                scaledH = img.getScaledHeight(ImageType.full_view);
             } else {
                 res = null;
                 img.download(ImageType.full_view);
@@ -65,7 +66,7 @@ public class OverlaySelectedCreation extends OverlayBase<GuiCreator> implements 
 
             Rectangle bounds = new Rectangle(x, y, 48, 48);
             Rectangle area = new Rectangle(0, 0, imgWidth, imgHeight);
-            GuiUtil.drawRectInscribed(area, bounds, scaledSize, scaledSize);
+            GuiUtil.drawRectInscribed(area, bounds, scaledW, scaledH);
 
             x += 24;
             y += 56;

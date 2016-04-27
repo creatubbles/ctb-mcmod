@@ -10,6 +10,7 @@ import net.minecraftforge.client.MinecraftForgeClient;
 import team.chisel.ctmlib.CTMRenderer;
 
 import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.ctbmod.client.gui.GuiUtil;
 import com.creatubbles.ctbmod.client.render.RenderPainting;
 import com.creatubbles.ctbmod.common.CommonProxy;
 import com.creatubbles.ctbmod.common.painting.TilePainting;
@@ -21,6 +22,8 @@ public class ClientProxy extends CommonProxy {
 
     @Override
     public void registerRenderers() {
+        GuiUtil.init();
+
         RenderingRegistry.registerBlockHandler(new CTMRenderer(CTBMod.renderIdPainting = RenderingRegistry.getNextAvailableRenderId()) {
 
             @Override

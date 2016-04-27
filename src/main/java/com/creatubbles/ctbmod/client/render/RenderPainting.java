@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.IItemRenderer;
@@ -77,14 +78,13 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
 
         int width = image.getWidth(type);
         int height = image.getHeight(type);
-        double scaledSize = image.getScaledSize(type);
+        double scaledW = image.getScaledWidth(type);
+        double scaledH = image.getScaledHeight(type);
         ResourceLocation res = image.getResource(type);
         
         if (res == DownloadableImage.MISSING_TEXTURE) {
             res = GuiUtil.Bubbles.TEXTURE;
-            width = 16;
-            height = 16;
-            scaledSize = 16;
+            scaledW = scaledH = width = height = 16;
             glEnable(GL_BLEND);
         }
 
@@ -106,8 +106,8 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
         }
 
         double minU = 0, minV = 0;
-        double maxU = width / scaledSize;
-        double maxV = height / scaledSize;
+        double maxU = width / scaledW;
+        double maxV = height / scaledH;
 
         // FIXME Bit of a hack for now
         if (res == GuiUtil.Bubbles.TEXTURE) {

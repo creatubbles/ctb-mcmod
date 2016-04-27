@@ -217,14 +217,15 @@ public class OverlayCreationList extends OverlayBase<GuiCreator> {
 
                 ResourceLocation res = img.getResource(type);
 
-                int w = 16, h = 16, scaledSize = 16;
+                int w = 16, h = 16, scaledW = 16, scaledH = 16;
                 if (!img.hasSize(type)) {
                     GL11.glEnable(GL11.GL_BLEND);
                     res = null;
                 } else {
                     w = img.getWidth(type);
                     h = img.getHeight(type);
-                    scaledSize = img.getScaledSize(type);
+                    scaledW = img.getScaledWidth(type);
+                    scaledH = img.getScaledHeight(type);
                 }
 
                 if (res != null) {
@@ -257,7 +258,7 @@ public class OverlayCreationList extends OverlayBase<GuiCreator> {
                         GuiUtil.drawLoadingTex(x, y, w, h);
                     }
                 } else {
-                    func_152125_a(x, y + Math.max(0, pastTop), 0, v, w, (int) (h * heightRatio), thumbnailSize, height, scaledSize, scaledSize);
+                    func_152125_a(x, y + Math.max(0, pastTop), 0, v, w, (int) (h * heightRatio), thumbnailSize, height, scaledW, scaledH);
                 }
                 GL11.glPopMatrix();
             }

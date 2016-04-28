@@ -4,7 +4,6 @@ Changes
 - After uploading a screenshot, you will be given the landing URL instead of a direct link, to allow logins.
 - Unapproved creations will no longer show in the creator GUI
 - Paintings will now render with smooth lighting
-
 Fixes
 - Improve memory usage. Overall the mod should use somewhere around 25% less RAM/VRAM if I had to estimate.
 

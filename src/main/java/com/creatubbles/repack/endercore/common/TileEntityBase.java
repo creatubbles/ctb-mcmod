@@ -4,11 +4,10 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import com.creatubbles.ctbmod.common.network.PacketHandler;
@@ -75,20 +74,21 @@ public abstract class TileEntityBase extends TileEntity implements ITickable {
     }
 
     @Override
-    public final void writeToNBT(NBTTagCompound root) {
+    public final NBTTagCompound writeToNBT(NBTTagCompound root) {
         super.writeToNBT(root);
         writeCustomNBT(root);
+        return root;
     }
 
     @Override
-    public Packet<?> getDescriptionPacket() {
+    public SPacketUpdateTileEntity getUpdatePacket() {
         NBTTagCompound tag = new NBTTagCompound();
         writeCustomNBT(tag);
-        return new S35PacketUpdateTileEntity(getPos(), 1, tag);
+        return new SPacketUpdateTileEntity(getPos(), 1, tag);
     }
 
     @Override
-    public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
+    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
         readCustomNBT(pkt.getNbtCompound());
     }
 
@@ -102,7 +102,8 @@ public abstract class TileEntityBase extends TileEntity implements ITickable {
 
     protected void updateBlock() {
         if (worldObj != null) {
-            worldObj.markBlockForUpdate(getPos());
+            IBlockState state = getWorld().getBlockState(getPos());
+            worldObj.notifyBlockUpdate(pos, state, state, 8);
         }
     }
 

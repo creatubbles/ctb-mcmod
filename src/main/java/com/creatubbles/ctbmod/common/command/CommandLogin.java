@@ -1,12 +1,13 @@
 package com.creatubbles.ctbmod.common.command;
 
-import com.creatubbles.api.request.auth.OAuthAccessTokenRequest;
-import com.creatubbles.api.response.auth.OAuthAccessTokenResponse;
 import lombok.SneakyThrows;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.server.MinecraftServer;
 
 import com.creatubbles.api.CreatubblesAPI;
+import com.creatubbles.api.request.auth.OAuthAccessTokenRequest;
+import com.creatubbles.api.response.auth.OAuthAccessTokenResponse;
 import com.creatubbles.repack.endercore.common.util.ChatUtil;
 
 public class CommandLogin extends ClientCommandBase {
@@ -25,12 +26,12 @@ public class CommandLogin extends ClientCommandBase {
 
     @Override
     @SneakyThrows
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_) {
-        if (p_71515_2_.length < 2) {
-            throw new WrongUsageException(getCommandUsage(p_71515_1_));
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
+        if (args.length < 2) {
+            throw new WrongUsageException(getCommandUsage(sender));
         }
         CreatubblesAPI.setStagingMode(false);
-        OAuthAccessTokenResponse resp = new OAuthAccessTokenRequest(p_71515_2_[0], p_71515_2_[1]).execute().getResponse();
+        OAuthAccessTokenResponse resp = new OAuthAccessTokenRequest(args[0], args[1]).execute().getResponse();
         if (resp.access_token == null) {
             ChatUtil.sendNoSpamClient("Login failed! Invalid email or password.");
         } else {

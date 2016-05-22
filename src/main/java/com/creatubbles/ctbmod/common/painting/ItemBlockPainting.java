@@ -6,9 +6,9 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
 import com.creatubbles.api.core.Creation;
@@ -25,7 +25,7 @@ public class ItemBlockPainting extends ItemBlock {
         super.addInformation(stack, playerIn, tooltip, advanced);
         Creation c = BlockPainting.getCreation(stack);
         if (c != null) {
-            tooltip.add(EnumChatFormatting.ITALIC.toString().concat(c.name));
+            tooltip.add(TextFormatting.ITALIC.toString().concat(c.name));
             tooltip.add(c.user_id);
             tooltip.add(BlockPainting.getWidth(stack) + "x" + BlockPainting.getHeight(stack));
         }

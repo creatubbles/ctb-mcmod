@@ -2,10 +2,10 @@ package com.creatubbles.repack.endercore.client.gui.button;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemDye;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 
 import org.lwjgl.opengl.GL11;
 
@@ -54,7 +54,7 @@ public class ColorButton extends IconButton {
 
     private void nextColor() {
         colorIndex++;
-        if (colorIndex >= ItemDye.dyeColors.length) {
+        if (colorIndex >= ItemDye.DYE_COLORS.length) {
             colorIndex = 0;
         }
         setColorIndex(colorIndex);
@@ -63,7 +63,7 @@ public class ColorButton extends IconButton {
     private void prevColor() {
         colorIndex--;
         if (colorIndex < 0) {
-            colorIndex = ItemDye.dyeColors.length - 1;
+            colorIndex = ItemDye.DYE_COLORS.length - 1;
         }
         setColorIndex(colorIndex);
     }
@@ -73,7 +73,7 @@ public class ColorButton extends IconButton {
     }
 
     public void setColorIndex(int colorIndex) {
-        this.colorIndex = MathHelper.clamp_int(colorIndex, 0, ItemDye.dyeColors.length - 1);
+        this.colorIndex = MathHelper.clamp_int(colorIndex, 0, ItemDye.DYE_COLORS.length - 1);
         String colStr = DyeColor.values()[colorIndex].getLocalisedName();
         if (tooltipPrefix != null && tooltipPrefix.length() > 0) {
             setToolTip(tooltipPrefix, colStr);
@@ -86,7 +86,7 @@ public class ColorButton extends IconButton {
     public void drawButton(Minecraft mc, int mouseX, int mouseY) {
         super.drawButton(mc, mouseX, mouseY);
         if (visible) {
-            WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
+            VertexBuffer renderer = Tessellator.getInstance().getBuffer();
             renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 
             int x = xPosition + 2;
@@ -94,7 +94,7 @@ public class ColorButton extends IconButton {
 
             GL11.glDisable(GL11.GL_TEXTURE_2D);
 
-            int col = ItemDye.dyeColors[colorIndex];
+            int col = ItemDye.DYE_COLORS[colorIndex];
             renderer.putColor4(col);
             renderer.pos(x, y + height - 4, zLevel).endVertex();
             renderer.pos(x + width - 4, y + height - 4, zLevel).endVertex();

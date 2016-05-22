@@ -24,9 +24,9 @@ import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.IResourceManager;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
@@ -87,17 +87,17 @@ public class DownloadableImage {
         public void loadTexture(IResourceManager resourceManager) throws IOException {}
     }
     
-    public static final Vec3 ZERO_DISTANCE = new Vec3(0, 0, 0);
+    public static final Vec3i ZERO_DISTANCE = new Vec3i(0, 0, 0);
     
     private class ImageDownloadTask implements Runnable {
 
         private final ImageType type;
         private final String filepath;
         private final ResourceLocation res;
-        private final Vec3 position;
+        private final Vec3i position;
         private double distSq;
         
-        private ImageDownloadTask(ImageType type, String filepath, ResourceLocation res, Vec3 position) {
+        private ImageDownloadTask(ImageType type, String filepath, ResourceLocation res, Vec3i position) {
             this.type = type;
             this.filepath = filepath;
             this.res = res;
@@ -105,6 +105,7 @@ public class DownloadableImage {
             updateDistance();
         }
         
+        @SuppressWarnings("deprecation")
         @Override
         @SneakyThrows
         public void run() {
@@ -202,7 +203,7 @@ public class DownloadableImage {
     private static Map<DownloadableImage, Set<ImageType>> inProgress = Maps.newConcurrentMap();
 
     static {
-        Minecraft.getMinecraft().getTextureManager().loadTexture(MISSING_TEXTURE, TextureUtil.missingTexture);
+        Minecraft.getMinecraft().getTextureManager().loadTexture(MISSING_TEXTURE, TextureUtil.MISSING_TEXTURE);
     }
 
     @Getter
@@ -328,7 +329,7 @@ public class DownloadableImage {
      * @see #updateSize(ImageType)
      */
     @SneakyThrows
-    public void download(final ImageType type, Vec3 position) {
+    public void download(final ImageType type, Vec3i position) {
         Set<ImageType> prog = inProgress.get(this);
         if (locations.get(type) == MISSING_TEXTURE && (prog == null || !prog.contains(type))) {
             TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();

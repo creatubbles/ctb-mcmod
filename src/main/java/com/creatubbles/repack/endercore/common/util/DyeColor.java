@@ -3,11 +3,12 @@ package com.creatubbles.repack.endercore.common.util;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.oredict.OreDictionary;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+@SuppressWarnings("deprecation")
 public enum DyeColor {
 
     BLACK,
@@ -70,7 +71,7 @@ public enum DyeColor {
     private DyeColor() {}
 
     public int getColor() {
-        return ItemDye.dyeColors[ordinal()];
+        return ItemDye.DYE_COLORS[ordinal()];
     }
 
     public String getName() {
@@ -78,7 +79,7 @@ public enum DyeColor {
     }
 
     public String getLocalisedName() {
-        return StatCollector.translateToLocal(DYE_ORE_UNLOCAL_NAMES[ordinal()]);
+        return I18n.translateToLocal(DYE_ORE_UNLOCAL_NAMES[ordinal()]);
     }
 
     @Override

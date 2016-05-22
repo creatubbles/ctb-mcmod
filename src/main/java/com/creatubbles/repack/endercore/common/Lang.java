@@ -3,11 +3,12 @@ package com.creatubbles.repack.endercore.common;
 import java.util.List;
 
 import lombok.Getter;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.text.translation.I18n;
 
 import com.google.common.collect.Lists;
 
 @Getter
+@SuppressWarnings("deprecation")
 public class Lang {
 
     private static final String REGEX = "\\" + '|';
@@ -68,7 +69,7 @@ public class Lang {
      * @return A localized string.
      */
     public String localizeExact(String unloc, Object... args) {
-        return StatCollector.translateToLocalFormatted(unloc, args);
+        return I18n.translateToLocalFormatted(unloc, args);
     }
 
     /**
@@ -80,7 +81,7 @@ public class Lang {
      * @return A localized string.
      */
     public String localizeExact(String unloc) {
-        return StatCollector.translateToLocal(unloc);
+        return I18n.translateToLocal(unloc);
     }
 
     /**
@@ -171,6 +172,6 @@ public class Lang {
      * @return True if there is a localization mapped, false otherwise.
      */
     public boolean canLocalizeExact(String unloc) {
-        return StatCollector.canTranslate(unloc);
+        return I18n.canTranslate(unloc);
     }
 }

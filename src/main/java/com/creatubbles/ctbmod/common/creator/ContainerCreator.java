@@ -21,11 +21,11 @@ public class ContainerCreator extends ContainerEnder<TileCreator> {
     protected void addSlots(InventoryPlayer playerInv) {
         int x = 71;
         int y = 20;
-        ItemStack paper = new ItemStack(Items.paper);
+        ItemStack paper = new ItemStack(Items.PAPER);
         addSlotToContainer(new SlotCreator(paper.copy(), getInv(), 0, x, y));
-        addSlotToContainer(new SlotCreator(Configs.harderPaintings ? new ItemStack(Items.dye, 1, DyeColor.RED.ordinal()) : paper.copy(), getInv(), 1, x + 18, y));
-        addSlotToContainer(new SlotCreator(Configs.harderPaintings ? new ItemStack(Items.dye, 1, DyeColor.GREEN.ordinal()) : paper.copy(), getInv(), 2, x, y + 18));
-        addSlotToContainer(new SlotCreator(Configs.harderPaintings ? new ItemStack(Items.dye, 1, DyeColor.BLUE.ordinal()) : paper.copy(), getInv(), 3, x + 18, y + 18));
+        addSlotToContainer(new SlotCreator(Configs.harderPaintings ? new ItemStack(Items.DYE, 1, DyeColor.RED.ordinal()) : paper.copy(), getInv(), 1, x + 18, y));
+        addSlotToContainer(new SlotCreator(Configs.harderPaintings ? new ItemStack(Items.DYE, 1, DyeColor.GREEN.ordinal()) : paper.copy(), getInv(), 2, x, y + 18));
+        addSlotToContainer(new SlotCreator(Configs.harderPaintings ? new ItemStack(Items.DYE, 1, DyeColor.BLUE.ordinal()) : paper.copy(), getInv(), 3, x + 18, y + 18));
 
         addSlotToContainer(new Slot(getInv(), 4, 145, 29) {
 

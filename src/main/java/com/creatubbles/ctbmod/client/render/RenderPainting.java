@@ -5,7 +5,7 @@ import java.awt.geom.Rectangle2D;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.EnumFacing;
@@ -46,7 +46,7 @@ public class RenderPainting extends TileEntitySpecialRenderer<TilePainting> {
 
             Minecraft.getMinecraft().renderEngine.bindTexture(res);
 
-            WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
+            VertexBuffer renderer = Tessellator.getInstance().getBuffer();
 
             // TODO this code is duped between here and OverlaySelectedCreation (kinda)
 

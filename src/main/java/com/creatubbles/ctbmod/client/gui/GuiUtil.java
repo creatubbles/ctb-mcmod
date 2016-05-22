@@ -11,7 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
@@ -167,8 +167,8 @@ public class GuiUtil extends Gui {
     
     public static void drawSlotBackground(int left, int top, int width, int height) {
 
-        WorldRenderer worldrenderer = Tessellator.getInstance().getWorldRenderer();
-        Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.optionsBackground);
+        VertexBuffer worldrenderer = Tessellator.getInstance().getBuffer();
+        Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.OPTIONS_BACKGROUND);
 
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         float f = 32.0F;

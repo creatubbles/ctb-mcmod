@@ -9,10 +9,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.oredict.OreDictionary;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -263,7 +263,7 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, ITic
             return true;
         }
         if (index == 0 || !Configs.harderPaintings && index < 4) {
-            return stack.getItem() == Items.paper;
+            return stack.getItem() == Items.PAPER;
         } else if (index < 4) {
             int[] ids = OreDictionary.getOreIDs(stack);
             String ore = colors[index - 1];
@@ -324,8 +324,8 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, ITic
     }
 
     @Override
-    public IChatComponent getDisplayName() {
-        return new ChatComponentText("This is stupid");
+    public ITextComponent getDisplayName() {
+        return new TextComponentString("This is stupid");
     }
 
     @Override

@@ -3,7 +3,7 @@ package com.creatubbles.repack.endercore.client.render;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 
@@ -64,7 +64,7 @@ public interface IWidgetMap {
         @Override
         public void render(IWidgetIcon widget, double x, double y, double width, double height, double zLevel, boolean doDraw, boolean flipY) {
 
-            WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
+            VertexBuffer renderer = Tessellator.getInstance().getBuffer();
             if (doDraw) {
                 Minecraft.getMinecraft().getTextureManager().bindTexture(getTexture());
                 renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);

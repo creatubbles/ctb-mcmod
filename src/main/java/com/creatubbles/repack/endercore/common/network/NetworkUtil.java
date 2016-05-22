@@ -1,7 +1,7 @@
 package com.creatubbles.repack.endercore.common.network;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 
 /**
  * Created by CrazyPants on 27/02/14.

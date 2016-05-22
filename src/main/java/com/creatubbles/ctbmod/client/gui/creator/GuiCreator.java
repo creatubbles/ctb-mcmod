@@ -1,7 +1,5 @@
 package com.creatubbles.ctbmod.client.gui.creator;
 
-import static net.minecraft.util.EnumChatFormatting.*;
-
 import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.Collection;
@@ -18,8 +16,8 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextFormatting;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -59,6 +57,8 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.gson.Gson;
+
+import static net.minecraft.util.text.TextFormatting.*;
 
 public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
@@ -124,7 +124,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                 checkCancel();
 
                 if (loginReq != null && !loginReq.wasSuccessful()) {
-                    header = EnumChatFormatting.YELLOW.toString().concat(loginReq.getResponse().message);
+                    header = YELLOW.toString().concat(loginReq.getResponse().message);
                     loginReq = null;
                     logout();
                 } else {
@@ -573,7 +573,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                 drawString(getFontRenderer(), CTBMod.lang.localize("gui.creator.height", te.getHeight()), x + 50, y, 0xFFFFFF);
 
                 y += 18;
-                EnumChatFormatting color = te.getRequiredPaper() > te.getPaperCount() ? RED : GREEN;
+                TextFormatting color = te.getRequiredPaper() > te.getPaperCount() ? RED : GREEN;
                 drawString(getFontRenderer(), CTBMod.lang.localize("gui.creator.paper", color.toString() + te.getRequiredPaper()), x, y, 0xFFFFFF);
                 if (Configs.harderPaintings) {
                     y += 10;

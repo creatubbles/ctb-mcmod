@@ -5,7 +5,7 @@ import java.awt.Rectangle;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 
 import org.lwjgl.opengl.GL11;
@@ -115,7 +115,7 @@ public class VScrollbar implements IHideable {
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
             GL11.glColor3f(1, 1, 1);
 
-            WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
+            VertexBuffer renderer = Tessellator.getInstance().getBuffer();
             renderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 
             iconUp.getMap().render(iconUp, btnUp.x, btnUp.y, false);

@@ -12,12 +12,12 @@ import lombok.SneakyThrows;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.event.ClickEvent;
-import net.minecraft.event.HoverEvent;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.util.text.event.HoverEvent;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -257,9 +257,9 @@ public class GuiUploadScreenshot extends GuiContainerBase {
                         public void run() {
 
                             if (error == null) {
-                                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(EnumChatFormatting.GREEN.toString().concat("[Creation upload successful! (Click to view \"" + name + "\")]")).setChatStyle(new ChatStyle().setChatClickEvent(
-                                        new ClickEvent(ClickEvent.Action.OPEN_URL, landingUrlf)).setChatHoverEvent(
-                                        new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText("Click to view creation on website.")))));
+                                Minecraft.getMinecraft().thePlayer.addChatMessage(new TextComponentString(TextFormatting.GREEN.toString().concat("[Creation upload successful! (Click to view \"" + name + "\")]")).setStyle(new Style().setClickEvent(
+                                        new ClickEvent(ClickEvent.Action.OPEN_URL, landingUrlf)).setHoverEvent(
+                                        new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString("Click to view creation on website.")))));
 
                             } else {
                                 ChatUtil.sendNoSpamClient("Upload failed: " + error.getMessage());

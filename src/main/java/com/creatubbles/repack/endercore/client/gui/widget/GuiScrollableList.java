@@ -7,7 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 
 import org.lwjgl.input.Mouse;
@@ -117,7 +117,7 @@ public abstract class GuiScrollableList<T> {
 
     public abstract int getNumElements();
 
-    protected abstract void drawElement(int elementIndex, int x, int y, int height, WorldRenderer renderer);
+    protected abstract void drawElement(int elementIndex, int x, int y, int height, VertexBuffer renderer);
 
     protected boolean elementClicked(int elementIndex, boolean doubleClick) {
         return true;
@@ -189,7 +189,7 @@ public abstract class GuiScrollableList<T> {
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         GL11.glScissor(sx, sy, sw, sh);
 
-        WorldRenderer renderer = Tessellator.getInstance().getWorldRenderer();
+        VertexBuffer renderer = Tessellator.getInstance().getBuffer();
         drawContainerBackground(renderer);
 
         int contentYOffset = this.minY + margin - (int) this.amountScrolled;
@@ -257,7 +257,7 @@ public abstract class GuiScrollableList<T> {
         GL11.glDisable(GL11.GL_BLEND);
     }
 
-    protected void renderScrollBar(WorldRenderer renderer) {
+    protected void renderScrollBar(VertexBuffer renderer) {
 
         int contentHeightOverBounds = getContentOverhang();
         if (contentHeightOverBounds > 0) {
@@ -393,7 +393,7 @@ public abstract class GuiScrollableList<T> {
         return minX + width;
     }
 
-    protected void drawContainerBackground(WorldRenderer renderer) {
+    protected void drawContainerBackground(VertexBuffer renderer) {
 
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         GL11.glDisable(GL11.GL_TEXTURE_2D);

@@ -8,15 +8,15 @@ import java.util.Comparator;
 
 import lombok.SneakyThrows;
 import net.minecraft.client.Minecraft;
-import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.NumberInvalidException;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.event.ClickEvent;
-import net.minecraft.event.HoverEvent;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.util.text.event.HoverEvent;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
@@ -47,7 +47,7 @@ public class CommandUpload extends ClientCommandBase {
 
     @Override
     @SneakyThrows
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException {
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
         if (args.length < 1) {
             throw new WrongUsageException("Not enough arguments. Usage: %s", getCommandUsage(sender));
         }
@@ -100,9 +100,9 @@ public class CommandUpload extends ClientCommandBase {
         pingCreationsUploads.setData(""); // fixes null PUT error
         pingCreationsUploads.execute();
 
-        sender.addChatMessage(new ChatComponentText(EnumChatFormatting.GREEN.toString().concat("[Creation upload successful! (Click to view)]")).setChatStyle(new ChatStyle()
-                .setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, URL_BASE + creationID))
-                .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText("Click to view creation on website.")))));
+        sender.addChatMessage(new TextComponentString(TextFormatting.GREEN.toString().concat("[Creation upload successful! (Click to view)]")).setStyle(new Style()
+                .setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, URL_BASE + creationID))
+                .setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString("Click to view creation on website.")))));
     }
 
     private int getScreenshotId(String[] args) {

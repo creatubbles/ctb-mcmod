@@ -1,5 +1,5 @@
 {
-	"parent":"block/cube",
+	"parent":"block/cube_all",
     "textures": {
     	"front":"ctbmod:blocks/creator_front",
         "particle":"ctbmod:blocks/creator_front",

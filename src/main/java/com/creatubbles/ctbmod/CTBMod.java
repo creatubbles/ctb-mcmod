@@ -32,7 +32,7 @@ import com.creatubbles.repack.endercore.common.config.ConfigProcessor;
 
 import static com.creatubbles.ctbmod.CTBMod.*;
 
-@Mod(modid = MODID, name = NAME, version = VERSION, acceptedMinecraftVersions = "[@MCVERSION@, 1.9)")
+@Mod(modid = MODID, name = NAME, version = VERSION, acceptedMinecraftVersions = "[@MCVERSION@, 1.10)")
 public class CTBMod {
 
     public static final String MODID = "CTBMod";
@@ -65,7 +65,7 @@ public class CTBMod {
 
         proxy.registerRenderers();
 
-        GameRegistry.addRecipe(new ShapedOreRecipe(creator, "ibi", "wpw", "iwi", 'i', "ingotIron", 'b', Items.bucket, 'w', "plankWood", 'p', Blocks.piston));
+        GameRegistry.addRecipe(new ShapedOreRecipe(creator, "ibi", "wpw", "iwi", 'i', "ingotIron", 'b', Items.BUCKET, 'w', "plankWood", 'p', Blocks.PISTON));
     }
 
     @EventHandler

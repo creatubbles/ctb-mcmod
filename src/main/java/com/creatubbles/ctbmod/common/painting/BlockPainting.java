@@ -4,11 +4,12 @@ import java.util.List;
 import java.util.Set;
 
 import jersey.repackaged.com.google.common.collect.Sets;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
@@ -19,10 +20,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -49,17 +50,17 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
     }
 
     protected BlockPainting() {
-        super("painting", TilePainting.class, Material.cloth);
+        super("painting", TilePainting.class, Material.CLOTH);
         setHardness(0.25f);
-        setStepSound(soundTypeCloth);
+        setSoundType(SoundType.CLOTH);
         setDefaultState(blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(DUMMY, false).withProperty(CONNECTION, ConnectionType.NONE));
-        setItemBlockClass(ItemBlockPainting.class);
+        setItemBlock(new ItemBlockPainting(this));
     }
 
     @Override
     protected void init() {
         super.init();
-        setCreativeTab(CreativeTabs.tabDecorations);
+        setCreativeTab(CreativeTabs.DECORATIONS);
         setUnlocalizedName(CTBMod.DOMAIN + "." + name);
         GameRegistry.registerTileEntity(TileDummyPainting.class, "ctbmod.dummyPainting");
     }
@@ -104,15 +105,14 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
 
     @Override
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-        ItemStack placed = placer.getHeldItem();
-        Creation c = NBTUtil.readJsonFromNBT(Creation.class, NBTUtil.getTag(placed));
+        Creation c = NBTUtil.readJsonFromNBT(Creation.class, NBTUtil.getTag(stack));
         
         TilePainting painting = getDataPainting(worldIn, pos);
         if (painting != null) {
             painting.setCreation(c);
         }
-        painting.setWidth(placed.getTagCompound().getInteger("pWidth"));
-        painting.setHeight(placed.getTagCompound().getInteger("pHeight"));
+        painting.setWidth(stack.getTagCompound().getInteger("pWidth"));
+        painting.setHeight(stack.getTagCompound().getInteger("pHeight"));
 
         EnumFacing facing = getState(worldIn, pos).getValue(FACING);
         EnumFacing ext = facing.rotateYCCW();
@@ -165,39 +165,30 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
     }
 
     @Override
-    public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos) {
-        IBlockState state = getState(worldIn, pos);
-        if (state == null) {
-            return;
+    @Deprecated
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+        IBlockState realstate = getState(source, pos);
+        if (realstate == null) {
+            return super.getBoundingBox(state, source, pos);
         }
         EnumFacing facing = state.getValue(FACING);
         switch (facing) {
             case EAST:
-                setBlockBounds(0, 0, 0, 1 / 16f, 1, 1);
-                break;
+                return new AxisAlignedBB(0, 0, 0, 1 / 16f, 1, 1);
             case NORTH:
-                setBlockBounds(0, 0, 15 / 16f, 1, 1, 1);
-                break;
+                return new AxisAlignedBB(0, 0, 15 / 16f, 1, 1, 1);
             case SOUTH:
-                setBlockBounds(0, 0, 0, 1, 1, 1 / 16f);
-                break;
+                return new AxisAlignedBB(0, 0, 0, 1, 1, 1 / 16f);
             case WEST:
-                setBlockBounds(15 / 16f, 0, 0, 1, 1, 1);
-                break;
+                return new AxisAlignedBB(15 / 16f, 0, 0, 1, 1, 1);
             default:
-                setBlockBounds(0, 0, 0, 1, 1, 1);
-                break;
+                return new AxisAlignedBB(0, 0, 0, 1, 1, 1);
         }
     }
-
+    
     @Override
-    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state) {
-        setBlockBoundsBasedOnState(worldIn, pos);
-        return super.getCollisionBoundingBox(worldIn, pos, state);
-    }
-
-    @Override
-    public AxisAlignedBB getSelectedBoundingBox(World worldIn, BlockPos pos) {
+    @Deprecated
+    public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World worldIn, BlockPos pos) {
         return getCompleteBoundingBox(worldIn, pos);
     }
 
@@ -215,9 +206,9 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         }
 
         BlockPainting painting = CTBMod.painting;
-        painting.setBlockBoundsBasedOnState(worldIn, pos);
-        AxisAlignedBB bb = new AxisAlignedBB(pos.getX() + painting.minX, pos.getY() + painting.minY, pos.getZ() + painting.minZ, pos.getX() + painting.maxX, pos.getY() + painting.maxY, pos.getZ()
-                + painting.maxZ);
+        AxisAlignedBB blockbb = painting.getBoundingBox(state, worldIn, pos);
+        AxisAlignedBB bb = new AxisAlignedBB(pos.getX() + blockbb.minX, pos.getY() + blockbb.minY, pos.getZ() + blockbb.minZ, pos.getX() + blockbb.maxX, pos.getY() + blockbb.maxY, pos.getZ()
+                + blockbb.maxZ);
         if (te == null) {
             return bb;
         }
@@ -247,7 +238,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
     }
 
     @Override
-    public ItemStack getPickBlock(MovingObjectPosition target, World world, BlockPos pos, EntityPlayer player) {
+    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
         TilePainting te = getDataPainting(world, pos);
         return create(te.getCreation(), te.getWidth(), te.getHeight());
     }
@@ -268,8 +259,8 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
     }
 
     @Override
-    protected BlockState createBlockState() {
-        return new BlockState(this, FACING, DUMMY, CONNECTION);
+    protected BlockStateContainer createBlockState() {
+        return new BlockStateContainer(this, FACING, DUMMY, CONNECTION);
     }
 
     @Override
@@ -298,17 +289,17 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
     }
 
     @Override
-    public boolean isOpaqueCube() {
+    public boolean isOpaqueCube(IBlockState state) {
         return false;
     }
 
     @Override
-    public boolean isFullBlock() {
+    public boolean isFullBlock(IBlockState state) {
         return false;
     }
 
     @Override
-    public boolean isFullCube() {
+    public boolean isFullCube(IBlockState state) {
         return false;
     }
 }

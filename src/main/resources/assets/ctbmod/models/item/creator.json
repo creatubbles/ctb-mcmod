@@ -1,16 +1,15 @@
 {
 	"parent": "ctbmod:block/creator",
 	"display": {
-		"thirdperson": {
-			"rotation": [ -10, 135, -170 ],
-			"translation": [ 0, 1.5, -2.75 ],
-			"scale": [ 0.375, 0.375, 0.375 ]
-		},
-		"firstperson": {
-			"rotation": [0, 180, 0]
-		},
 		"gui": {
-			"rotation": [0, 180, 0]
-		}
+            "rotation": [ 30, 45, 0 ],
+            "translation": [ 0, 0, 0],
+            "scale":[ 0.625, 0.625, 0.625 ]
+        },
+        "thirdperson_righthand": {
+            "rotation": [ 75, 225, 0 ],
+            "translation": [ 0, 2.5, 0],
+            "scale": [ 0.375, 0.375, 0.375 ]
+        }
 	}
 }

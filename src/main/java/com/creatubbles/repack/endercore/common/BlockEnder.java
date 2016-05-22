@@ -5,7 +5,9 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import lombok.Setter;
+import lombok.SneakyThrows;
 import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -13,9 +15,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -29,10 +31,10 @@ public abstract class BlockEnder<T extends TileEntityBase> extends Block {
     protected final String name;
 
     @Setter
-    private Class<? extends ItemBlock> itemBlockClass;
+    private ItemBlock itemBlock;
 
     protected BlockEnder(String name, Class<? extends T> teClass) {
-        this(name, teClass, new Material(MapColor.ironColor));
+        this(name, teClass, new Material(MapColor.IRON));
     }
 
     protected BlockEnder(String name, Class<? extends T> teClass, Material mat) {
@@ -41,16 +43,20 @@ public abstract class BlockEnder<T extends TileEntityBase> extends Block {
         this.name = name;
         setHardness(0.5F);
         setUnlocalizedName(name);
-        setStepSound(Block.soundTypeMetal);
+        setRegistryName(name);
+        setSoundType(SoundType.METAL);
         setHarvestLevel("pickaxe", 0);
     }
 
+    @SneakyThrows
     protected void init() {
-        if (itemBlockClass != null) {
-            GameRegistry.registerBlock(this, itemBlockClass, name);
-        } else {
-            GameRegistry.registerBlock(this, name);
+        GameRegistry.register(this);
+        if (itemBlock == null) {
+            itemBlock = new ItemBlock(this);
         }
+        itemBlock.setRegistryName(this.getRegistryName());
+        GameRegistry.register(itemBlock);
+        
         if (teClass != null) {
             GameRegistry.registerTileEntity(teClass, name + "TileEntity");
         }
@@ -78,7 +84,7 @@ public abstract class BlockEnder<T extends TileEntityBase> extends Block {
     /* Subclass Helpers */
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ) {
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
         if (playerIn.isSneaking()) {
             return false;
         }
@@ -94,16 +100,16 @@ public abstract class BlockEnder<T extends TileEntityBase> extends Block {
     }
 
     @Override
-    public boolean removedByPlayer(World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
+    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
         if (willHarvest) {
             return true;
         }
-        return super.removedByPlayer(world, pos, player, willHarvest);
+        return super.removedByPlayer(state, world, pos, player, willHarvest);
     }
 
     @Override
-    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te) {
-        super.harvestBlock(worldIn, player, pos, state, te);
+    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te, ItemStack stack) {
+        super.harvestBlock(worldIn, player, pos, state, te, stack);
         worldIn.setBlockToAir(pos);
     }
 
@@ -150,19 +156,5 @@ public abstract class BlockEnder<T extends TileEntityBase> extends Block {
         } else {
             return te.shouldDoWorkThisTick(interval, offset);
         }
-    }
-
-    // Because the vanilla method takes floats...
-    public void setBlockBounds(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
-        this.minX = minX;
-        this.minY = minY;
-        this.minZ = minZ;
-        this.maxX = maxX;
-        this.maxY = maxY;
-        this.maxZ = maxZ;
-    }
-
-    public void setBlockBounds(AxisAlignedBB bb) {
-        setBlockBounds(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ);
     }
 }

@@ -2,6 +2,7 @@ package com.creatubbles.ctbmod.common.command;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.server.MinecraftServer;
 
 public abstract class ClientCommandBase extends CommandBase {
 
@@ -11,7 +12,7 @@ public abstract class ClientCommandBase extends CommandBase {
     }
 
     @Override
-    public boolean canCommandSenderUseCommand(ICommandSender player) {
-        return player.getEntityWorld().isRemote || super.canCommandSenderUseCommand(player);
+    public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
+        return sender.getEntityWorld().isRemote || super.checkPermission(server, sender);
     }
 }

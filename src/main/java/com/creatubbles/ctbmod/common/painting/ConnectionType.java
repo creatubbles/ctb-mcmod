@@ -1,16 +1,13 @@
 package com.creatubbles.ctbmod.common.painting;
 
-import static com.creatubbles.ctbmod.common.painting.Connections.DOWN;
-import static com.creatubbles.ctbmod.common.painting.Connections.LEFT;
-import static com.creatubbles.ctbmod.common.painting.Connections.RIGHT;
-import static com.creatubbles.ctbmod.common.painting.Connections.UP;
-
 import java.util.Locale;
 import java.util.Set;
 
 import net.minecraft.util.IStringSerializable;
 
 import com.google.common.collect.Sets;
+
+import static com.creatubbles.ctbmod.common.painting.Connections.*;
 
 public enum ConnectionType implements IStringSerializable {
 

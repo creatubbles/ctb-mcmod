@@ -1,11 +1,13 @@
 package com.creatubbles.ctbmod.common.command;
 
+import net.minecraft.command.CommandException;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.server.MinecraftServer;
+
 import com.creatubbles.api.request.creator.GetCreatorsRequest;
 import com.creatubbles.api.request.user.UserProfileRequest;
 import com.creatubbles.api.response.creator.GetCreatorsResponse;
 import com.creatubbles.api.response.user.UserProfileResponse;
-import net.minecraft.command.ICommandSender;
-
 import com.creatubbles.repack.endercore.common.util.ChatUtil;
 
 public class CommandGetCreators extends ClientCommandBase {
@@ -21,12 +23,11 @@ public class CommandGetCreators extends ClientCommandBase {
     }
 
     @Override
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_) {
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         UserProfileResponse uPResponse = new UserProfileRequest(CommandLogin.accessToken).execute().getResponse();
-        GetCreatorsResponse resp = new GetCreatorsRequest(uPResponse.user.id, CommandLogin.accessToken).
-                execute().getResponse();
+        GetCreatorsResponse resp = new GetCreatorsRequest(uPResponse.user.id, CommandLogin.accessToken).execute().getResponse();
         if (resp.creators != null) {
-            p_71515_1_.addChatMessage(ChatUtil.wrap("Found creators: " + resp.creators));
+            sender.addChatMessage(ChatUtil.wrap("Found creators: " + resp.creators));
         } else {
             ChatUtil.sendNoSpamClient("Error: " + resp.message);
         }

@@ -2,13 +2,13 @@ package com.creatubbles.ctbmod.common.creator;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyDirection;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -28,14 +28,14 @@ public class BlockCreator extends BlockEnder<TileCreator> implements IGuiHandler
     }
 
     public BlockCreator() {
-        super("creator", TileCreator.class, Material.rock);
+        super("creator", TileCreator.class, Material.ROCK);
         setDefaultState(getDefaultState().withProperty(FACING, EnumFacing.SOUTH));
     }
 
     @Override
     protected void init() {
         super.init();
-        setCreativeTab(CreativeTabs.tabDecorations);
+        setCreativeTab(CreativeTabs.DECORATIONS);
         setUnlocalizedName(CTBMod.DOMAIN + "." + name);
         NetworkRegistry.INSTANCE.registerGuiHandler(CTBMod.instance, this);
     }
@@ -56,10 +56,9 @@ public class BlockCreator extends BlockEnder<TileCreator> implements IGuiHandler
     }
 
     @Override
-    protected BlockState createBlockState() {
-        return new BlockState(this, FACING);
+    protected BlockStateContainer createBlockState() {
+        return new BlockStateContainer(this, FACING);
     }
-
 
     @Override
     protected boolean openGui(World world, BlockPos pos, EntityPlayer entityPlayer, EnumFacing side) {

@@ -2,7 +2,7 @@ package com.creatubbles.ctbmod.common.network;
 
 import io.netty.buffer.ByteBuf;
 import lombok.NoArgsConstructor;
-import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -47,7 +47,7 @@ public class MessageCreate extends MessageTileEntity<TileCreator> {
         @Override
         public IMessage onMessage(final MessageCreate message, MessageContext ctx) {
             final TileCreator te = message.getTileEntity(ctx.getServerHandler().playerEntity.worldObj);
-            MinecraftServer.getServer().addScheduledTask(new Runnable() {
+            FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(new Runnable() {
 
                 @Override
                 public void run() {

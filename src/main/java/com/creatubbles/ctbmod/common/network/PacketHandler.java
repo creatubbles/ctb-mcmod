@@ -2,7 +2,7 @@ package com.creatubbles.ctbmod.common.network;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -34,7 +34,7 @@ public class PacketHandler {
 
     public static void sendToAllAround(IMessage message, TileEntity te, int range) {
         BlockPos pos = te.getPos();
-        INSTANCE.sendToAllAround(message, new TargetPoint(te.getWorld().provider.getDimensionId(), pos.getX(), pos.getY(), pos.getZ(), range));
+        INSTANCE.sendToAllAround(message, new TargetPoint(te.getWorld().provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), range));
     }
 
     public static void sendToAllAround(IMessage message, TileEntity te) {

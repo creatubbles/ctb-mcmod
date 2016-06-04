@@ -68,7 +68,7 @@ public class CommandUpload extends ClientCommandBase {
         createCreation.setData("{\"name\":\"" + name + "\"}");
         CreateCreationResponse createCreationResponse = createCreation.execute().getResponse();
 
-        String creationID = createCreationResponse.creation.id;
+        String creationID = createCreationResponse.getId();
 
         File screenshotsFolder = new File(Minecraft.getMinecraft().mcDataDir, "screenshots");
         File[] screenshots = screenshotsFolder.listFiles((FileFilter) FileFilterUtils.suffixFileFilter(".png"));
@@ -84,20 +84,20 @@ public class CommandUpload extends ClientCommandBase {
         sortScreenshots(screenshots);
 
         // create url for upload
-        CreationsUploadsRequest creationsUploads = new CreationsUploadsRequest(createCreationResponse.creation.id, FilenameUtils.getExtension(screenshots[id].getName()), CommandLogin.accessToken);
+        CreationsUploadsRequest creationsUploads = new CreationsUploadsRequest(createCreationResponse.getId(), FilenameUtils.getExtension(screenshots[id].getName()), CommandLogin.accessToken);
         CreationsUploadsResponse creationsUploadsResponse = creationsUploads.execute().getResponse();
 
         byte[] data = Files.readAllBytes(screenshots[id].toPath());
 
         // upload image to s3
-        UploadS3FileRequest uploadS3Image = new UploadS3FileRequest(data, creationsUploadsResponse.url, creationsUploadsResponse.content_type);
+        UploadS3FileRequest uploadS3Image = new UploadS3FileRequest(data, creationsUploadsResponse.getUrl(), creationsUploadsResponse.getType());
         UploadS3FileResponse uploadS3Response = uploadS3Image.execute().getResponse();
-        if (!uploadS3Response.success) {
-            ChatUtil.sendNoSpamClient("Upload failed: " + uploadS3Response.message);
+        if (!uploadS3Response.isSuccess()) {
+            ChatUtil.sendNoSpamClient("Upload failed: " + uploadS3Response.getMessage());
             return;
         }
         
-        PingCreationsUploadsRequest pingCreationsUploads = new PingCreationsUploadsRequest(creationsUploadsResponse.ping_url, CommandLogin.accessToken);
+        PingCreationsUploadsRequest pingCreationsUploads = new PingCreationsUploadsRequest(creationsUploadsResponse.getPingUrl(), CommandLogin.accessToken);
         pingCreationsUploads.setData(""); // fixes null PUT error
         pingCreationsUploads.execute();
 

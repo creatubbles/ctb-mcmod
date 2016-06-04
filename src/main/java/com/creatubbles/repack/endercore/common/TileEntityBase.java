@@ -75,21 +75,29 @@ public abstract class TileEntityBase extends TileEntity implements ITickable {
 
     @Override
     public final NBTTagCompound writeToNBT(NBTTagCompound root) {
-        super.writeToNBT(root);
+        root = super.writeToNBT(root);
         writeCustomNBT(root);
         return root;
     }
 
     @Override
+    public NBTTagCompound getUpdateTag() {
+        return writeToNBT(super.getUpdateTag());
+    }
+    
+    @Override
     public SPacketUpdateTileEntity getUpdatePacket() {
-        NBTTagCompound tag = new NBTTagCompound();
-        writeCustomNBT(tag);
-        return new SPacketUpdateTileEntity(getPos(), 1, tag);
+        return new SPacketUpdateTileEntity(getPos(), 1, writeToNBT(new NBTTagCompound()));
     }
 
     @Override
     public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-        readCustomNBT(pkt.getNbtCompound());
+        handleUpdateTag(pkt.getNbtCompound());
+    }
+    
+    @Override
+    public void handleUpdateTag(NBTTagCompound tag) {
+        readCustomNBT(tag);
     }
 
     public boolean canPlayerAccess(EntityPlayer player) {

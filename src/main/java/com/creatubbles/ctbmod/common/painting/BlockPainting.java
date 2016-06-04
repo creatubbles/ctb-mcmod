@@ -216,7 +216,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         return bb.union(corner);
     }
 
-    private static TilePainting getDataPainting(IBlockAccess world, BlockPos pos) {
+    public static TilePainting getDataPainting(IBlockAccess world, BlockPos pos) {
         TileEntity te = world.getTileEntity(pos);
         if (te instanceof TilePainting) {
             return (TilePainting) te;

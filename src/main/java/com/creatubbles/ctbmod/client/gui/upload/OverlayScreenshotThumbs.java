@@ -42,7 +42,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 
 public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
 
-    private final ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
+    private static final ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
 
     private static ThumbnailStitcher[] prevStitchers = new ThumbnailStitcher[3];
     private static File[] prevFiles = null;
@@ -89,7 +89,7 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
 
     private void load(int... pages) {
         for (int i : pages) {
-            if (i < 0 || i >= this.pages || stitchers.containsKey(i)) {
+            if (i < 0 || i >= this.pages) {
                 continue;
             }
             ThumbnailStitcher temp;
@@ -303,12 +303,12 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
     @Override
     public void guiClosed() {
         super.guiClosed();
-        executor.shutdown();
         for (int i : stitchers.keys()) {
             if (i > 2) {
                 stitchers.get(i).dispose();
             }
         }
+        stitchers.clear();
     }
 
     public void page(int delta) {

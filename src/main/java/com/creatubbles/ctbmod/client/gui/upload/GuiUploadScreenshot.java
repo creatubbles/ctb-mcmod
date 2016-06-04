@@ -107,6 +107,7 @@ public class GuiUploadScreenshot extends GuiContainerBase {
 
     @Override
     public void initGui() {
+        System.out.println("Init: " + Thread.currentThread());
         this.xSize = width;
         this.ySize = height;
 
@@ -171,6 +172,7 @@ public class GuiUploadScreenshot extends GuiContainerBase {
 
     @Override
     protected void drawForegroundImpl(int mouseX, int mouseY) {
+        System.out.println("Draw:" + Thread.currentThread());
         super.drawForegroundImpl(mouseX, mouseY);
 
         String name = files[index].getName();

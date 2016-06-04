@@ -32,11 +32,11 @@ public class CommandLogin extends ClientCommandBase {
         }
         CreatubblesAPI.setStagingMode(false);
         OAuthAccessTokenResponse resp = new OAuthAccessTokenRequest(args[0], args[1]).execute().getResponse();
-        if (resp.access_token == null) {
+        if (resp.getAccessToken() == null) {
             ChatUtil.sendNoSpamClient("Login failed! Invalid email or password.");
         } else {
-            ChatUtil.sendNoSpamClient("Access Token Received: " + resp.access_token);
-            accessToken = resp.access_token;
+            ChatUtil.sendNoSpamClient("Access Token Received: " + resp.getAccessToken());
+            accessToken = resp.getAccessToken();
         }
     }
 }

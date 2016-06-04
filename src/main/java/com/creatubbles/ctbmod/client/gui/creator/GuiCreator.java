@@ -378,8 +378,10 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
             @Override
             protected void updateText() {
-                setToolTipText("Creating paintings takes resources!", "A painting of this size needs:", "- " + te.getRequiredPaper() + " pieces of paper", "- " + te.getRequiredDye()
-                        + " of each dye (red, green, blue)");
+                setToolTipText("Creating paintings takes resources!", "A painting of this size needs:", "- " + te.getRequiredPaper() + " pieces of paper");
+                if (Configs.harderPaintings) {
+                    getToolTipText().add("- " + te.getRequiredDye() + " of each dye (red, green, blue)");
+                }
             }
         };
         addToolTip(resourceInfo);
@@ -579,14 +581,13 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
             case LOGGED_OUT:
                 x += xSize / 2;
                 y += 5;
-                List<String> lines = getFontRenderer().listFormattedStringToWidth(header, xSize - 6);
-                if (lines.size() > 2) {
-                    String line = lines.get(0);
-                    lines.clear();
-                    lines.add(line.substring(line.length() - 3, line.length()) + "...");
-                }
-                for (int i = 0; i < lines.size(); i++) {
-                    drawCenteredString(getFontRenderer(), lines.get(i), x, y + i*8, 0xFFFFFF);
+                List<String> lines = Lists.newArrayList(getFontRenderer().listFormattedStringToWidth(header, xSize - 6)); // Vanilla uses Arrays.asList which does not support remove
+                for (int i = 0; i < Math.min(2, lines.size()); i++) {
+                    String line = lines.get(i);
+                    if (i == 1 && lines.size() > 1) {
+                        line = line.substring(0, line.length() - 3) + "...";
+                    }
+                    drawCenteredString(getFontRenderer(), line, x, y + i * 8, 0xFFFFFF);
                 }
 
                 x = guiLeft + 13;

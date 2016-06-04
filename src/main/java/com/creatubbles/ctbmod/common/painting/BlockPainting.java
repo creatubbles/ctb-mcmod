@@ -223,7 +223,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
         return bb.func_111270_a(corner); // union
     }
 
-    private static TilePainting getDataPainting(IBlockAccess world, BlockCoord pos) {
+    static TilePainting getDataPainting(IBlockAccess world, BlockCoord pos) {
         TileEntity te = pos.getTileEntity(world);
         if (te instanceof TilePainting) {
             return (TilePainting) te;

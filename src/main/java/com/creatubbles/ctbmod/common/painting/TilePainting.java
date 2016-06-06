@@ -70,7 +70,7 @@ public class TilePainting extends TileEntityBase {
 
     @Override
     protected void readCustomNBT(NBTTagCompound root) {
-        creation = NBTUtil.readJsonFromNBT(CreationRelations.class, root);
+        creation = BlockPainting.getCreation(root);
         width = root.getInteger("width");
         height = root.getInteger("height");
     }

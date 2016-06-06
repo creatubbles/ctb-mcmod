@@ -30,6 +30,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import org.apache.commons.lang3.BooleanUtils;
 
+import com.creatubbles.api.core.Creation;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.config.Configs;
 import com.creatubbles.ctbmod.common.http.CreationRelations;
@@ -82,12 +83,20 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
     }
 
     public static CreationRelations getCreation(ItemStack painting) {
-    	if (!NBTUtil.tagUpToDate(painting)) {
-    		switch (NBTUtil.tagVersion(painting)) {
-    		case 0:
-    		}
-    	}
-        return NBTUtil.readJsonFromNBT(CreationRelations.class, NBTUtil.getTag(painting));
+    	return getCreation(NBTUtil.getTag(painting));
+    }
+
+    public static CreationRelations getCreation(NBTTagCompound tag) {
+        if (!NBTUtil.tagUpToDate(tag)) {
+            switch (NBTUtil.tagVersion(tag)) {
+            case 0:
+                Creation c = NBTUtil.readJsonFromNBT(Creation.class, tag);
+                return CreationRelations.complete(c, tag);
+            default:
+                break;
+            }
+        }
+        return NBTUtil.readJsonFromNBT(CreationRelations.class, tag);
     }
 
     public static int getWidth(ItemStack painting) {
@@ -110,7 +119,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
 
     @Override
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-        CreationRelations c = NBTUtil.readJsonFromNBT(CreationRelations.class, NBTUtil.getTag(stack));
+        CreationRelations c = getCreation(stack);
         
         TilePainting painting = getDataPainting(worldIn, pos);
         if (painting != null) {

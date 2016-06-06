@@ -42,6 +42,7 @@ import com.creatubbles.ctbmod.common.config.DataCache;
 import com.creatubbles.ctbmod.common.util.JsonUtil;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
@@ -327,7 +328,25 @@ public class DownloadableImage {
      * @see #updateSize(ImageType)
      */
     @SneakyThrows
-    public void download(final ImageType type, Vec3i position) {
+    public void download(final ImageType type, final Vec3i position) {
+        // If this is an "incomplete" creation, listen for its completion then execute the download afterwards
+        if (getOwner().getRelationships() == null) {
+            getOwner().getCompletionCallback().addListener(new Runnable() {
+
+                @Override
+                public void run() {
+                    download(type, position);
+                }
+            }, new Executor() {
+
+                @Override
+                public void execute(Runnable command) {
+                    Minecraft.getMinecraft().addScheduledTask(command);
+                }
+            });
+            return;
+        }
+
         Set<ImageType> prog = inProgress.get(this);
         if (locations.get(type) == MISSING_TEXTURE && (prog == null || !prog.contains(type))) {
             TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();

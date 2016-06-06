@@ -26,7 +26,9 @@ public class ItemBlockPainting extends ItemBlock {
         CreationRelations c = BlockPainting.getCreation(stack);
         if (c != null) {
             tooltip.add(TextFormatting.ITALIC.toString().concat(c.getName()));
-            tooltip.add(c.getRelationships().getUser().getId());
+            if (c.getRelationships() != null) {
+                tooltip.add(c.getRelationships().getUser().getId());
+            }
             tooltip.add(BlockPainting.getWidth(stack) + "x" + BlockPainting.getHeight(stack));
         }
     }

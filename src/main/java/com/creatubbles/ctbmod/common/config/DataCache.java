@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import lombok.EqualsAndHashCode;
@@ -15,9 +16,9 @@ import lombok.Value;
 
 import org.apache.commons.io.FileUtils;
 
-import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.User;
 import com.creatubbles.api.response.auth.OAuthAccessTokenResponse;
+import com.creatubbles.ctbmod.common.http.CreationRelations;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
@@ -77,7 +78,7 @@ public class DataCache {
      */
     @Getter
     @Setter
-    private transient Creation[] creationCache;
+    private transient List<CreationRelations> creationCache;
 
     @Getter
     private transient boolean dirty;
@@ -115,7 +116,7 @@ public class DataCache {
 
     public void setOAuth(OAuthAccessTokenResponse response) {
         // copy data for immutable state
-        this.OAuth = response == null ? null : new OAuth(response.access_token, response.token_type);        
+        this.OAuth = response == null ? null : new OAuth(response.getAccessToken(), response.getType());        
     }
     
     public Collection<UserAndAuth> getSavedUsers() {

@@ -11,7 +11,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
-import com.creatubbles.api.core.Creation;
+import com.creatubbles.ctbmod.common.http.CreationRelations;
 
 public class ItemBlockPainting extends ItemBlock {
 
@@ -23,10 +23,10 @@ public class ItemBlockPainting extends ItemBlock {
     @Override
     public void addInformation(ItemStack stack, EntityPlayer playerIn, List tooltip, boolean advanced) {
         super.addInformation(stack, playerIn, tooltip, advanced);
-        Creation c = BlockPainting.getCreation(stack);
+        CreationRelations c = BlockPainting.getCreation(stack);
         if (c != null) {
-            tooltip.add(TextFormatting.ITALIC.toString().concat(c.name));
-            tooltip.add(c.user_id);
+            tooltip.add(TextFormatting.ITALIC.toString().concat(c.getName()));
+            tooltip.add(c.getRelationships().getUser().getId());
             tooltip.add(BlockPainting.getWidth(stack) + "x" + BlockPainting.getHeight(stack));
         }
     }

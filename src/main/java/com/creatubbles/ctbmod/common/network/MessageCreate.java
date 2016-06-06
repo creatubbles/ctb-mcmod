@@ -9,17 +9,17 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import com.creatubbles.api.CreatubblesAPI;
-import com.creatubbles.api.core.Creation;
 import com.creatubbles.ctbmod.common.creator.TileCreator;
+import com.creatubbles.ctbmod.common.http.CreationRelations;
 import com.creatubbles.repack.endercore.common.network.MessageTileEntity;
 
 @NoArgsConstructor
 public class MessageCreate extends MessageTileEntity<TileCreator> {
 
-    private Creation creation;
+    private CreationRelations creation;
     private int width, height;
 
-    public MessageCreate(Creation creation, TileCreator creator) {
+    public MessageCreate(CreationRelations creation, TileCreator creator) {
         super(creator);
         this.creation = creation;
         width = creator.getWidth();
@@ -37,7 +37,7 @@ public class MessageCreate extends MessageTileEntity<TileCreator> {
     @Override
     public void fromBytes(ByteBuf buf) {
         super.fromBytes(buf);
-        creation = CreatubblesAPI.GSON.fromJson(ByteBufUtils.readUTF8String(buf), Creation.class);
+        creation = CreatubblesAPI.GSON.fromJson(ByteBufUtils.readUTF8String(buf), CreationRelations.class);
         width = buf.readByte();
         height = buf.readByte();
     }

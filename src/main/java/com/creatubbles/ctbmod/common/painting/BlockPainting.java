@@ -30,9 +30,9 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import org.apache.commons.lang3.BooleanUtils;
 
-import com.creatubbles.api.core.Creation;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.config.Configs;
+import com.creatubbles.ctbmod.common.http.CreationRelations;
 import com.creatubbles.ctbmod.common.util.NBTUtil;
 import com.creatubbles.repack.endercore.common.BlockEnder;
 import com.creatubbles.repack.endercore.common.TileEntityBase;
@@ -65,7 +65,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         GameRegistry.registerTileEntity(TileDummyPainting.class, "ctbmod.dummyPainting");
     }
 
-    public static ItemStack create(Creation creation, int width, int height) {
+    public static ItemStack create(CreationRelations creation, int width, int height) {
         ItemStack stack = new ItemStack(CTBMod.painting);
         stack.setTagCompound(new NBTTagCompound());
         NBTUtil.writeJsonToNBT(creation, NBTUtil.getTag(stack));
@@ -81,8 +81,13 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
         return stack;
     }
 
-    public static Creation getCreation(ItemStack painting) {
-        return NBTUtil.readJsonFromNBT(Creation.class, NBTUtil.getTag(painting));
+    public static CreationRelations getCreation(ItemStack painting) {
+    	if (!NBTUtil.tagUpToDate(painting)) {
+    		switch (NBTUtil.tagVersion(painting)) {
+    		case 0:
+    		}
+    	}
+        return NBTUtil.readJsonFromNBT(CreationRelations.class, NBTUtil.getTag(painting));
     }
 
     public static int getWidth(ItemStack painting) {
@@ -96,8 +101,8 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public void getSubBlocks(Item itemIn, CreativeTabs tab, List list) {
-        if (CTBMod.cache.getCreationCache() != null && CTBMod.cache.getCreationCache().length > 0) {
-            for (Creation c : CTBMod.cache.getCreationCache()) {
+        if (CTBMod.cache.getCreationCache() != null && CTBMod.cache.getCreationCache().size() > 0) {
+            for (CreationRelations c : CTBMod.cache.getCreationCache()) {
                 list.add(create(c, 2, 2));
             }
         }
@@ -105,7 +110,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> {
 
     @Override
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-        Creation c = NBTUtil.readJsonFromNBT(Creation.class, NBTUtil.getTag(stack));
+        CreationRelations c = NBTUtil.readJsonFromNBT(CreationRelations.class, NBTUtil.getTag(stack));
         
         TilePainting painting = getDataPainting(worldIn, pos);
         if (painting != null) {

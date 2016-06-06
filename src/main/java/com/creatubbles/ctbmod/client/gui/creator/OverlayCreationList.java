@@ -3,7 +3,6 @@ package com.creatubbles.ctbmod.client.gui.creator;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -15,15 +14,15 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.Image.ImageType;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.client.gui.GuiUtil;
+import com.creatubbles.ctbmod.common.http.CreationRelations;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
 import com.creatubbles.repack.endercore.api.client.gui.IGuiScreen;
 import com.creatubbles.repack.endercore.client.gui.widget.GuiToolTip;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 public class OverlayCreationList extends OverlayBase<GuiCreator> {
@@ -31,19 +30,19 @@ public class OverlayCreationList extends OverlayBase<GuiCreator> {
     @Value
     private class CreationAndLocation {
 
-        private Creation creation;
+        private CreationRelations creation;
         private Point location;
         private Rectangle bounds;
         private GuiToolTip tooltip;
 
-        private CreationAndLocation(Creation c, Point p) {
+        private CreationAndLocation(CreationRelations c, Point p) {
             creation = c;
             location = p;
             bounds = new Rectangle(p.x, p.y, thumbnailSize, thumbnailSize);
 
             // TODO more localization here
             List<String> tt = Lists.newArrayList();
-            tt.add(c.name);
+            tt.add(c.getName());
 //            tt.add(c.creator_ids.length == 1 ? "Creator:" : "Creators:");
 //            for (Creator creator : c.creators) {
 //                tt.add("    " + creator.name);
@@ -52,9 +51,7 @@ public class OverlayCreationList extends OverlayBase<GuiCreator> {
         }
     }
 
-
-    @Getter
-    private Creation[] creations;
+    private List<CreationRelations> creations;
 
     @Getter
     private int paddingX = 4, paddingY = 4;
@@ -68,7 +65,7 @@ public class OverlayCreationList extends OverlayBase<GuiCreator> {
     private int thumbnailSize = 16;
 
     @Getter
-    private Creation selected;
+    private CreationRelations selected;
 
     private final List<CreationAndLocation> list = Lists.newArrayList();
     private final List<CreationAndLocation> listAbsolute = Lists.newArrayList();
@@ -85,9 +82,17 @@ public class OverlayCreationList extends OverlayBase<GuiCreator> {
         callback.callback(getSelected());
     }
 
-    public void setCreations(Creation[] creations) {
-        this.creations = ArrayUtils.clone(creations);
+    public List<CreationRelations> getCreations() {
+    	return ImmutableList.copyOf(creations);
+    }
+    
+    public void setCreations(List<CreationRelations> creations) {
+    	this.creations = creations;
         rebuildList();
+    }
+    
+    public void setCreations(CreationRelations[] creations) {
+        setCreations(Lists.newArrayList(creations));
     }
 
     @Override
@@ -100,17 +105,17 @@ public class OverlayCreationList extends OverlayBase<GuiCreator> {
     private void rebuildList() {
         clear();
 
-        Creation[] creations = this.creations == null ? CTBMod.cache.getCreationCache() : this.creations;
+        List<CreationRelations> creations = this.creations == null ? CTBMod.cache.getCreationCache() : this.creations;
 
-        if (creations == null || creations.length == 0) {
+        if (creations == null || creations.size() == 0) {
             return;
         }
 
-        Arrays.sort(creations, new Comparator<Creation>() {
+        creations.sort(new Comparator<Creation>() {
 
             @Override
             public int compare(Creation o1, Creation o2) {
-                return o1.name.compareTo(o2.name);
+                return o1.getName().compareTo(o2.getName());
             }
         });
 
@@ -134,7 +139,7 @@ public class OverlayCreationList extends OverlayBase<GuiCreator> {
         }
 
         // The amount of thumbnails on each row/column
-        rows = creations.length / cols;
+        rows = creations.size() / cols;
 
         // Use the max spacing possible, but no less than minSpacing
         int minWidth = thumbnailSize * cols;
@@ -145,7 +150,7 @@ public class OverlayCreationList extends OverlayBase<GuiCreator> {
 
         spacing = Math.max(minSpacing, spacing);
 
-        for (Creation c : creations) {
+        for (CreationRelations c : creations) {
             int xMin = xRel + paddingX, yMin = yRel + paddingY;
 
             int x = xMin + col * (thumbnailSize + spacing);
@@ -290,7 +295,7 @@ public class OverlayCreationList extends OverlayBase<GuiCreator> {
         return super.handleMouseInput(x, y, b);
     }
 
-    private void setSelected(Creation creation) {
+    private void setSelected(CreationRelations creation) {
         if (creation != getSelected()) {
             selected = creation;
             for (ISelectionCallback callback : callbacks) {

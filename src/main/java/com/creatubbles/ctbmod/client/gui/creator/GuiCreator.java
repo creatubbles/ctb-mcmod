@@ -6,17 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import lombok.SneakyThrows;
-import lombok.Synchronized;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.ResourceLocation;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -28,6 +17,7 @@ import com.creatubbles.api.request.auth.OAuthAccessTokenRequest;
 import com.creatubbles.api.request.creation.GetCreationsRequest;
 import com.creatubbles.api.request.user.UserProfileRequest;
 import com.creatubbles.api.response.creation.GetCreationsResponse;
+import com.creatubbles.api.response.meta.MetaPagination;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.client.gui.GuiButtonHideable;
 import com.creatubbles.ctbmod.client.gui.IHideable;
@@ -38,6 +28,7 @@ import com.creatubbles.ctbmod.common.config.DataCache.UserAndAuth;
 import com.creatubbles.ctbmod.common.creator.ContainerCreator;
 import com.creatubbles.ctbmod.common.creator.SlotCreator;
 import com.creatubbles.ctbmod.common.creator.TileCreator;
+import com.creatubbles.ctbmod.common.http.CreationRelations;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
 import com.creatubbles.ctbmod.common.network.MessageCreate;
 import com.creatubbles.ctbmod.common.network.PacketHandler;
@@ -57,6 +48,17 @@ import com.google.common.collect.MultimapBuilder;
 
 import static net.minecraft.util.EnumChatFormatting.*;
 import static org.lwjgl.opengl.GL11.*;
+
+import lombok.SneakyThrows;
+import lombok.Synchronized;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.ResourceLocation;
 
 public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
@@ -122,7 +124,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                 checkCancel();
 
                 if (loginReq != null && !loginReq.wasSuccessful()) {
-                    header = EnumChatFormatting.YELLOW.toString().concat(loginReq.getResponse().message);
+                    header = EnumChatFormatting.YELLOW.toString().concat(loginReq.getResponse().getMessage());
                     loginReq = null;
                     logout();
                 } else {
@@ -136,14 +138,14 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                         userReq = new UserProfileRequest(getAccessToken());
                         userReq.execute();
                         if (userReq.wasSuccessful()) {
-                            CTBMod.cache.activateUser(new UserAndAuth(userReq.getResponse().user, CTBMod.cache.getOAuth()));
+                            CTBMod.cache.activateUser(new UserAndAuth(userReq.getResponse().getUser(), CTBMod.cache.getOAuth()));
                             CTBMod.cache.save();
                         } else {
                             if (userReq.getRawResponse().getStatus() == 401) {
                                 logout();
                                 header = CTBMod.lang.localize("gui.creator.header.invalid");
                             } else {
-                                header = userReq.getResponse().message;
+                                header = userReq.getResponse().getMessage();
                             }
                             return;
                         }
@@ -160,34 +162,40 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
                     checkCancel();
 
-                    Creation[] creations = creationList.getCreations();
+                    List<CreationRelations> creations = creationList.getCreations();
                     if (creations == null) {
                         String stepUnloc = "gui.creator.step.creations";
                         loadStep = CTBMod.lang.localize(stepUnloc, 1, "?");
                         setState(State.LOGGING_IN, true);
 
-                        GetCreationsRequest creationsReq = new GetCreationsRequest(getUser().id, getAccessToken());
+                        GetCreationsRequest creationsReq = new GetCreationsRequest(getUser().getId(), getAccessToken());
                         creationsReq.execute();
                         checkCancel();
                         
                         if (creationsReq.wasSuccessful()) {
-                            GetCreationsResponse resp = creationsReq.getResponse();
-                            creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[0]));
-                            for (int i = 2; i <= resp.total_pages && i <= 10; i++) {
-                                loadStep = CTBMod.lang.localize(stepUnloc, i, "" + resp.total_pages);
-                                creationsReq = new GetCreationsRequest(getUser().id, i, getAccessToken());
+                            List<GetCreationsResponse> resp = creationsReq.getResponseList();
+                            creations = Lists.newArrayList();
+                            for (GetCreationsResponse r : resp) {
+                                creations.add(new CreationRelations(r.getCreation(), r.getRelationships()));
+                            }
+                            MetaPagination pages = creationsReq.getMetadata(MetaPagination.class);
+                            for (int i = 2; i <= pages.getPageCount() && i <= 10; i++) {
+                                loadStep = CTBMod.lang.localize(stepUnloc, i, "" + pages.getPageCount());
+                                creationsReq = new GetCreationsRequest(getUser().getId(), i, getAccessToken());
                                 creationsReq.execute();
-                                resp = creationsReq.getResponse();
-                                creations = ArrayUtils.addAll(creations, resp.creations.toArray(new Creation[0]));
+                                resp = creationsReq.getResponseList();
+                                for (GetCreationsResponse r : resp) {
+                                    creations.add(new CreationRelations(r.getCreation(), r.getRelationships()));
+                                }
                                 checkCancel();
                             }
                             
-                            creations = FluentIterable.from(Lists.newArrayList(creations)).filter(new Predicate<Creation>() {
+                            creations = FluentIterable.from(creations).filter(new Predicate<Creation>() {
                                 @Override
                                 public boolean apply(Creation input) {
-                                    return input.approved;
+                                    return input.isApproved();
                                 }
-                            }).toArray(Creation.class);
+                            }).toList();
 
                             creationList.setCreations(creations);
                             CTBMod.cache.setCreationCache(creations);
@@ -196,7 +204,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                                 logout();
                                 header = CTBMod.lang.localize("gui.creator.header.invalid");
                             } else {
-                                header = creationsReq.getResponse().message;
+                                header = creationsReq.getResponse().getMessage();
                             }
                             return;
                         }
@@ -206,8 +214,8 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                     // Once we have all creation data, we can say we are "logged in" while the images download
                     setState(State.LOGGED_IN, true);
 
-                    for (Creation c : creations) {
-                        DownloadableImage img = new DownloadableImage(c.image, c);
+                    for (CreationRelations c : creations) {
+                        DownloadableImage img = new DownloadableImage(c.getImage(), c);
                         images.put(c, img);
                         img.download(ImageType.list_view);
                         checkCancel();
@@ -253,9 +261,6 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
     static final ResourceLocation OVERLAY_TEX = new ResourceLocation(CTBMod.DOMAIN, "textures/gui/creator_overlays.png");
     static final UserAndAuth DUMMY_USER = new UserAndAuth(new User(), null);
-    static {
-        DUMMY_USER.getUser().username = "No Users";
-    }
 
     private final Multimap<IHideable, State> visibleMap = MultimapBuilder.hashKeys().enumSetValues(State.class).build();
 
@@ -273,7 +278,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
     private OverlayCreationList creationList;
     private OverlayUserSelection userSelection;
     private OverlaySelectedCreation selectedCreation;
-    private Creation selected;
+    private CreationRelations selected;
 
     private State state;
 
@@ -363,13 +368,13 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                     return new Rectangle();
                 }
                 FontRenderer fr = getFontRenderer();
-                return new Rectangle(25, 110, fr.getStringWidth(getUser().username), 8);
+                return new Rectangle(25, 110, fr.getStringWidth(getUser().getUsername()), 8);
             }
 
             @Override
             protected void updateText() {
                 User u = getUser();
-                setToolTipText(StringUtils.capitalize(u.role), u.age, u.country);
+                setToolTipText(StringUtils.capitalize(u.getRole()), u.getAge(), u.getCountryName());
             }
         };
         addToolTip(userInfo);
@@ -467,7 +472,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
     }
 
     @Override
-    public void callback(Creation selected) {
+    public void callback(CreationRelations selected) {
         this.selected = selected;
     }
 
@@ -528,7 +533,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
                 x += 25;
                 y += 110;
-                drawString(getFontRenderer(), getUser().username, x, y, 0xFFFFFF);
+                drawString(getFontRenderer(), getUser().getUsername(), x, y, 0xFFFFFF);
 
                 x = guiLeft + 90;
                 y = guiTop + 12;

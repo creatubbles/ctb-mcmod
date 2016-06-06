@@ -7,16 +7,6 @@ import java.io.File;
 
 import javax.imageio.ImageIO;
 
-import lombok.SneakyThrows;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.event.ClickEvent;
-import net.minecraft.event.HoverEvent;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.ResourceLocation;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -39,6 +29,16 @@ import com.creatubbles.repack.endercore.client.gui.widget.TextFieldEnder;
 import com.creatubbles.repack.endercore.client.render.EnderWidget;
 import com.creatubbles.repack.endercore.common.util.ChatUtil;
 import com.google.common.util.concurrent.ListenableFuture;
+
+import lombok.SneakyThrows;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.event.ClickEvent;
+import net.minecraft.event.HoverEvent;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.ResourceLocation;
 
 public class GuiUploadScreenshot extends GuiContainerBase {
 
@@ -222,26 +222,26 @@ public class GuiUploadScreenshot extends GuiContainerBase {
 
                         // create url for upload
                         buttonUpload.displayString = "Uploading...";
-                        CreationsUploadsRequest creationsUploads = new CreationsUploadsRequest(createCreationResponse.creation.id, FilenameUtils.getExtension(files[index].getName()), accessToken);
+                        CreationsUploadsRequest creationsUploads = new CreationsUploadsRequest(createCreationResponse.getCreation().getId(), FilenameUtils.getExtension(files[index].getName()), accessToken);
                         CreationsUploadsResponse creationsUploadsResponse = creationsUploads.execute().getResponse();
 
                         byte[] data = FileUtils.readFileToByteArray(files[index]);
 
                         // upload image to s3
-                        UploadS3FileRequest uploadS3Image = new UploadS3FileRequest(data, creationsUploadsResponse.url, creationsUploadsResponse.content_type);
+                        UploadS3FileRequest uploadS3Image = new UploadS3FileRequest(data, creationsUploadsResponse.getUrl(), creationsUploadsResponse.getType());
                         UploadS3FileResponse uploadS3Response = uploadS3Image.execute().getResponse();
 
-                        if (!uploadS3Response.success) {
-                            throw new RuntimeException("Upload Failed: " + uploadS3Response.message);
+                        if (!uploadS3Response.isSuccess()) {
+                            throw new RuntimeException("Upload Failed: " + uploadS3Response.getMessage());
                         }
 
                         buttonUpload.displayString = "Finalizing...";
-                        PingCreationsUploadsRequest pingCreationsUploads = new PingCreationsUploadsRequest(creationsUploadsResponse.ping_url, accessToken);
+                        PingCreationsUploadsRequest pingCreationsUploads = new PingCreationsUploadsRequest(creationsUploadsResponse.getPingUrl(), accessToken);
                         pingCreationsUploads.setData(""); // fixes null PUT error
                         pingCreationsUploads.execute();
                         
-                        GetCreationLandingUrlRequest landingReq = new GetCreationLandingUrlRequest(createCreationResponse.creation.id, accessToken);
-                        landingUrl = landingReq.execute().getResponse().url;
+                        GetCreationLandingUrlRequest landingReq = new GetCreationLandingUrlRequest(createCreationResponse.getCreation().getId(), accessToken);
+                        landingUrl = landingReq.execute().getResponse().getUrl();
                         
                         
                     } catch (Exception e2) {

@@ -15,22 +15,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
-import lombok.Getter;
-import lombok.SneakyThrows;
-import lombok.ToString;
-import lombok.Value;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.ITextureObject;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.renderer.texture.TextureUtil;
-import net.minecraft.client.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Vec3;
-import net.minecraftforge.common.MinecraftForge;
-
 import org.lwjgl.util.Dimension;
 
-import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.Image;
 import com.creatubbles.api.core.Image.ImageType;
 import com.creatubbles.ctbmod.CTBMod;
@@ -45,6 +31,18 @@ import com.google.gson.reflect.TypeToken;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
+import lombok.Getter;
+import lombok.SneakyThrows;
+import lombok.ToString;
+import lombok.Value;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.ITextureObject;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.texture.TextureUtil;
+import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Vec3;
+import net.minecraftforge.common.MinecraftForge;
 
 @ToString
 public class DownloadableImage {
@@ -108,7 +106,7 @@ public class DownloadableImage {
         @Override
         @SneakyThrows
         public void run() {
-            String url = parent.links == null ? parent.url : parent.links.get(type);
+            String url = parent.getUrl(type);
             File cache = new File(DataCache.cacheFolder, filepath);
             BufferedImage image = null;
             if (cache.exists()) {
@@ -206,7 +204,7 @@ public class DownloadableImage {
     }
 
     @Getter
-    private Creation owner;
+    private CreationRelations owner;
 
     private transient final EnumMap<ImageType, ResourceLocation> locations = Maps.newEnumMap(ImageType.class);
     private transient EnumMap<ImageType, Size> sizes = Maps.newEnumMap(ImageType.class);
@@ -216,7 +214,7 @@ public class DownloadableImage {
         initDefaults();
     }
 
-    public DownloadableImage(Image image, Creation owner) {
+    public DownloadableImage(Image image, CreationRelations owner) {
         this.parent = image;
         this.owner = owner;
         initDefaults();
@@ -338,7 +336,7 @@ public class DownloadableImage {
         Set<ImageType> prog = inProgress.get(this);
         if (locations.get(type) == MISSING_TEXTURE && (prog == null || !prog.contains(type))) {
             TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
-            final String filepath = "creations/" + owner.user_id + "/" + type.name() + "/" + owner.id + ".jpg";
+            final String filepath = "creations/" + getOwner().getRelationships().getUser().getId() + "/" + type.name() + "/" + getOwner().getId() + ".jpg";
             final ResourceLocation res = new ResourceLocation(CTBMod.DOMAIN, filepath);
             ITextureObject texture = texturemanager.getTexture(res);
 

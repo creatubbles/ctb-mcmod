@@ -5,27 +5,21 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import jersey.repackaged.com.google.common.collect.Maps;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.SneakyThrows;
-import lombok.Value;
-
 import org.apache.commons.io.FileUtils;
 
-import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.User;
 import com.creatubbles.api.request.auth.OAuthAccessTokenRequest;
 import com.creatubbles.api.request.user.UserProfileRequest;
 import com.creatubbles.api.response.auth.OAuthAccessTokenResponse;
 import com.creatubbles.api.response.user.UserProfileResponse;
-import com.creatubbles.api.util.OAuthUtil;
+import com.creatubbles.ctbmod.common.http.CreationRelations;
+import com.creatubbles.ctbmod.common.http.OAuthUtil;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -38,6 +32,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
+
+import jersey.repackaged.com.google.common.collect.Maps;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.SneakyThrows;
+import lombok.Value;
 
 public class DataCache {
     
@@ -90,7 +91,7 @@ public class DataCache {
      */
     @Getter
     @Setter
-    private transient Creation[] creationCache;
+    private transient List<CreationRelations> creationCache;
     
 
     @Getter
@@ -119,7 +120,7 @@ public class DataCache {
         if (user != null) {
             savedUsers.remove(user);
             savedUsers.add(user);
-            idToUser.put(user.getUser().id, user.getUser());
+            idToUser.put(user.getUser().getId(), user.getUser());
             activeUser = user.getUser();
             OAuth = user.getAuth();
         } else {
@@ -130,7 +131,7 @@ public class DataCache {
 
     public void setOAuth(OAuthAccessTokenResponse response) {
         // copy data for immutable state
-        this.OAuth = response == null ? null : new OAuth(response.access_token, response.token_type);        
+        this.OAuth = response == null ? null : new OAuth(response.getAccessToken(), response.getType());        
     }
     
     public Collection<UserAndAuth> getSavedUsers() {
@@ -163,10 +164,10 @@ public class DataCache {
                     OAuthAccessTokenRequest authReq = new OAuthAccessTokenRequest(OAuthUtil.CLIENT_ID, OAuthUtil.CLIENT_SECRET);
                     OAuthAccessTokenResponse authResp = authReq.execute().getResponse();
                     
-                    UserProfileRequest req = new UserProfileRequest(id, authResp.access_token);
+                    UserProfileRequest req = new UserProfileRequest(id, authResp.getAccessToken());
                     UserProfileResponse resp = req.execute().getResponse();
                     
-                    idToUser.put(id, resp.user);
+                    idToUser.put(id, resp.getUser());
                     loadingIds.remove(id);
                 }
             });

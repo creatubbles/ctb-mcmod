@@ -23,6 +23,7 @@ import team.chisel.ctmlib.SubmapManagerCTM;
 
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.ctbmod.common.http.CreationRelations;
 import com.creatubbles.ctbmod.common.util.NBTUtil;
 import com.creatubbles.repack.endercore.common.BlockEnder;
 import com.creatubbles.repack.endercore.common.TileEntityBase;
@@ -67,8 +68,8 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
         return stack;
     }
 
-    public static Creation getCreation(ItemStack painting) {
-        return NBTUtil.readJsonFromNBT(Creation.class, NBTUtil.getTag(painting));
+    public static CreationRelations getCreation(ItemStack painting) {
+        return NBTUtil.readJsonFromNBT(CreationRelations.class, NBTUtil.getTag(painting));
     }
 
     public static int getWidth(ItemStack painting) {
@@ -82,7 +83,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public void getSubBlocks(Item itemIn, CreativeTabs tab, List list) {
-        if (CTBMod.cache.getCreationCache() != null && CTBMod.cache.getCreationCache().length > 0) {
+        if (CTBMod.cache.getCreationCache() != null && CTBMod.cache.getCreationCache().size() > 0) {
             for (Creation c : CTBMod.cache.getCreationCache()) {
                 list.add(create(c, 2, 2));
             }
@@ -107,7 +108,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
     @Override
     public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase placer, ItemStack stack) {
         ItemStack placed = placer.getHeldItem();
-        Creation c = NBTUtil.readJsonFromNBT(Creation.class, NBTUtil.getTag(placed));
+        CreationRelations c = NBTUtil.readJsonFromNBT(CreationRelations.class, NBTUtil.getTag(placed));
         BlockCoord pos = new BlockCoord(x, y, z);
 
         TilePainting painting = getDataPainting(world, pos);

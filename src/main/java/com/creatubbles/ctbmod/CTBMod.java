@@ -2,17 +2,11 @@ package com.creatubbles.ctbmod;
 
 import java.util.Locale;
 
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraftforge.client.ClientCommandHandler;
-import net.minecraftforge.oredict.ShapedOreRecipe;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.creatubbles.api.CreatubblesAPI;
 import com.creatubbles.ctbmod.common.CommonProxy;
-import com.creatubbles.ctbmod.common.command.CommandGetCreators;
 import com.creatubbles.ctbmod.common.command.CommandLogin;
 import com.creatubbles.ctbmod.common.command.CommandUpload;
 import com.creatubbles.ctbmod.common.config.Configs;
@@ -23,6 +17,8 @@ import com.creatubbles.ctbmod.common.painting.BlockPainting;
 import com.creatubbles.repack.endercore.common.Lang;
 import com.creatubbles.repack.endercore.common.config.ConfigProcessor;
 
+import static com.creatubbles.ctbmod.CTBMod.*;
+
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -30,10 +26,12 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraftforge.client.ClientCommandHandler;
+import net.minecraftforge.oredict.ShapedOreRecipe;
 
-import static com.creatubbles.ctbmod.CTBMod.*;
-
-@Mod(modid = MODID, name = NAME, version = VERSION)
+@Mod(modid = MODID, name = NAME, version = VERSION, acceptedMinecraftVersions = "[@MCVERSION@, 1.10)")
 public class CTBMod {
 
     public static final String MODID = "CTBMod";
@@ -52,11 +50,11 @@ public class CTBMod {
     public static BlockPainting painting;
 
     public static DataCache cache;
-    
-    public static final Lang lang = new Lang("ctb");
 
     public static int renderIdPainting;
     public static int renderIdCreator;
+    
+    public static final Lang lang = new Lang("ctb");
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -70,10 +68,6 @@ public class CTBMod {
         proxy.registerRenderers();
 
         GameRegistry.addRecipe(new ShapedOreRecipe(creator, "ibi", "wpw", "iwi", 'i', "ingotIron", 'b', Items.bucket, 'w', "plankWood", 'p', Blocks.piston));
-
-        if (Configs.noIceMelt) {
-            Blocks.ice.setTickRandomly(false);
-        }
     }
 
     @EventHandler
@@ -88,7 +82,6 @@ public class CTBMod {
 
     public void registerCommands() {
         ClientCommandHandler.instance.registerCommand(new CommandLogin());
-        ClientCommandHandler.instance.registerCommand(new CommandGetCreators());
         ClientCommandHandler.instance.registerCommand(new CommandUpload());
     }
 }

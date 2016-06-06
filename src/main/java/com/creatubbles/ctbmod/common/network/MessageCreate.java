@@ -1,25 +1,25 @@
 package com.creatubbles.ctbmod.common.network;
 
-import io.netty.buffer.ByteBuf;
-import lombok.NoArgsConstructor;
-
 import com.creatubbles.api.CreatubblesAPI;
-import com.creatubbles.api.core.Creation;
 import com.creatubbles.ctbmod.common.creator.TileCreator;
+import com.creatubbles.ctbmod.common.http.CreationRelations;
 import com.creatubbles.repack.endercore.common.network.MessageTileEntity;
 
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import io.netty.buffer.ByteBuf;
+import lombok.NoArgsConstructor;
+
 
 @NoArgsConstructor
 public class MessageCreate extends MessageTileEntity<TileCreator> {
 
-    private Creation creation;
+    private CreationRelations creation;
     private int width, height;
 
-    public MessageCreate(Creation creation, TileCreator creator) {
+    public MessageCreate(CreationRelations creation, TileCreator creator) {
         super(creator);
         this.creation = creation;
         width = creator.getWidth();
@@ -37,7 +37,7 @@ public class MessageCreate extends MessageTileEntity<TileCreator> {
     @Override
     public void fromBytes(ByteBuf buf) {
         super.fromBytes(buf);
-        creation = CreatubblesAPI.GSON.fromJson(ByteBufUtils.readUTF8String(buf), Creation.class);
+        creation = CreatubblesAPI.GSON.fromJson(ByteBufUtils.readUTF8String(buf), CreationRelations.class);
         width = buf.readByte();
         height = buf.readByte();
     }
@@ -45,8 +45,8 @@ public class MessageCreate extends MessageTileEntity<TileCreator> {
     public static class Handler implements IMessageHandler<MessageCreate, IMessage> {
 
         @Override
-        public IMessage onMessage(MessageCreate message, MessageContext ctx) {
-            final TileCreator te = message.getTileEntity(ctx.getServerHandler().playerEntity.worldObj);
+        public IMessage onMessage(final MessageCreate message, MessageContext ctx) {
+            TileCreator te = message.getTileEntity(ctx.getServerHandler().playerEntity.worldObj);
             te.create(message.creation);
             te.markDirty();
             return null;

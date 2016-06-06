@@ -1,5 +1,13 @@
 package com.creatubbles.ctbmod.common.painting;
 
+import com.creatubbles.api.core.Image.ImageType;
+import com.creatubbles.ctbmod.common.http.CreationRelations;
+import com.creatubbles.ctbmod.common.http.DownloadableImage;
+import com.creatubbles.ctbmod.common.util.NBTUtil;
+import com.creatubbles.repack.endercore.common.TileEntityBase;
+
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -9,15 +17,6 @@ import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 
-import com.creatubbles.api.core.Creation;
-import com.creatubbles.api.core.Image.ImageType;
-import com.creatubbles.ctbmod.common.http.DownloadableImage;
-import com.creatubbles.ctbmod.common.util.NBTUtil;
-import com.creatubbles.repack.endercore.common.TileEntityBase;
-
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-
 public class TilePainting extends TileEntityBase {
 
     @Getter
@@ -25,7 +24,7 @@ public class TilePainting extends TileEntityBase {
     private int width, height;
 
     @Getter
-    private Creation creation;
+    private CreationRelations creation;
 
     @SideOnly(Side.CLIENT)
     @Getter(onMethod = @__({ @SideOnly(Side.CLIENT) }))
@@ -40,7 +39,7 @@ public class TilePainting extends TileEntityBase {
     @Accessors(fluent = true)
     private boolean render = true;
 
-    public void setCreation(Creation image) {
+    public void setCreation(CreationRelations image) {
         creation = image;
     }
 
@@ -54,7 +53,7 @@ public class TilePainting extends TileEntityBase {
 
     private void createImage() {
         AxisAlignedBB bb = BlockPainting.getCompleteBoundingBox(getWorldObj(), xCoord, yCoord, zCoord);
-        image = new DownloadableImage(creation.image, creation);
+        image = new DownloadableImage(creation.getImage(), creation);
         type = width <= 4 || height <= 4 ? ImageType.full_view : ImageType.original;
         image.download(type, Vec3.createVectorHelper(bb.minX + ((bb.maxX - bb.minX) / 2), bb.minY + ((bb.maxY - bb.minY) / 2), bb.minZ + ((bb.maxZ - bb.minZ) / 2)));
     }
@@ -73,8 +72,9 @@ public class TilePainting extends TileEntityBase {
 
     @Override
     protected void readCustomNBT(NBTTagCompound root) {
-        creation = NBTUtil.readJsonFromNBT(Creation.class, root);
+        creation = NBTUtil.readJsonFromNBT(CreationRelations.class, root);
         width = root.getInteger("width");
         height = root.getInteger("height");
     }
 }
+

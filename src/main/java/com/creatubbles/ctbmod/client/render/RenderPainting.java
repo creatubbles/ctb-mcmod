@@ -20,6 +20,7 @@ import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.Image.ImageType;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.client.gui.GuiUtil;
+import com.creatubbles.ctbmod.common.http.CreationRelations;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
 import com.creatubbles.ctbmod.common.painting.BlockPainting;
 import com.creatubbles.ctbmod.common.painting.TilePainting;
@@ -158,12 +159,12 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
         Tessellator tess = Tessellator.instance;
         IIcon frontIcon = CTBMod.painting.getIcon(3, 0);
 
-        Creation c = BlockPainting.getCreation(item);
+        CreationRelations c = BlockPainting.getCreation(item);
         
         DownloadableImage img = null;
 
         if (c != null) {
-            img = new DownloadableImage(c.image, c);
+            img = new DownloadableImage(c.getImage(), c);
             img.download(ImageType.full_view);
         }
 

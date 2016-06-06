@@ -16,6 +16,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.config.Configs;
+import com.creatubbles.ctbmod.common.http.CreationRelations;
 import com.creatubbles.ctbmod.common.network.MessageDimensionChange;
 import com.creatubbles.ctbmod.common.network.PacketHandler;
 import com.creatubbles.ctbmod.common.painting.BlockPainting;
@@ -28,7 +29,7 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, IPro
     private static final Bound<Integer> DIMENSION_BOUND = Bound.of(1, 16);
 
     private final ItemStack[] inventory = new ItemStack[5];
-    private Creation creating;
+    private CreationRelations creating;
     private int progress;
 
     @Getter
@@ -82,7 +83,7 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, IPro
         return ret;
     }
 
-    public void create(Creation creation) {
+    public void create(CreationRelations creation) {
         if (!canCreate()) {
             return;
         }

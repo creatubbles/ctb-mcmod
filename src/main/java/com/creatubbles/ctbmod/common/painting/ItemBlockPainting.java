@@ -2,6 +2,9 @@ package com.creatubbles.ctbmod.common.painting;
 
 import java.util.List;
 
+import com.creatubbles.ctbmod.common.http.CreationRelations;
+import com.creatubbles.repack.endercore.common.util.BlockCoord;
+
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
@@ -9,10 +12,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
-
-import com.creatubbles.api.core.Creation;
-import com.creatubbles.ctbmod.common.http.CreationRelations;
-import com.creatubbles.repack.endercore.common.util.BlockCoord;
 
 public class ItemBlockPainting extends ItemBlock {
 
@@ -27,7 +26,9 @@ public class ItemBlockPainting extends ItemBlock {
         CreationRelations c = BlockPainting.getCreation(stack);
         if (c != null) {
             tooltip.add(EnumChatFormatting.ITALIC.toString().concat(c.getName()));
-            tooltip.add(c.getRelationships().getUser().getId());
+            if (c.getRelationships() != null) {
+                tooltip.add(c.getRelationships().getUser().getId());
+            }
             tooltip.add(BlockPainting.getWidth(stack) + "x" + BlockPainting.getHeight(stack));
         }
     }

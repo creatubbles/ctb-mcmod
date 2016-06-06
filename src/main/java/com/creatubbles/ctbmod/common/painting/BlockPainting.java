@@ -2,6 +2,17 @@ package com.creatubbles.ctbmod.common.painting;
 
 import java.util.List;
 
+import com.creatubbles.api.core.Creation;
+import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.ctbmod.common.http.CreationRelations;
+import com.creatubbles.ctbmod.common.util.NBTUtil;
+import com.creatubbles.repack.endercore.common.BlockEnder;
+import com.creatubbles.repack.endercore.common.TileEntityBase;
+import com.creatubbles.repack.endercore.common.util.BlockCoord;
+
+import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -20,18 +31,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 import team.chisel.ctmlib.ICTMBlock;
 import team.chisel.ctmlib.SubmapManagerCTM;
-
-import com.creatubbles.api.core.Creation;
-import com.creatubbles.ctbmod.CTBMod;
-import com.creatubbles.ctbmod.common.http.CreationRelations;
-import com.creatubbles.ctbmod.common.util.NBTUtil;
-import com.creatubbles.repack.endercore.common.BlockEnder;
-import com.creatubbles.repack.endercore.common.TileEntityBase;
-import com.creatubbles.repack.endercore.common.util.BlockCoord;
-
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlock<SubmapManagerCTM> {
 
@@ -69,7 +68,20 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
     }
 
     public static CreationRelations getCreation(ItemStack painting) {
-        return NBTUtil.readJsonFromNBT(CreationRelations.class, NBTUtil.getTag(painting));
+    	return getCreation(NBTUtil.getTag(painting));
+    }
+
+    public static CreationRelations getCreation(NBTTagCompound tag) {
+        if (!NBTUtil.tagUpToDate(tag)) {
+            switch (NBTUtil.tagVersion(tag)) {
+            case 0:
+                Creation c = NBTUtil.readJsonFromNBT(Creation.class, tag);
+                return CreationRelations.complete(c, tag);
+            default:
+                break;
+            }
+        }
+        return NBTUtil.readJsonFromNBT(CreationRelations.class, tag);
     }
 
     public static int getWidth(ItemStack painting) {
@@ -84,7 +96,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
     @Override
     public void getSubBlocks(Item itemIn, CreativeTabs tab, List list) {
         if (CTBMod.cache.getCreationCache() != null && CTBMod.cache.getCreationCache().size() > 0) {
-            for (Creation c : CTBMod.cache.getCreationCache()) {
+            for (CreationRelations c : CTBMod.cache.getCreationCache()) {
                 list.add(create(c, 2, 2));
             }
         }

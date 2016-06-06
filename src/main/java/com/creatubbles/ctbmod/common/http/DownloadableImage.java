@@ -229,7 +229,11 @@ public class DownloadableImage {
 
     /**
      * Gets the bindable {@link ResourceLocation} for the given {@link ImageType type}.
+<<<<<<< HEAD
      *
+=======
+     * 
+>>>>>>> cd019b9... Some work on backwards compat
      * @param type
      *            The {@link ImageType} to get the resource for.
      * @return A {@link ResourceLocation}, which may be a dummy if this Image has not been downloaded, or is in the
@@ -245,7 +249,11 @@ public class DownloadableImage {
 
     /**
      * The dimensions for this image.
+<<<<<<< HEAD
      *
+=======
+     * 
+>>>>>>> cd019b9... Some work on backwards compat
      * @param type
      *            The {@link ImageType} to get the dimensions for.
      * @return An {@link Dimension} representing the size of this image. May be zero if the image is not downloaded.
@@ -256,7 +264,11 @@ public class DownloadableImage {
 
     /**
      * The width of this image.
+<<<<<<< HEAD
      *
+=======
+     * 
+>>>>>>> cd019b9... Some work on backwards compat
      * @param type
      *            The {@link ImageType} to get the width for.
      * @return The width of this image. May be zero if the image is not downloaded.
@@ -267,7 +279,11 @@ public class DownloadableImage {
 
     /**
      * The height of this image.
+<<<<<<< HEAD
      *
+=======
+     * 
+>>>>>>> cd019b9... Some work on backwards compat
      * @param type
      *            The {@link ImageType} to get the height for.
      * @return The height of this image. May be zero if the image is not downloaded.
@@ -278,6 +294,7 @@ public class DownloadableImage {
 
     /**
 <<<<<<< HEAD
+<<<<<<< HEAD
      * To avoid issues with certain GPUs, the in-memory image is scaled up to the nearest power of two square dimension.
      * This method returns that value for use in rendering.
      *
@@ -286,6 +303,11 @@ public class DownloadableImage {
      * This method returns that scaled width for use in rendering.
      * 
 >>>>>>> 9ddb5bc... Reduce texture size waste by only upscaling when necessary
+=======
+     * To avoid issues with certain GPUs, the in-memory image is scaled up to the nearest power of two rectangular dimensions.
+     * This method returns that scaled width for use in rendering.
+     * 
+>>>>>>> cd019b9... Some work on backwards compat
      * @param type
      *            The {@link ImageType} to get the width for.
      * @return The scaled width of this image.
@@ -332,7 +354,25 @@ public class DownloadableImage {
      * @see #updateSize(ImageType)
      */
     @SneakyThrows
-    public void download(final ImageType type, Vec3 position) {
+    public void download(final ImageType type, final Vec3 position) {
+        // If this is an "incomplete" creation, listen for its completion then execute the download afterwards
+        if (getOwner().getRelationships() == null) {
+            getOwner().getCompletionCallback().addListener(new Runnable() {
+
+                @Override
+                public void run() {
+                    download(type, position);
+                }
+            }, new Executor() {
+
+                @Override
+                public void execute(Runnable command) {
+                    Minecraft.getMinecraft().func_152344_a(command);
+                }
+            });
+            return;
+        }
+
         Set<ImageType> prog = inProgress.get(this);
         if (locations.get(type) == MISSING_TEXTURE && (prog == null || !prog.contains(type))) {
             TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
@@ -359,7 +399,11 @@ public class DownloadableImage {
 
     /**
      * Checks if the size for the given type has been initialized
+<<<<<<< HEAD
      *
+=======
+     * 
+>>>>>>> cd019b9... Some work on backwards compat
      * @param type
      *            The {@link ImageType} to check for.
      * @return True if the size for this type has been initialized. False otherwise.

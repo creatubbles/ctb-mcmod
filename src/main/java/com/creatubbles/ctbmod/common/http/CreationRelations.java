@@ -10,7 +10,6 @@ import com.creatubbles.api.response.creation.GetCreationResponse;
 import com.creatubbles.api.response.relationships.Relationships;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.util.ConcurrentUtil;
-import com.creatubbles.ctbmod.common.util.NBTUtil;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import jersey.repackaged.com.google.common.collect.Maps;
@@ -18,7 +17,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Delegate;
-import net.minecraft.nbt.NBTTagCompound;
 
 @Getter
 public class CreationRelations extends Creation {
@@ -52,11 +50,9 @@ public class CreationRelations extends Creation {
      * 
      * @param c
      *            The creation to complete
-     * @param tag
-     *            The tag to write the updated data to
-     * @return A soon-to-be compledted {@link CreationRelations} object.
+     * @return A soon-to-be completed {@link CreationRelations} object.
      */
-    public static CreationRelations complete(Creation c, final NBTTagCompound tag) {
+    public static CreationRelations complete(Creation c) {
         if (completing.containsKey(c.getId())) {
             return completing.get(c.getId());
         }
@@ -68,7 +64,6 @@ public class CreationRelations extends Creation {
             public void run() {
                 GetCreationResponse resp = req.execute().getResponse();
                 ret.setRelationships(resp.getRelationships());
-                NBTUtil.writeJsonToNBT(ret, tag);
                 completing.remove(ret.getCreation().getId());
             }
         });

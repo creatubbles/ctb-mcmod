@@ -3,6 +3,7 @@ package com.creatubbles.ctbmod.common.painting;
 import com.creatubbles.api.core.Image.ImageType;
 import com.creatubbles.ctbmod.common.http.CreationRelations;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
+import com.creatubbles.ctbmod.common.util.ConcurrentUtil;
 import com.creatubbles.ctbmod.common.util.NBTUtil;
 import com.creatubbles.repack.endercore.common.TileEntityBase;
 
@@ -73,6 +74,16 @@ public class TilePainting extends TileEntityBase {
     @Override
     protected void readCustomNBT(NBTTagCompound root) {
         creation = BlockPainting.getCreation(root);
+        // If this is an "incomplete" creation, listen for its completion then execute the download afterwards
+        if (creation.getRelationships() == null) {
+            ConcurrentUtil.addServerThreadListener(creation.getCompletionCallback(), new Runnable() {
+
+                @Override
+                public void run() {
+                    worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+                }
+            });
+        }
         width = root.getInteger("width");
         height = root.getInteger("height");
     }

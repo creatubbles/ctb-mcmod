@@ -52,8 +52,7 @@ public class OverlayCreationList extends OverlayBase<GuiCreator> {
         }
     }
 
-
-    private List<CreationRelations> creations;
+    private List<CreationRelations> creations = Lists.newArrayList();
 
     @Getter
     private int paddingX = 4, paddingY = 4;
@@ -85,12 +84,19 @@ public class OverlayCreationList extends OverlayBase<GuiCreator> {
     }
 
     public List<CreationRelations> getCreations() {
-        return ImmutableList.copyOf(creations);
+    	return ImmutableList.copyOf(creations);
     }
     
     public void setCreations(List<CreationRelations> creations) {
-        this.creations = creations;
+    	this.creations = creations;
+    	if (this.creations == null) {
+    	    this.creations = Lists.newArrayList();
+    	}
         rebuildList();
+    }
+    
+    public void setCreations(CreationRelations[] creations) {
+        setCreations(creations == null ? Lists.<CreationRelations>newArrayList() : Lists.newArrayList(creations));
     }
 
     @Override

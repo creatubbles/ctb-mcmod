@@ -76,7 +76,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
             switch (NBTUtil.tagVersion(tag)) {
             case 0:
                 Creation c = NBTUtil.readJsonFromNBT(Creation.class, tag);
-                return CreationRelations.complete(c, tag);
+                return CreationRelations.complete(c);
             default:
                 break;
             }

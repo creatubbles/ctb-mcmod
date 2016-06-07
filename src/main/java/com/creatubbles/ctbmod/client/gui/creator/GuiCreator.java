@@ -1,12 +1,25 @@
 package com.creatubbles.ctbmod.client.gui.creator;
 
+import static net.minecraft.util.EnumChatFormatting.*;
+
 import java.awt.Rectangle;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.lang3.ArrayUtils;
+import lombok.SneakyThrows;
+import lombok.Synchronized;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.ResourceLocation;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -46,32 +59,22 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 
-import static net.minecraft.util.EnumChatFormatting.*;
-import static org.lwjgl.opengl.GL11.*;
+import com.google.gson.Gson;
 
-import lombok.SneakyThrows;
-import lombok.Synchronized;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.ResourceLocation;
+import static org.lwjgl.opengl.GL11.*;
 
 public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
-	private class PasswordTextField extends TextFieldEnder {
+    private class PasswordTextField extends TextFieldEnder {
 
-		public PasswordTextField(FontRenderer fnt, int x, int y, int width, int height) {
-			super(fnt, x, y, width, height);
-		}
-		
-		@Override
-		public void setFocused(boolean state) {
+        public PasswordTextField(FontRenderer fnt, int x, int y, int width, int height) {
+            super(fnt, x, y, width, height);
+        }
+
+        @Override
+        public void setFocused(boolean state) {
             super.setFocused(state);
-            GuiCreator.this.tfActualPassword.setFocused(state);
+            tfActualPassword.setFocused(state);
         }
 
         private String transformText(String text) {
@@ -124,7 +127,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                 checkCancel();
 
                 if (loginReq != null && !loginReq.wasSuccessful()) {
-                    header = EnumChatFormatting.YELLOW.toString().concat(loginReq.getResponse().getMessage());
+                    header = YELLOW.toString().concat(loginReq.getResponse().getMessage());
                     loginReq = null;
                     logout();
                 } else {
@@ -197,7 +200,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                                 }
                             }).toList();
 
-                            creationList.setCreations(creations);
+                            creationList.setCreations(creations.toArray(new CreationRelations[creations.size()]));
                             CTBMod.cache.setCreationCache(creations);
                         } else {
                             if (creationsReq.getRawResponse().getStatus() == 401) {
@@ -338,7 +341,6 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
         creationList = new OverlayCreationList(XSIZE_DEFAULT, 0);
         addOverlay(creationList);
-
 
         logoutButton = new IconButton(this, ID_LOGOUT, 7, 106, EnderWidget.CROSS);
         logoutButton.setToolTip("Log Out");
@@ -506,6 +508,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
         glColor4f(1, 1, 1, 1);
@@ -521,7 +524,8 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
         switch (state) {
             case LOGGED_IN:
                 if (getUser() == null) {
-                    System.out.println("!");
+                    System.out.println(new Gson().toJson(CTBMod.cache));
+                    break;
                 }
 
                 for (int i = 0; i < 4; i++) {
@@ -547,7 +551,6 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
 
                 x += 74;
                 y += 9;
-
                 drawTexturedModalRect(x, y, 94, 90, 18, 18);
 
                 x -= 23;
@@ -586,13 +589,14 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
             case LOGGED_OUT:
                 x += xSize / 2;
                 y += 5;
-                List<String> lines = Lists.newArrayList(getFontRenderer().listFormattedStringToWidth(header, xSize - 6)); // Vanilla uses Arrays.asList which does not support remove
-                for (int i = 0; i < Math.min(2, lines.size()); i++) {
-                    String line = lines.get(i);
-                    if (i == 1 && lines.size() > 1) {
-                        line = line.substring(0, line.length() - 3) + "...";
-                    }
-                    drawCenteredString(getFontRenderer(), line, x, y + i * 8, 0xFFFFFF);
+                List<String> lines = getFontRenderer().listFormattedStringToWidth(header, xSize - 6);
+                if (lines.size() > 2) {
+                    String line = lines.get(0);
+                    lines.clear();
+                    lines.add(line.substring(line.length() - 3, line.length()) + "...");
+                }
+                for (int i = 0; i < lines.size(); i++) {
+                    drawCenteredString(getFontRenderer(), lines.get(i), x, y + i*8, 0xFFFFFF);
                 }
 
                 x = guiLeft + 13;
@@ -770,6 +774,6 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
         CTBMod.cache.activateUser(null);
 //        CTBMod.cache.setCreators(null);
         CTBMod.cache.setCreationCache(null);
-        creationList.setCreations(null);
+        creationList.setCreations((CreationRelations[]) null);
     }
 }

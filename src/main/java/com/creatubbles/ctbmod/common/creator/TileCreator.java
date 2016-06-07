@@ -9,11 +9,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
+
 import net.minecraftforge.oredict.OreDictionary;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import com.creatubbles.api.core.Creation;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.config.Configs;
 import com.creatubbles.ctbmod.common.http.CreationRelations;
@@ -74,13 +74,13 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, IPro
     }
 
     public int getLowestDyeCount() {
-        int ret = 0;
+        int ret = Integer.MAX_VALUE;
         for (int i = 1; i < 4; i++) {
             if (inventory[i] != null) {
-                ret = Math.max(ret, inventory[i].stackSize);
+                ret = Math.min(ret, inventory[i].stackSize);
             }
         }
-        return ret;
+        return ret == Integer.MAX_VALUE ? 0 : ret;
     }
 
     public void create(CreationRelations creation) {
@@ -253,6 +253,12 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, IPro
     @Override
     public String getInventoryName() {
         return "tile.ctbmod.creator";
+    }
+
+    public void clear() {
+        for (int i = 0; i < inventory.length; i++) {
+            inventory[i] = null;
+        }
     }
 
     private final String[] colors = new String[] { "dyeRed", "dyeGreen", "dyeBlue" };

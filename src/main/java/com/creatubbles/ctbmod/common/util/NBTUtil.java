@@ -49,7 +49,7 @@ public final class NBTUtil {
     public static void writeJsonToNBT(Object response, NBTTagCompound tag, Gson gson) {
         String json = gson.toJson(response);
         tag.setString("response", json);
-        //writeVersion(tag);
+        writeVersion(tag);
     }
 
     public static <T> T readJsonFromNBT(Class<T> responseClass, NBTTagCompound tag) {

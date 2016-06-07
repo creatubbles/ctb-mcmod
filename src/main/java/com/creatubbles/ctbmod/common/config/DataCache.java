@@ -6,21 +6,13 @@ import java.io.FileWriter;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.apache.commons.io.FileUtils;
 
 import com.creatubbles.api.core.User;
-import com.creatubbles.api.request.auth.OAuthAccessTokenRequest;
-import com.creatubbles.api.request.user.UserProfileRequest;
 import com.creatubbles.api.response.auth.OAuthAccessTokenResponse;
-import com.creatubbles.api.response.user.UserProfileResponse;
 import com.creatubbles.ctbmod.common.http.CreationRelations;
-import com.creatubbles.ctbmod.common.http.OAuthUtil;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
@@ -33,7 +25,6 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
 
-import jersey.repackaged.com.google.common.collect.Maps;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -75,10 +66,6 @@ public class DataCache {
     private static final Gson gson = new GsonBuilder().registerTypeAdapter(UserAndAuth.class, new UserAndAuthBackwardsCompat()).setPrettyPrinting().create();
 
     private final Set<UserAndAuth> savedUsers = Sets.newHashSet();
-    
-    private transient Map<String, User> idToUser = Maps.newConcurrentMap();
-    private transient Set<String> loadingIds = Sets.newConcurrentHashSet();
-    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Getter
     private OAuth OAuth;
@@ -92,7 +79,6 @@ public class DataCache {
     @Getter
     @Setter
     private transient List<CreationRelations> creationCache;
-    
 
     @Getter
     private transient boolean dirty;
@@ -120,7 +106,6 @@ public class DataCache {
         if (user != null) {
             savedUsers.remove(user);
             savedUsers.add(user);
-            idToUser.put(user.getUser().getId(), user.getUser());
             activeUser = user.getUser();
             OAuth = user.getAuth();
         } else {
@@ -149,29 +134,5 @@ public class DataCache {
 
     public void dirty(boolean dirty) {
         this.dirty = dirty;
-    }
-    
-    public Optional<User> getUserForID(final String id) {
-        if (idToUser.containsKey(id)) {
-            return Optional.of(idToUser.get(id));
-        }
-        if (!loadingIds.contains(id)) {
-            loadingIds.add(id);
-            executor.submit(new Runnable() {
-
-                @Override
-                public void run() {
-                    OAuthAccessTokenRequest authReq = new OAuthAccessTokenRequest(OAuthUtil.CLIENT_ID, OAuthUtil.CLIENT_SECRET);
-                    OAuthAccessTokenResponse authResp = authReq.execute().getResponse();
-                    
-                    UserProfileRequest req = new UserProfileRequest(id, authResp.getAccessToken());
-                    UserProfileResponse resp = req.execute().getResponse();
-                    
-                    idToUser.put(id, resp.getUser());
-                    loadingIds.remove(id);
-                }
-            });
-        }
-        return Optional.absent();
     }
 }

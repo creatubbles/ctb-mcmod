@@ -87,7 +87,6 @@ public class CTBMod {
 
     public void registerCommands() {
         ClientCommandHandler.instance.registerCommand(new CommandLogin());
-        ClientCommandHandler.instance.registerCommand(new CommandGetCreators());
         ClientCommandHandler.instance.registerCommand(new CommandUpload());
     }
 }

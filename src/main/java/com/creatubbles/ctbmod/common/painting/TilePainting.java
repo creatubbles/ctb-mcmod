@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -77,7 +78,7 @@ public class TilePainting extends TileEntityBase {
     protected void readCustomNBT(NBTTagCompound root) {
         creation = BlockPainting.getCreation(root);
         // If this is an "incomplete" creation, listen for its completion then execute the download afterwards
-        if (creation.getRelationships() == null) {
+        if (creation.getRelationships() == null && FMLCommonHandler.instance().getEffectiveSide().isServer()) {
             ConcurrentUtil.addServerThreadListener(creation.getCompletionCallback(), new Runnable() {
 
                 @Override

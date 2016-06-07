@@ -64,7 +64,6 @@ public class CreationRelations extends Creation {
             public void run() {
                 GetCreationResponse resp = req.execute().getResponse();
                 ret.setRelationships(resp.getRelationships());
-                completing.remove(ret.getCreation().getId());
             }
         });
         return ret;

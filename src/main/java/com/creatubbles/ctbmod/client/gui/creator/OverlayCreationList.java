@@ -6,6 +6,7 @@ import java.awt.Rectangle;
 import java.util.Comparator;
 import java.util.List;
 
+import scala.actors.threadpool.Arrays;
 import lombok.Getter;
 import lombok.Synchronized;
 import lombok.Value;
@@ -87,15 +88,13 @@ public class OverlayCreationList extends OverlayBase<GuiCreator> {
     }
     
     public void setCreations(List<CreationRelations> creations) {
-    	this.creations = creations;
-    	if (this.creations == null) {
-    	    this.creations = Lists.newArrayList();
-    	}
+    	this.creations = creations == null ? Lists.<CreationRelations>newArrayList() : Lists.newArrayList(creations);
         rebuildList();
     }
     
+    @SuppressWarnings("unchecked")
     public void setCreations(CreationRelations[] creations) {
-        setCreations(creations == null ? Lists.<CreationRelations>newArrayList() : Lists.newArrayList(creations));
+        setCreations(creations == null ? null : Arrays.asList(creations));
     }
 
     @Override

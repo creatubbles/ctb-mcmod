@@ -48,6 +48,12 @@ public class DataCache {
         private OAuth auth;
     }
     
+    @Value
+    public static class CacheVersion {
+        private int userVersion;
+        private int creationVersion;
+    }
+    
     private static class UserAndAuthBackwardsCompat implements JsonDeserializer<UserAndAuth> {
         @Override
         public UserAndAuth deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
@@ -59,11 +65,19 @@ public class DataCache {
             }
         }
     }
+    
+    private static final int USER_VERSION = 1;
+    private static final int CREATION_VERSION = 1;
+    
+    public static final CacheVersion VERSION = new CacheVersion(USER_VERSION, CREATION_VERSION);
 
-    public static final File cacheFolderv1 = new File(".", "creatubbles");
-    public static final File cacheFolder = new File(".", "creatubblesv2");
+    public static final File cacheFolderv2 = new File(".", "creatubblesv2");
+    public static final File cacheFolder = new File(".", "creatubbles");
+    private static final File version = new File(cacheFolder, ".cacheversion");
     private static final File cache = new File(cacheFolder, "usercache.json");
     private static final Gson gson = new GsonBuilder().registerTypeAdapter(UserAndAuth.class, new UserAndAuthBackwardsCompat()).setPrettyPrinting().create();
+
+    public static final File creations = new File(cacheFolder, "creations");
 
     private final Set<UserAndAuth> savedUsers = Sets.newHashSet();
 
@@ -85,11 +99,30 @@ public class DataCache {
 
     @SneakyThrows
     public static DataCache loadCache() {
-        if (cacheFolderv1.exists()) {
-            FileUtils.deleteDirectory(cacheFolderv1);
+        if (cacheFolderv2.exists()) {
+            FileUtils.deleteDirectory(cacheFolderv2);
         }
         
         cacheFolder.mkdir();
+        
+        CacheVersion ver;
+        if (version.exists()) {
+            ver = gson.fromJson(new FileReader(version), CacheVersion.class);
+        } else {
+            ver = new CacheVersion(0, 0);
+        }
+        
+        if (ver.getCreationVersion() < CREATION_VERSION) {
+            FileUtils.deleteDirectory(creations);
+        }
+        if (ver.getUserVersion() < USER_VERSION) {
+            cache.delete();
+        }
+        
+        FileWriter vfw = new FileWriter(version);
+        vfw.write(gson.toJson(VERSION));
+        vfw.flush();
+        vfw.close();
 
         if (cache.exists() && Configs.refreshUserCache) {
             cache.delete();
@@ -97,7 +130,7 @@ public class DataCache {
         cache.createNewFile();
         JsonElement parsed = new JsonParser().parse(new FileReader(cache));
         if (parsed != null && !parsed.isJsonNull()) {
-            return gson.fromJson(parsed, DataCache.class);
+            gson.fromJson(parsed, DataCache.class);
         }
         return new DataCache();
     }
@@ -125,9 +158,8 @@ public class DataCache {
 
     @SneakyThrows
     public void save() {
-        String json = gson.toJson(this);
         FileWriter fw = new FileWriter(cache);
-        fw.write(json);
+        fw.write(gson.toJson(this));
         fw.flush();
         fw.close();
     }

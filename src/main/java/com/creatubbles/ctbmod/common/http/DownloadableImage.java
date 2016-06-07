@@ -91,14 +91,14 @@ public class DownloadableImage {
     private class ImageDownloadTask implements Runnable {
 
         private final ImageType type;
-        private final String filepath;
+        private final File cache;
         private final ResourceLocation res;
         private final Vec3i position;
         private double distSq;
         
-        private ImageDownloadTask(ImageType type, String filepath, ResourceLocation res, Vec3i position) {
+        private ImageDownloadTask(ImageType type, File cache, ResourceLocation res, Vec3i position) {
             this.type = type;
-            this.filepath = filepath;
+            this.cache = cache;
             this.res = res;
             this.position = position;
             updateDistance();
@@ -108,7 +108,6 @@ public class DownloadableImage {
         @SneakyThrows
         public void run() {
             String url =  parent.getUrl(type);
-            File cache = new File(DataCache.cacheFolder, filepath);
             BufferedImage image = null;
             if (cache.exists()) {
                 image = ImageIO.read(cache);
@@ -334,8 +333,9 @@ public class DownloadableImage {
         Set<ImageType> prog = inProgress.get(this);
         if (locations.get(type) == MISSING_TEXTURE && (prog == null || !prog.contains(type))) {
             TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
-            final String filepath = "creations/" + getOwner().getRelationships().getUser().getId() + "/" + type.name() + "/" + getOwner().getId() + ".jpg";
-            final ResourceLocation res = new ResourceLocation(CTBMod.DOMAIN, filepath);
+            String path = getOwner().getRelationships().getUser().getId() + "/" + type.name() + "/" + getOwner().getId() + ".jpg";
+            final File filepath = new File(DataCache.creations, path);
+            final ResourceLocation res = new ResourceLocation(CTBMod.DOMAIN, path);
             ITextureObject texture = texturemanager.getTexture(res);
 
             if (texture == null) {

@@ -11,6 +11,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
+import com.creatubbles.api.response.relationships.RelationshipUser;
 import com.creatubbles.ctbmod.common.http.CreationRelations;
 
 public class ItemBlockPainting extends ItemBlock {
@@ -27,7 +28,9 @@ public class ItemBlockPainting extends ItemBlock {
         if (c != null) {
             tooltip.add(TextFormatting.ITALIC.toString().concat(c.getName()));
             if (c.getRelationships() != null) {
-                tooltip.add(c.getRelationships().getUser().getId());
+                for (RelationshipUser r : c.getRelationships().getCreators()) {
+                    tooltip.add(r.getId());
+                }
             }
             tooltip.add(BlockPainting.getWidth(stack) + "x" + BlockPainting.getHeight(stack));
         }

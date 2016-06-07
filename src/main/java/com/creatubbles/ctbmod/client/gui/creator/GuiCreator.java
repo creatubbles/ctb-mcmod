@@ -166,7 +166,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                     checkCancel();
 
                     List<CreationRelations> creations = creationList.getCreations();
-                    if (creations == null) {
+                    if (creations.isEmpty()) {
                         String stepUnloc = "gui.creator.step.creations";
                         loadStep = CTBMod.lang.localize(stepUnloc, 1, "?");
                         setState(State.LOGGING_IN, true);

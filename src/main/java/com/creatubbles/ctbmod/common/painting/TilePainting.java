@@ -1,8 +1,12 @@
 package com.creatubbles.ctbmod.common.painting;
 
+import java.util.concurrent.Executor;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -12,6 +16,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import com.creatubbles.api.core.Image.ImageType;
 import com.creatubbles.ctbmod.common.http.CreationRelations;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
+import com.creatubbles.ctbmod.common.util.ConcurrentUtil;
 import com.creatubbles.ctbmod.common.util.NBTUtil;
 import com.creatubbles.repack.endercore.common.TileEntityBase;
 
@@ -71,6 +76,17 @@ public class TilePainting extends TileEntityBase {
     @Override
     protected void readCustomNBT(NBTTagCompound root) {
         creation = BlockPainting.getCreation(root);
+        // If this is an "incomplete" creation, listen for its completion then execute the download afterwards
+        if (creation.getRelationships() == null) {
+            ConcurrentUtil.addServerThreadListener(creation.getCompletionCallback(), new Runnable() {
+
+                @Override
+                public void run() {
+                    IBlockState state = worldObj.getBlockState(getPos());
+                    worldObj.notifyBlockUpdate(pos, state, state, 8);
+                }
+            });
+        }
         width = root.getInteger("width");
         height = root.getInteger("height");
     }

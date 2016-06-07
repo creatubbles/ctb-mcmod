@@ -7,6 +7,7 @@ import com.creatubbles.ctbmod.common.util.ConcurrentUtil;
 import com.creatubbles.ctbmod.common.util.NBTUtil;
 import com.creatubbles.repack.endercore.common.TileEntityBase;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import lombok.Getter;
@@ -75,7 +76,7 @@ public class TilePainting extends TileEntityBase {
     protected void readCustomNBT(NBTTagCompound root) {
         creation = BlockPainting.getCreation(root);
         // If this is an "incomplete" creation, listen for its completion then execute the download afterwards
-        if (creation.getRelationships() == null) {
+        if (creation.getRelationships() == null && FMLCommonHandler.instance().getEffectiveSide().isServer()) {
             ConcurrentUtil.addServerThreadListener(creation.getCompletionCallback(), new Runnable() {
 
                 @Override

@@ -25,6 +25,7 @@ import lombok.Value;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.util.ResourceLocation;
+import scala.actors.threadpool.Arrays;
 
 public class OverlayCreationList extends OverlayBase<GuiCreator> {
 
@@ -88,15 +89,13 @@ public class OverlayCreationList extends OverlayBase<GuiCreator> {
     }
     
     public void setCreations(List<CreationRelations> creations) {
-    	this.creations = creations;
-    	if (this.creations == null) {
-    	    this.creations = Lists.newArrayList();
-    	}
+    	this.creations = creations == null ? Lists.<CreationRelations>newArrayList() : Lists.newArrayList(creations);
         rebuildList();
     }
     
+    @SuppressWarnings("unchecked")
     public void setCreations(CreationRelations[] creations) {
-        setCreations(creations == null ? Lists.<CreationRelations>newArrayList() : Lists.newArrayList(creations));
+        setCreations(creations == null ? null : Arrays.asList(creations));
     }
 
     @Override

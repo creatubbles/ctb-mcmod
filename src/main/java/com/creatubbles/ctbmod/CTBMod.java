@@ -1,5 +1,9 @@
 package com.creatubbles.ctbmod;
 
+import static com.creatubbles.ctbmod.CTBMod.MODID;
+import static com.creatubbles.ctbmod.CTBMod.NAME;
+import static com.creatubbles.ctbmod.CTBMod.VERSION;
+
 import java.util.Locale;
 
 import net.minecraft.init.Blocks;
@@ -19,7 +23,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.creatubbles.api.CreatubblesAPI;
 import com.creatubbles.ctbmod.common.CommonProxy;
-import com.creatubbles.ctbmod.common.command.CommandGetCreators;
 import com.creatubbles.ctbmod.common.command.CommandLogin;
 import com.creatubbles.ctbmod.common.command.CommandUpload;
 import com.creatubbles.ctbmod.common.config.Configs;
@@ -29,8 +32,6 @@ import com.creatubbles.ctbmod.common.network.PacketHandler;
 import com.creatubbles.ctbmod.common.painting.BlockPainting;
 import com.creatubbles.repack.endercore.common.Lang;
 import com.creatubbles.repack.endercore.common.config.ConfigProcessor;
-
-import static com.creatubbles.ctbmod.CTBMod.*;
 
 @Mod(modid = MODID, name = NAME, version = VERSION, acceptedMinecraftVersions = "[@MCVERSION@, 1.10)")
 public class CTBMod {
@@ -80,7 +81,6 @@ public class CTBMod {
 
     public void registerCommands() {
         ClientCommandHandler.instance.registerCommand(new CommandLogin());
-        ClientCommandHandler.instance.registerCommand(new CommandGetCreators());
         ClientCommandHandler.instance.registerCommand(new CommandUpload());
     }
 }

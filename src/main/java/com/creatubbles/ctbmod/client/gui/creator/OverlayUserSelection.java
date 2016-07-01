@@ -27,7 +27,7 @@ public class OverlayUserSelection extends OverlayBase<GuiCreator> {
         private UserAndLocation(UserAndAuth u, Point p) {
             this.user = u;
             location = p;
-            bounds = createBounds(u.getUser().username);
+            bounds = createBounds(u.getUser().getUsername());
         }
 
         private Rectangle createBounds(String username) {
@@ -100,7 +100,7 @@ public class OverlayUserSelection extends OverlayBase<GuiCreator> {
         for (UserAndLocation u : list) {
             Point p = u.getLocation();
             boolean hover = isMouseIn(mouseX, mouseY, u.getBounds());
-            drawCenteredString(Minecraft.getMinecraft().fontRendererObj, u.getUser().getUser().username, p.x, p.y, hover ? 0xFFFF00 : 0xFFFFFF);
+            drawCenteredString(Minecraft.getMinecraft().fontRendererObj, u.getUser().getUser().getUsername(), p.x, p.y, hover ? 0xFFFF00 : 0xFFFFFF);
         }
     }
 

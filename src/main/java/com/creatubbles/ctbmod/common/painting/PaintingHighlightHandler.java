@@ -12,6 +12,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.User;
+import com.creatubbles.api.response.relationships.RelationshipUser;
 import com.creatubbles.ctbmod.CTBMod;
 import com.google.common.base.Optional;
 
@@ -42,19 +43,21 @@ public class PaintingHighlightHandler {
                 x += 10;
                 y -= fr.FONT_HEIGHT / 2 - 1;
                 
-                fr.drawStringWithShadow("\"" + TextFormatting.ITALIC + painting.getCreation().name + TextFormatting.RESET + "\"", x, y, 0xFFFFFFFF);
+                fr.drawStringWithShadow("\"" + TextFormatting.ITALIC + painting.getCreation().getName() + TextFormatting.RESET + "\"", x, y, 0xFFFFFFFF);
                 y += fr.FONT_HEIGHT + 2;
 
-                String[] creators = painting.getCreation().creator_ids;
-                if (creators.length == 1) {
-                    Optional<User> user = CTBMod.cache.getUserForID(creators[0]);
-                    fr.drawStringWithShadow("By: " + getUserString(user, painting.getCreation()), x, y, 0xFFFFFFFF);
-                } else if (creators.length > 1) {
-                    fr.drawStringWithShadow("By:", x, y, 0xFFFFFFFF);
-                    for (String s : creators) {
-                        y += fr.FONT_HEIGHT + 2;
-                        Optional<User> user = CTBMod.cache.getUserForID(s);
-                        fr.drawStringWithShadow("- " + getUserString(user, painting.getCreation()), x, y, 0xFFFFFFFF);
+                if (painting.getCreation().getRelationships() != null) {
+                    RelationshipUser[] creators = painting.getCreation().getRelationships().getCreators();
+                    if (creators.length == 1) {
+                        Optional<User> user = CTBMod.cache.getUserForID(creators[0].getId());
+                        fr.drawStringWithShadow("By: " + getUserString(user, painting.getCreation()), x, y, 0xFFFFFFFF);
+                    } else if (creators.length > 1) {
+                        fr.drawStringWithShadow("By:", x, y, 0xFFFFFFFF);
+                        for (RelationshipUser r : creators) {
+                            y += fr.FONT_HEIGHT + 2;
+                            Optional<User> user = CTBMod.cache.getUserForID(r.getId());
+                            fr.drawStringWithShadow("- " + getUserString(user, painting.getCreation()), x, y, 0xFFFFFFFF);
+                        }
                     }
                 }
             }
@@ -64,8 +67,8 @@ public class PaintingHighlightHandler {
     private static String getUserString(Optional<User> opt, Creation creation) {
         if (opt.isPresent()) {
             User user = opt.get();
-            String gender = user.gender.equals("male") ? "\u2642" : user.gender.equals("female") ? "\u2640" : "";
-            return user.display_name + gender + " \u2295" + user.country_name + " " + creation.created_at_age_per_creator.get(user.id);
+            String gender = user.getGender().equals("male") ? "\u2642" : user.getGender().equals("female") ? "\u2640" : "";
+            return user.getDisplayName() + gender + " \u2295" + user.getCountryName() + " " + creation.getCreatedAge(user);
         } else {
             int dots = (int) ((Minecraft.getMinecraft().theWorld.getTotalWorldTime() / 4) % 4);
             String s = "Loading";

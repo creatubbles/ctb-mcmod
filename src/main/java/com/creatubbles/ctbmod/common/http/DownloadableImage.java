@@ -33,7 +33,6 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
 import org.lwjgl.util.Dimension;
 
-import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.Image;
 import com.creatubbles.api.core.Image.ImageType;
 import com.creatubbles.ctbmod.CTBMod;
@@ -92,25 +91,23 @@ public class DownloadableImage {
     private class ImageDownloadTask implements Runnable {
 
         private final ImageType type;
-        private final String filepath;
+        private final File cache;
         private final ResourceLocation res;
         private final Vec3i position;
         private double distSq;
         
-        private ImageDownloadTask(ImageType type, String filepath, ResourceLocation res, Vec3i position) {
+        private ImageDownloadTask(ImageType type, File cache, ResourceLocation res, Vec3i position) {
             this.type = type;
-            this.filepath = filepath;
+            this.cache = cache;
             this.res = res;
             this.position = position;
             updateDistance();
         }
         
-        @SuppressWarnings("deprecation")
         @Override
         @SneakyThrows
         public void run() {
-            String url = parent.links == null ? parent.url : parent.links.get(type);
-            File cache = new File(DataCache.cacheFolder, filepath);
+            String url =  parent.getUrl(type);
             BufferedImage image = null;
             if (cache.exists()) {
                 image = ImageIO.read(cache);
@@ -207,7 +204,7 @@ public class DownloadableImage {
     }
 
     @Getter
-    private Creation owner;
+    private CreationRelations owner;
 
     private transient final EnumMap<ImageType, ResourceLocation> locations = Maps.newEnumMap(ImageType.class);
     private transient EnumMap<ImageType, Size> sizes = Maps.newEnumMap(ImageType.class);
@@ -217,7 +214,7 @@ public class DownloadableImage {
         initDefaults();
     }
 
-    public DownloadableImage(Image image, Creation owner) {
+    public DownloadableImage(Image image, CreationRelations owner) {
         this.parent = image;
         this.owner = owner;
         initDefaults();
@@ -330,11 +327,15 @@ public class DownloadableImage {
      */
     @SneakyThrows
     public void download(final ImageType type, Vec3i position) {
+        if (getOwner().getRelationships() == null) {
+            return;
+        }
         Set<ImageType> prog = inProgress.get(this);
         if (locations.get(type) == MISSING_TEXTURE && (prog == null || !prog.contains(type))) {
             TextureManager texturemanager = Minecraft.getMinecraft().getTextureManager();
-            final String filepath = "creations/" + owner.user_id + "/" + type.name() + "/" + owner.id + ".jpg";
-            final ResourceLocation res = new ResourceLocation(CTBMod.DOMAIN, filepath);
+            String path = getOwner().getRelationships().getUser().getId() + "/" + type.name() + "/" + getOwner().getId() + ".jpg";
+            final File filepath = new File(DataCache.creations, path);
+            final ResourceLocation res = new ResourceLocation(CTBMod.DOMAIN, path);
             ITextureObject texture = texturemanager.getTexture(res);
 
             if (texture == null) {

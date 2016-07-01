@@ -5,10 +5,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import jersey.repackaged.com.google.common.collect.Maps;
 import lombok.EqualsAndHashCode;
@@ -19,12 +18,14 @@ import lombok.Value;
 
 import org.apache.commons.io.FileUtils;
 
-import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.User;
 import com.creatubbles.api.request.auth.OAuthAccessTokenRequest;
 import com.creatubbles.api.request.user.UserProfileRequest;
 import com.creatubbles.api.response.auth.OAuthAccessTokenResponse;
 import com.creatubbles.api.response.user.UserProfileResponse;
+import com.creatubbles.ctbmod.common.http.CreationRelations;
+import com.creatubbles.ctbmod.common.http.OAuthUtil;
+import com.creatubbles.ctbmod.common.util.ConcurrentUtil;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -55,6 +56,12 @@ public class DataCache {
         private OAuth auth;
     }
     
+    @Value
+    public static class CacheVersion {
+        private int userVersion;
+        private int creationVersion;
+    }
+    
     private static class UserAndAuthBackwardsCompat implements JsonDeserializer<UserAndAuth> {
         @Override
         public UserAndAuth deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
@@ -66,17 +73,24 @@ public class DataCache {
             }
         }
     }
+    
+    private static final int USER_VERSION = 1;
+    private static final int CREATION_VERSION = 1;
+    
+    public static final CacheVersion VERSION = new CacheVersion(USER_VERSION, CREATION_VERSION);
 
-    public static final File cacheFolderv1 = new File(".", "creatubbles");
-    public static final File cacheFolder = new File(".", "creatubblesv2");
+    public static final File cacheFolderv2 = new File(".", "creatubblesv2");
+    public static final File cacheFolder = new File(".", "creatubbles");
+    private static final File version = new File(cacheFolder, ".cacheversion");
     private static final File cache = new File(cacheFolder, "usercache.json");
     private static final Gson gson = new GsonBuilder().registerTypeAdapter(UserAndAuth.class, new UserAndAuthBackwardsCompat()).setPrettyPrinting().create();
+
+    public static final File creations = new File(cacheFolder, "creations");
 
     private final Set<UserAndAuth> savedUsers = Sets.newHashSet();
     
     private transient Map<String, User> idToUser = Maps.newConcurrentMap();
     private transient Set<String> loadingIds = Sets.newConcurrentHashSet();
-    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Getter
     private OAuth OAuth;
@@ -89,19 +103,37 @@ public class DataCache {
      */
     @Getter
     @Setter
-    private transient Creation[] creationCache;
-    
+    private transient List<CreationRelations> creationCache;
 
     @Getter
     private transient boolean dirty;
 
     @SneakyThrows
     public static DataCache loadCache() {
-        if (cacheFolderv1.exists()) {
-            FileUtils.deleteDirectory(cacheFolderv1);
+        if (cacheFolderv2.exists()) {
+            FileUtils.deleteDirectory(cacheFolderv2);
         }
         
         cacheFolder.mkdir();
+        
+        CacheVersion ver;
+        if (version.exists()) {
+            ver = gson.fromJson(new FileReader(version), CacheVersion.class);
+        } else {
+            ver = new CacheVersion(0, 0);
+        }
+        
+        if (ver.getCreationVersion() < CREATION_VERSION) {
+            FileUtils.deleteDirectory(creations);
+        }
+        if (ver.getUserVersion() < USER_VERSION) {
+            cache.delete();
+        }
+        
+        FileWriter vfw = new FileWriter(version);
+        vfw.write(gson.toJson(VERSION));
+        vfw.flush();
+        vfw.close();
 
         if (cache.exists() && Configs.refreshUserCache) {
             cache.delete();
@@ -109,7 +141,7 @@ public class DataCache {
         cache.createNewFile();
         JsonElement parsed = new JsonParser().parse(new FileReader(cache));
         if (parsed != null && !parsed.isJsonNull()) {
-            return gson.fromJson(parsed, DataCache.class);
+            gson.fromJson(parsed, DataCache.class);
         }
         return new DataCache();
     }
@@ -118,7 +150,7 @@ public class DataCache {
         if (user != null) {
             savedUsers.remove(user);
             savedUsers.add(user);
-            idToUser.put(user.getUser().id, user.getUser());
+            idToUser.put(user.getUser().getId(), user.getUser());
             activeUser = user.getUser();
             OAuth = user.getAuth();
         } else {
@@ -129,7 +161,7 @@ public class DataCache {
 
     public void setOAuth(OAuthAccessTokenResponse response) {
         // copy data for immutable state
-        this.OAuth = response == null ? null : new OAuth(response.access_token, response.token_type);        
+        this.OAuth = response == null ? null : new OAuth(response.getAccessToken(), response.getType());        
     }
     
     public Collection<UserAndAuth> getSavedUsers() {
@@ -138,9 +170,8 @@ public class DataCache {
 
     @SneakyThrows
     public void save() {
-        String json = gson.toJson(this);
         FileWriter fw = new FileWriter(cache);
-        fw.write(json);
+        fw.write(gson.toJson(this));
         fw.flush();
         fw.close();
     }
@@ -155,17 +186,17 @@ public class DataCache {
         }
         if (!loadingIds.contains(id)) {
             loadingIds.add(id);
-            executor.submit(new Runnable() {
+            ConcurrentUtil.execute(new Runnable() {
 
                 @Override
                 public void run() {
-                    OAuthAccessTokenRequest authReq = new OAuthAccessTokenRequest();
+                    OAuthAccessTokenRequest authReq = new OAuthAccessTokenRequest(OAuthUtil.CLIENT_ID, OAuthUtil.CLIENT_SECRET);
                     OAuthAccessTokenResponse authResp = authReq.execute().getResponse();
                     
-                    UserProfileRequest req = new UserProfileRequest(id, authResp.access_token);
+                    UserProfileRequest req = new UserProfileRequest(id, authResp.getAccessToken());
                     UserProfileResponse resp = req.execute().getResponse();
                     
-                    idToUser.put(id, resp.user);
+                    idToUser.put(id, resp.getUser());
                     loadingIds.remove(id);
                 }
             });

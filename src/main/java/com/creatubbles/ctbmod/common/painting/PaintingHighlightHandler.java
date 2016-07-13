@@ -4,6 +4,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.util.text.TextFormatting;
@@ -48,34 +49,49 @@ public class PaintingHighlightHandler {
 
                 if (painting.getCreation().getRelationships() != null) {
                     RelationshipUser[] creators = painting.getCreation().getRelationships().getCreators();
-                    if (creators.length == 1) {
-                        Optional<User> user = CTBMod.cache.getUserForID(creators[0].getId());
-                        fr.drawStringWithShadow("By: " + getUserString(user, painting.getCreation()), x, y, 0xFFFFFFFF);
-                    } else if (creators.length > 1) {
-                        fr.drawStringWithShadow("By:", x, y, 0xFFFFFFFF);
-                        for (RelationshipUser r : creators) {
-                            y += fr.FONT_HEIGHT + 2;
-                            Optional<User> user = CTBMod.cache.getUserForID(r.getId());
-                            fr.drawStringWithShadow("- " + getUserString(user, painting.getCreation()), x, y, 0xFFFFFFFF);
-                        }
+                    for (RelationshipUser r : creators) {
+                        Optional<User> user = CTBMod.cache.getUserForID(r.getId());
+                        y = drawUserString(getUserString(user, painting.getCreation()), x, y);
+                        y += fr.FONT_HEIGHT;
                     }
                 }
             }
         }
     }
     
-    private static String getUserString(Optional<User> opt, Creation creation) {
+    private static int drawUserString(String[] data, int x, int y) {
+        FontRenderer fr = Minecraft.getMinecraft().fontRendererObj;
+        ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
+        fr.drawStringWithShadow(data[0], x, y, -1);
+        int ret = y;
+        if (data.length > 1) {
+            int len0 = fr.getStringWidth(data[0]);
+            int len1 = fr.getStringWidth(data[1]);
+            fr.drawStringWithShadow(data[1], x + len0, y, -1);
+            if (x + len0 + len1 + fr.getStringWidth(data[2]) > sr.getScaledWidth()) {
+                y += fr.FONT_HEIGHT;
+                ret = y + 5;
+                x += 12;
+            } else {
+                x += len0 + len1;
+            }
+            fr.drawStringWithShadow(data[2], x, y, -1);
+        }
+        return ret;
+    }
+    
+    private static String[] getUserString(Optional<User> opt, Creation creation) {
         if (opt.isPresent()) {
             User user = opt.get();
             String gender = user.getGender().equals("male") ? "\u2642" : user.getGender().equals("female") ? "\u2640" : "";
-            return user.getDisplayName() + gender + " \u2295" + user.getCountryName() + " " + creation.getCreatedAge(user);
+            return new String[] { "By: " + user.getDisplayName() + gender, " " + creation.getCreatedAge(user), " \u2295" + user.getCountryName() };
         } else {
             int dots = (int) ((Minecraft.getMinecraft().theWorld.getTotalWorldTime() / 4) % 4);
             String s = "Loading";
             for (int i = 0; i < dots; i++) {
                 s += '.';
             }
-            return s;
+            return new String[] { s };
         }
     }
 }

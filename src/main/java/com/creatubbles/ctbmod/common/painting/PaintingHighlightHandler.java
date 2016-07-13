@@ -2,6 +2,7 @@ package com.creatubbles.ctbmod.common.painting;
 
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.User;
+import com.creatubbles.api.response.relationships.RelationshipUser;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.repack.endercore.common.util.BlockCoord;
 import com.google.common.base.Optional;
@@ -45,37 +46,55 @@ public class PaintingHighlightHandler {
                 x += 10;
                 y -= fr.FONT_HEIGHT / 2 - 1;
                 
-                fr.drawStringWithShadow("\"" + EnumChatFormatting.ITALIC + painting.getCreation().name + EnumChatFormatting.RESET + "\"", x, y, 0xFFFFFFFF);
+                fr.drawStringWithShadow("\"" + EnumChatFormatting.ITALIC + painting.getCreation().getName() + EnumChatFormatting.RESET + "\"", x, y, 0xFFFFFFFF);
                 y += fr.FONT_HEIGHT + 2;
 
-                String[] creators = painting.getCreation().creator_ids;
-                if (creators.length == 1) {
-                    Optional<User> user = CTBMod.cache.getUserForID(creators[0]);
-                    fr.drawStringWithShadow("By: " + getUserString(user, painting.getCreation()), x, y, 0xFFFFFFFF);
-                } else if (creators.length > 1) {
-                    fr.drawStringWithShadow("By:", x, y, 0xFFFFFFFF);
-                    for (String s : creators) {
-                        y += fr.FONT_HEIGHT + 2;
-                        Optional<User> user = CTBMod.cache.getUserForID(s);
-                        fr.drawStringWithShadow("- " + getUserString(user, painting.getCreation()), x, y, 0xFFFFFFFF);
+                if (painting.getCreation().getRelationships() != null) {
+                    RelationshipUser[] creators = painting.getCreation().getRelationships().getCreators();
+                    for (RelationshipUser r : creators) {
+                        Optional<User> user = CTBMod.cache.getUserForID(r.getId());
+                        y = drawUserString(getUserString(user, painting.getCreation()), x, y);
+                        y += fr.FONT_HEIGHT;
                     }
                 }
             }
         }
     }
     
-    private static String getUserString(Optional<User> opt, Creation creation) {
+    private static int drawUserString(String[] data, int x, int y) {
+        Minecraft mc = Minecraft.getMinecraft();
+        FontRenderer fr = mc.fontRenderer;
+        ScaledResolution sr = new ScaledResolution(mc, mc.displayWidth, mc.displayHeight);
+        fr.drawStringWithShadow(data[0], x, y, -1);
+        int ret = y;
+        if (data.length > 1) {
+            int len0 = fr.getStringWidth(data[0]);
+            int len1 = fr.getStringWidth(data[1]);
+            fr.drawStringWithShadow(data[1], x + len0, y, -1);
+            if (x + len0 + len1 + fr.getStringWidth(data[2]) > sr.getScaledWidth()) {
+                y += fr.FONT_HEIGHT;
+                ret = y + 5;
+                x += 12;
+            } else {
+                x += len0 + len1;
+            }
+            fr.drawStringWithShadow(data[2], x, y, -1);
+        }
+        return ret;
+    }
+    
+    private static String[] getUserString(Optional<User> opt, Creation creation) {
         if (opt.isPresent()) {
             User user = opt.get();
-            String gender = user.gender.equals("male") ? "\u2642" : user.gender.equals("female") ? "\u2640" : "";
-            return user.display_name + gender + " \u2295" + user.country_name + " " + creation.created_at_age_per_creator.get(user.id);
+            String gender = user.getGender().equals("male") ? "\u2642" : user.getGender().equals("female") ? "\u2640" : "";
+            return new String[] { "By: " + user.getDisplayName() + gender, " " + creation.getCreatedAge(user), " \u2295" + user.getCountryName() };
         } else {
             int dots = (int) ((Minecraft.getMinecraft().theWorld.getTotalWorldTime() / 4) % 4);
             String s = "Loading";
             for (int i = 0; i < dots; i++) {
                 s += '.';
             }
-            return s;
+            return new String[] { s };
         }
     }
 }

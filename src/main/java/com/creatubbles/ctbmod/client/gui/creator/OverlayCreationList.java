@@ -3,6 +3,7 @@ package com.creatubbles.ctbmod.client.gui.creator;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -113,7 +114,7 @@ public class OverlayCreationList extends OverlayBase<GuiCreator> {
             return;
         }
 
-        creations.sort(new Comparator<Creation>() {
+        Collections.sort(creations, new Comparator<Creation>() {
 
             @Override
             public int compare(Creation o1, Creation o2) {

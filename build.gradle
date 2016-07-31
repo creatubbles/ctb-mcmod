@@ -162,6 +162,7 @@ curseforge {
         changelog = System.getenv('CHANGELOG') == null || System.getenv('CHANGELOG').equals('none') ? getChangelogText() : System.getenv('CHANGELOG')
         changelogType = 'html'
         releaseType = project.hasProperty('mod_appendix') ? project.mod_appendix : 'release'
+        addGameVersion '1.10.2'
         mainArtifact(shadowJar) {
             displayName = "Creatubbles - ${mod_version}-${buildnumber}"
         }

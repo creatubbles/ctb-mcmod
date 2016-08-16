@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.creatubbles.api.CreatubblesAPI;
 import com.creatubbles.ctbmod.common.CommonProxy;
+import com.creatubbles.ctbmod.common.command.CommandGetCreators;
 import com.creatubbles.ctbmod.common.command.CommandLogin;
 import com.creatubbles.ctbmod.common.command.CommandUpload;
 import com.creatubbles.ctbmod.common.config.Configs;
@@ -31,7 +32,7 @@ import net.minecraft.init.Items;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
-@Mod(modid = MODID, name = NAME, version = VERSION, acceptedMinecraftVersions = "[@MCVERSION@, 1.10)")
+@Mod(modid = MODID, name = NAME, version = VERSION)
 public class CTBMod {
 
     public static final String MODID = "CTBMod";
@@ -68,6 +69,10 @@ public class CTBMod {
         proxy.registerRenderers();
 
         GameRegistry.addRecipe(new ShapedOreRecipe(creator, "ibi", "wpw", "iwi", 'i', "ingotIron", 'b', Items.bucket, 'w', "plankWood", 'p', Blocks.piston));
+        
+        if (Configs.noIceMelt) {
+            Blocks.ice.setTickRandomly(false);
+        }
     }
 
     @EventHandler
@@ -82,6 +87,7 @@ public class CTBMod {
 
     public void registerCommands() {
         ClientCommandHandler.instance.registerCommand(new CommandLogin());
+        ClientCommandHandler.instance.registerCommand(new CommandGetCreators());
         ClientCommandHandler.instance.registerCommand(new CommandUpload());
     }
 }

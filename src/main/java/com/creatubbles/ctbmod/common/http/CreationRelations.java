@@ -5,7 +5,9 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import com.creatubbles.api.core.Creation;
+import com.creatubbles.api.request.auth.OAuthAccessTokenRequest;
 import com.creatubbles.api.request.creation.GetCreationRequest;
+import com.creatubbles.api.response.auth.OAuthAccessTokenResponse;
 import com.creatubbles.api.response.creation.GetCreationResponse;
 import com.creatubbles.api.response.relationships.Relationships;
 import com.creatubbles.ctbmod.CTBMod;
@@ -52,16 +54,23 @@ public class CreationRelations extends Creation {
      *            The creation to complete
      * @return A soon-to-be completed {@link CreationRelations} object.
      */
-    public static CreationRelations complete(Creation c) {
+    public static CreationRelations complete(final Creation c) {
         if (completing.containsKey(c.getId())) {
             return completing.get(c.getId());
         }
-        final GetCreationRequest req = new GetCreationRequest(c.getId(), CTBMod.cache.getOAuth().getAccessToken());
         final CreationRelations ret = new CreationRelations(c, null);
         ret.completionCallback = ConcurrentUtil.execute(new Runnable() { { completing.put(ret.getCreation().getId(), ret); }
 
             @Override
             public void run() {
+                String accessToken = CTBMod.cache.getOAuth() == null ? null : CTBMod.cache.getOAuth().getAccessToken();
+                if (accessToken == null) {
+                    OAuthAccessTokenRequest authReq = new OAuthAccessTokenRequest(OAuthUtil.CLIENT_ID, OAuthUtil.CLIENT_SECRET);
+                    OAuthAccessTokenResponse authResp = authReq.execute().getResponse();
+                    accessToken = authResp.getAccessToken();
+                }
+
+                GetCreationRequest req = new GetCreationRequest(c.getId(), accessToken);
                 GetCreationResponse resp = req.execute().getResponse();
                 ret.setRelationships(resp.getRelationships());
             }

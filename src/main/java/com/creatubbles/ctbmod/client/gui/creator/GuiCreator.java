@@ -43,6 +43,7 @@ import com.creatubbles.ctbmod.common.creator.SlotCreator;
 import com.creatubbles.ctbmod.common.creator.TileCreator;
 import com.creatubbles.ctbmod.common.http.CreationRelations;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
+import com.creatubbles.ctbmod.common.http.OAuthUtil;
 import com.creatubbles.ctbmod.common.network.MessageCreate;
 import com.creatubbles.ctbmod.common.network.PacketHandler;
 import com.creatubbles.repack.endercore.client.gui.GuiContainerBase;
@@ -120,7 +121,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                 loadStep = CTBMod.lang.localize("gui.creator.step.auth");
                 if (getAccessToken() == null) {
                     setState(State.LOGGING_IN, true);
-                    loginReq = new OAuthAccessTokenRequest(tfEmail.getText(), tfActualPassword.getText());
+                    loginReq = new OAuthAccessTokenRequest(OAuthUtil.CLIENT_ID, OAuthUtil.CLIENT_SECRET, tfEmail.getText(), tfActualPassword.getText());
                     loginReq.execute();
                 }
 
@@ -589,7 +590,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
             case LOGGED_OUT:
                 x += xSize / 2;
                 y += 5;
-                List<String> lines = getFontRenderer().listFormattedStringToWidth(header, xSize - 6);
+                List<String> lines = Lists.newArrayList(getFontRenderer().listFormattedStringToWidth(header, xSize - 6));
                 if (lines.size() > 2) {
                     String line = lines.get(0);
                     lines.clear();

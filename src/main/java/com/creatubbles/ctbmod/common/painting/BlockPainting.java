@@ -120,7 +120,7 @@ public class BlockPainting extends BlockEnder<TileEntityBase> implements ICTMBlo
     @Override
     public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase placer, ItemStack stack) {
         ItemStack placed = placer.getHeldItem();
-        CreationRelations c = NBTUtil.readJsonFromNBT(CreationRelations.class, NBTUtil.getTag(placed));
+        CreationRelations c = getCreation(placed);
         BlockCoord pos = new BlockCoord(x, y, z);
 
         TilePainting painting = getDataPainting(world, pos);

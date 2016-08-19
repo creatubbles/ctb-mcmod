@@ -7,7 +7,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.creatubbles.api.CreatubblesAPI;
 import com.creatubbles.ctbmod.common.CommonProxy;
-import com.creatubbles.ctbmod.common.command.CommandGetCreators;
 import com.creatubbles.ctbmod.common.command.CommandLogin;
 import com.creatubbles.ctbmod.common.command.CommandUpload;
 import com.creatubbles.ctbmod.common.config.Configs;

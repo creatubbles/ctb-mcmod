@@ -18,7 +18,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.util.ResourceLocation;
 
-import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GLContext;
 
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.repack.endercore.client.render.IWidgetIcon;
@@ -29,8 +29,7 @@ public class GuiUtil extends Gui {
     public static final boolean NON_POT_SUPPORTED;
 
     static {
-        String s = GL11.glGetString(GL11.GL_EXTENSIONS);
-        NON_POT_SUPPORTED = s.contains("GL_ARB_texture_non_power_of_two");
+        NON_POT_SUPPORTED = GLContext.getCapabilities().GL_ARB_texture_non_power_of_two;
     }
 
     public static void init() {}

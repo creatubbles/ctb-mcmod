@@ -22,6 +22,8 @@ public class ClientProxy extends CommonProxy {
     public void registerRenderers() {
         GuiUtil.init();
         
+        MinecraftForge.EVENT_BUS.register(new GifRecorder());
+        
         ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(CTBMod.creator), 0, new ModelResourceLocation(CTBMod.DOMAIN + ":creator", "inventory"));
         ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(CTBMod.painting), 0, new ModelResourceLocation(CTBMod.DOMAIN + ":painting", "inventory"));
 

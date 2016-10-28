@@ -13,6 +13,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.commons.io.IOUtils;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
+
+import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.repack.dragon66.AnimatedGIFWriter;
+
 import jersey.repackaged.com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -22,24 +31,15 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.shader.Framebuffer;
-import net.minecraft.event.ClickEvent;
-import net.minecraft.event.HoverEvent;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ScreenShotHelper;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.util.text.event.HoverEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
-
-import org.apache.commons.io.IOUtils;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-
-import com.creatubbles.ctbmod.CTBMod;
-import com.creatubbles.repack.dragon66.AnimatedGIFWriter;
 
 /** Most code taken from ScreenShotHelper with the File IO code replaced */
 public class GifRecorder {
@@ -192,17 +192,17 @@ public class GifRecorder {
                     sb.append(" ");
                 }
                 sb.append("]");
-                Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new ChatComponentText(sb.toString()), task.hashCode());
+                Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new TextComponentString(sb.toString()), task.hashCode());
                 lastStep = step;
             } else if (future.isDone()) {
-                ChatComponentText msg = new ChatComponentText(sb.toString());
+                TextComponentString msg = new TextComponentString(sb.toString());
                 if (future.get() == null) {
-                    msg.appendSibling(new ChatComponentText(EnumChatFormatting.RED + "Failed! See console for errors."));
+                    msg.appendSibling(new TextComponentString(TextFormatting.RED + "Failed! See console for errors."));
                 } else {
-                    ChatComponentText doneTag = new ChatComponentText(EnumChatFormatting.GREEN.toString() + "[Done!]");
-                    doneTag.setChatStyle(new ChatStyle().setChatClickEvent(
-                            new ClickEvent(ClickEvent.Action.OPEN_FILE, future.get().getAbsolutePath())).setChatHoverEvent(
-                            new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText("Click to view gif: " + future.get().getName()))
+                    TextComponentString doneTag = new TextComponentString(TextFormatting.GREEN.toString() + "[Done!]");
+                    doneTag.setStyle(new Style().setClickEvent(
+                            new ClickEvent(ClickEvent.Action.OPEN_FILE, future.get().getAbsolutePath())).setHoverEvent(
+                            new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString("Click to view gif: " + future.get().getName()))
                     ));
 
                     msg.appendSibling(doneTag);

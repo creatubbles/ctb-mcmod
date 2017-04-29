@@ -104,6 +104,7 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
             }
             
             final ThumbnailStitcher stitcher = temp;
+            final int page = i;
             
             stitchers.put(i, stitcher);
             stitchTasks.put(i, executor.submit(new Runnable() {

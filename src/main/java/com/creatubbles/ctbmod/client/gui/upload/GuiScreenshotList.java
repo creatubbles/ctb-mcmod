@@ -61,7 +61,7 @@ public class GuiScreenshotList extends GuiContainerBase {
             public void run() {
                 pgPrev.visible = true;
                 pgNext.visible = true;
-                if (thumbs.getPages() <= 1) {
+                if (thumbs.getPage() == thumbs.getPages() - 1) {
                     pgNext.enabled = false;
                 }
                 if (thumbs.getPage() == 0) {

@@ -10,7 +10,7 @@ buildscript {
 plugins {
 	id 'java'
     id 'net.franz-becker.gradle-lombok'  version '1.5'
-    id 'com.matthewprenger.cursegradle'  version '1.0.5'
+    id 'com.matthewprenger.cursegradle'  version '1.0.8'
 	id 'com.github.johnrengelman.shadow' version '1.2.2'
 }
 
@@ -162,7 +162,6 @@ curseforge {
         changelog = System.getenv('CHANGELOG') == null || System.getenv('CHANGELOG').equals('none') ? getChangelogText() : System.getenv('CHANGELOG')
         changelogType = 'html'
         releaseType = project.hasProperty('mod_appendix') ? project.mod_appendix : 'release'
-        addGameVersion '1.10.2'
         mainArtifact(shadowJar) {
             displayName = "Creatubbles - ${mod_version}-${buildnumber}"
         }

@@ -1,3 +1,10 @@
+0.4.0:
+New
+- Update purely to 1.10.2
+- Paintings now once again render their image in item form
+Fixes
+- Fix screenshot upload GUI
+
 0.3.0:
 New
 - Update to 1.9/1.10

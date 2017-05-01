@@ -1,3 +1,14 @@
+0.4.0:
+Fixes
+- Fix screenshot upload GUI
+
+0.3.0:
+New
+- Now uses v2.0 of the Creatubbles API. General loading should be faster and less error prone.
+- While looking at a painting, information about it will be displayed.
+Fixes
+- Timeout limit has been raised to prevent failed logins on slow connections
+
 0.2.1:
 Changes
 - Painting load order will now be prioritized by player location. This means paintings closer to you will load first.

@@ -1,3 +1,8 @@
+0.4.1:
+Fixes
+- Fix screenshot upload not working
+- Fix usercache not being loaded
+
 0.4.0:
 Fixes
 - Fix screenshot upload GUI

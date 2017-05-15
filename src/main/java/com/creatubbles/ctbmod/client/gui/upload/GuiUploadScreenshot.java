@@ -220,7 +220,7 @@ public class GuiUploadScreenshot extends GuiContainerBase {
 
                         // create url for upload
                         buttonUpload.displayString = "Uploading...";
-                        CreationsUploadsRequest creationsUploads = new CreationsUploadsRequest(createCreationResponse.getCreation().getId(), FilenameUtils.getExtension(files[index].getName()), accessToken);
+                        CreationsUploadsRequest creationsUploads = new CreationsUploadsRequest(createCreationResponse.getId(), FilenameUtils.getExtension(files[index].getName()), accessToken);
                         CreationsUploadsResponse creationsUploadsResponse = creationsUploads.execute().getResponse();
 
                         byte[] data = FileUtils.readFileToByteArray(files[index]);
@@ -238,9 +238,8 @@ public class GuiUploadScreenshot extends GuiContainerBase {
                         pingCreationsUploads.setData(""); // fixes null PUT error
                         pingCreationsUploads.execute();
                         
-                        GetCreationLandingUrlRequest landingReq = new GetCreationLandingUrlRequest(createCreationResponse.getCreation().getId(), accessToken);
+                        GetCreationLandingUrlRequest landingReq = new GetCreationLandingUrlRequest(createCreationResponse.getId(), accessToken);
                         landingUrl = landingReq.execute().getResponse().getUrl();
-                        
                         
                     } catch (Exception e2) {
                         e = e2;

@@ -279,7 +279,7 @@ public class GuiUploadScreenshot extends GuiContainerBase {
                 files[index].delete();
                 File[] newFiles = ArrayUtils.remove(files, index);
                 parentInvalid = true;
-                Minecraft.getMinecraft().displayGuiScreen(new GuiUploadScreenshot(this, newFiles, index));
+                Minecraft.getMinecraft().displayGuiScreen(new GuiUploadScreenshot(this, newFiles, Math.min(newFiles.length - 1, index)));
             } else {
                 confirm++;
             }

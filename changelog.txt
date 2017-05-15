@@ -1,3 +1,8 @@
+0.4.1:
+Fixes
+- Fix screenshot upload not working
+- Fix usercache not being loaded
+
 0.4.0:
 New
 - Update purely to 1.10.2

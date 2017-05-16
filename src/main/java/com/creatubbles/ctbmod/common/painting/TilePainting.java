@@ -64,6 +64,11 @@ public class TilePainting extends TileEntityBase {
     public AxisAlignedBB getRenderBoundingBox() {
         return BlockPainting.getCompleteBoundingBox(getWorldObj(), xCoord, yCoord, zCoord);
     }
+    
+    @Override
+    public double getMaxRenderDistanceSquared() {
+        return super.getMaxRenderDistanceSquared() * 4; // Twice as far as default
+    }
 
     @Override
     protected void writeCustomNBT(NBTTagCompound root) {

@@ -1,11 +1,15 @@
 package com.creatubbles.ctbmod.common.creator;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.IBlockAccess;
@@ -39,6 +43,9 @@ public class BlockCreator extends BlockEnder<TileCreator> implements IGuiHandler
         setCreativeTab(CreativeTabs.tabDecorations);
         setBlockName(CTBMod.DOMAIN + "." + name);
         setBlockTextureName(CTBMod.DOMAIN + ":" + name);
+        setHardness(5);
+        setResistance(10);
+        setHarvestLevel("pickaxe", 1);
         NetworkRegistry.INSTANCE.registerGuiHandler(CTBMod.instance, this);
     }
     
@@ -62,6 +69,53 @@ public class BlockCreator extends BlockEnder<TileCreator> implements IGuiHandler
     public int getRenderType() {
         return CTBMod.renderIdCreator;
     }
+    
+    public void breakBlock(World p_149749_1_, int p_149749_2_, int p_149749_3_, int p_149749_4_, Block p_149749_5_, int p_149749_6_)
+    {
+        TileCreator creator = (TileCreator) p_149749_1_.getTileEntity(p_149749_2_, p_149749_3_, p_149749_4_);
+
+        if (creator != null)
+        {
+            for (int i1 = 0; i1 < creator.getSizeInventory(); ++i1)
+            {
+                ItemStack itemstack = creator.getStackInSlot(i1);
+
+                if (itemstack != null)
+                {
+                    float f = p_149749_1_.rand.nextFloat() * 0.8F + 0.1F;
+                    float f1 = p_149749_1_.rand.nextFloat() * 0.8F + 0.1F;
+                    EntityItem entityitem;
+
+                    for (float f2 = p_149749_1_.rand.nextFloat() * 0.8F + 0.1F; itemstack.stackSize > 0; p_149749_1_.spawnEntityInWorld(entityitem))
+                    {
+                        int j1 = p_149749_1_.rand.nextInt(21) + 10;
+
+                        if (j1 > itemstack.stackSize)
+                        {
+                            j1 = itemstack.stackSize;
+                        }
+
+                        itemstack.stackSize -= j1;
+                        entityitem = new EntityItem(p_149749_1_, (double)((float)p_149749_2_ + f), (double)((float)p_149749_3_ + f1), (double)((float)p_149749_4_ + f2), new ItemStack(itemstack.getItem(), j1, itemstack.getItemDamage()));
+                        float f3 = 0.05F;
+                        entityitem.motionX = p_149749_1_.rand.nextGaussian() * f3;
+                        entityitem.motionY = p_149749_1_.rand.nextGaussian() * f3 + 0.2F;
+                        entityitem.motionZ = p_149749_1_.rand.nextGaussian() * f3;
+
+                        if (itemstack.hasTagCompound())
+                        {
+                            entityitem.getEntityItem().setTagCompound((NBTTagCompound)itemstack.getTagCompound().copy());
+                        }
+                    }
+                }
+            }
+
+            p_149749_1_.func_147453_f(p_149749_2_, p_149749_3_, p_149749_4_, p_149749_5_);
+        }
+
+        super.breakBlock(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_, p_149749_5_, p_149749_6_);
+    }
+
     
     @Override
     public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase placer, ItemStack stack) {

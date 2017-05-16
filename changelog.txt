@@ -1,3 +1,15 @@
+0.4.1:
+Fixes
+- Fix screenshot upload not working
+- Fix usercache not being loaded
+
+0.4.0:
+New
+- Update purely to 1.10.2
+- Paintings now once again render their image in item form
+Fixes
+- Fix screenshot upload GUI
+
 0.3.0:
 New
 - Update to 1.9/1.10

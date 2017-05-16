@@ -141,7 +141,7 @@ public class DataCache {
         cache.createNewFile();
         JsonElement parsed = new JsonParser().parse(new FileReader(cache));
         if (parsed != null && !parsed.isJsonNull()) {
-            gson.fromJson(parsed, DataCache.class);
+            return gson.fromJson(parsed, DataCache.class);
         }
         return new DataCache();
     }

@@ -138,7 +138,7 @@ public class RenderPaintingItem extends RenderPainting {
         GlStateManager.cullFace(GlStateManager.CullFace.BACK);
         GlStateManager.popMatrix();
         GlStateManager.disableRescaleNormal();
-        GlStateManager.disableBlend();
+        GlStateManager.enableBlend(); // renderPaintingImage will disable blend due to normal TE context, but GUI expects it to remain active
         GlStateManager.enableLighting();
         
         Minecraft.getMinecraft().mcProfiler.endSection();

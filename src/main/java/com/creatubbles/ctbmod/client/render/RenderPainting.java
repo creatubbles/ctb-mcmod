@@ -68,7 +68,7 @@ public class RenderPainting extends TileEntitySpecialRenderer<TilePainting> {
 
         VertexBuffer renderer = Tessellator.getInstance().getBuffer();
 
-        // TODO this code is duped between here and OverlaySelectedCreation (kinda)
+        // TODO this code is duped between here and GuiUtil.drawRectInscribed (kinda)
 
         Rectangle2D.Double bounds = new Rectangle2D.Double(2 / 16f, 2 / 16f, blockwidth - 4 / 16f, blockheight - 4 / 16f);
         if (width / blockwidth > height / blockheight) {

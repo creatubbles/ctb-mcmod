@@ -48,6 +48,12 @@ public class ClientProxy extends CommonProxy {
         ModelBakery.registerItemVariants(Item.getItemFromBlock(CTBMod.painting), new ModelResourceLocation(new ResourceLocation(CTBMod.DOMAIN, "painting"), "inventory"));
 
         MinecraftForge.EVENT_BUS.register(new PaintingHighlightHandler());
+        MinecraftForge.EVENT_BUS.register(ClientTickHandler.INSTANCE);
+    }
+    
+    @Override
+    public long getTicksElapsed() {
+        return ClientTickHandler.INSTANCE.getTicksElapsed();
     }
     
     @SubscribeEvent

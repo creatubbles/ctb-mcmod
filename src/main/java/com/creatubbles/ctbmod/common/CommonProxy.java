@@ -11,4 +11,8 @@ public class CommonProxy {
     public World getClientWorld() {
         return null;
     }
+
+    public long getTicksElapsed() {
+        return 0;
+    }
 }

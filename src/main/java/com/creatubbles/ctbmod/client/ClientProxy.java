@@ -9,6 +9,7 @@ import com.creatubbles.ctbmod.common.painting.TilePainting;
 
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
+import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderBlocks;
@@ -43,6 +44,12 @@ public class ClientProxy extends CommonProxy {
         MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(CTBMod.painting), rp);
 
         MinecraftForge.EVENT_BUS.register(new PaintingHighlightHandler());
+        FMLCommonHandler.instance().bus().register(ClientTickHandler.INSTANCE);
+    }
+    
+    @Override
+    public long getTicksElapsed() {
+        return ClientTickHandler.INSTANCE.getTicksElapsed();
     }
 
     @Override

@@ -18,10 +18,12 @@ import net.minecraft.inventory.Container;
 import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
 
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.repack.endercore.client.render.IWidgetIcon;
 import com.creatubbles.repack.endercore.client.render.IWidgetMap;
+import com.creatubbles.repack.endercore.client.render.RenderUtil;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -78,8 +80,8 @@ public class GuiUtil extends Gui {
     private static final GuiUtil INSTANCE = new GuiUtil();
 
     public static void drawLoadingTex(int x, int y, int width, int height) {
-        long millis = System.currentTimeMillis();
-        float rot = (float) (((double) millis / 10) % 360f);
+        double ticks = CTBMod.proxy.getTicksElapsed() + RenderUtil.getTimer().elapsedPartialTicks;
+        float rot = (float) ((ticks * 4) % 360d);
 
         TextureManager engine = Minecraft.getMinecraft().getTextureManager();
         engine.bindTexture(Bubbles.TEXTURE);

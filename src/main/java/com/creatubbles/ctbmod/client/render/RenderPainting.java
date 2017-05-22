@@ -93,7 +93,7 @@ public class RenderPainting extends TileEntitySpecialRenderer implements IItemRe
 
         Tessellator renderer = Tessellator.instance;
 
-        // TODO this code is duped between here and OverlaySelectedCreation (kinda)
+        // TODO this code is duped between here and GuiUtil.drawRectInscribed (kinda)
 
         Rectangle2D.Double bounds = new Rectangle2D.Double(2 / 16f, 2 / 16f, pwidth - 4 / 16f, pheight - 4 / 16f);
         if (width / pwidth > height / pheight) {

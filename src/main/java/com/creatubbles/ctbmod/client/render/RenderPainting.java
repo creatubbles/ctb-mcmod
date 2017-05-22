@@ -22,6 +22,11 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 
 public class RenderPainting extends TileEntitySpecialRenderer<TilePainting> {
+    
+    @Override
+    public boolean isGlobalRenderer(TilePainting te) {
+         return te.getWidth() > 1 || te.getHeight() > 1;
+    }
 
     @Override
     public void renderTileEntityAt(TilePainting te, double x, double y, double z, float partialTicks, int destroyStage) {

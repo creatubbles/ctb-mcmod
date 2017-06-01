@@ -13,6 +13,7 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 
 import lombok.Getter;
@@ -112,7 +113,11 @@ public class DownloadableImage {
             if (cache.exists()) {
                 image = ImageIO.read(cache);
             } else {
-                image = ImageIO.read(new URL(url));
+            	try {
+            		image = ImageIO.read(new URL(url));
+            	} catch (IOException e) {
+            		return;
+            	}
                 cache.getParentFile().mkdirs();
                 try {
                     // Cache the original, not the resize, this way we do not lose original size data

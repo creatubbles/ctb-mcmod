@@ -242,6 +242,7 @@ public class GuiUploadScreenshot extends GuiContainerBase {
                         pingCreationsUploads.execute();
                         
                         GetCreationLandingUrlRequest landingReq = new GetCreationLandingUrlRequest(createCreationResponse.getId(), accessToken);
+                        landingReq.setAcceptLanguage(Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode().substring(0, 2));
                         landingUrl = landingReq.execute().getResponse().getUrl();
                         
                     } catch (Exception e2) {

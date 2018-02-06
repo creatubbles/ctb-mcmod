@@ -1,5 +1,12 @@
 0.4.2:
+Changes
+- Extend the draw distance of paintings
 Fixes
+- Fix the loading animation being slightly jittery
+- Fix paintings sometimes disappearing
+- Fix creator not dropping its contents when broken
+- Fix creator block not having an effective tool and hardness value
+- Fix crash when deleting the last screenshot in the folder
 - Fix a crash that would occur sometimes when a creation is deleted
 - Remove alphabetical sorting of creations, instead use the same order as the site
 

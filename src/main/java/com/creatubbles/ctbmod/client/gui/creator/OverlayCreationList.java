@@ -115,14 +115,6 @@ public class OverlayCreationList extends OverlayBase<GuiCreator> {
             return;
         }
 
-        Collections.sort(creations, new Comparator<Creation>() {
-
-            @Override
-            public int compare(Creation o1, Creation o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
-
         int row = 0;
         int col = 0;
 

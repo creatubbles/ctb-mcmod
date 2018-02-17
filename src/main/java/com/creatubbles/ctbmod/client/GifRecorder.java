@@ -20,7 +20,9 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
 import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.ctbmod.common.config.Configs;
 import com.creatubbles.repack.dragon66.AnimatedGIFWriter;
+import com.creatubbles.repack.endercore.client.render.RenderUtil;
 
 import jersey.repackaged.com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
@@ -97,12 +99,10 @@ public class GifRecorder {
                                 bufferedimage.setRGB(0, 0, width, height, frame, 0, width);
                             }
                             
-                            float scale;
-                            if (width > height) {
-                                scale = 500.0f / width;
-                            } else {
-                                scale = 500.0f / height;
-                            }
+                            float scale = Math.min(
+                                (float) Configs.maxGifWidth / width,
+                                (float) Configs.maxGifHeight / height
+                            );
                             if (scale < 1) {
                                 int w = (int) (width * scale);
                                 int h = (int) (height * scale);

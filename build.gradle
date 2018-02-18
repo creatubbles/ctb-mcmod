@@ -57,6 +57,7 @@ repositories {
 
 dependencies {
     compile "com.creatubbles.api:creatubbles-wsapi:${wsapi_version}"
+    compile group: 'com.madgag', name: 'animated-gif-lib', version: '1.0'
 }
 
 lombok {

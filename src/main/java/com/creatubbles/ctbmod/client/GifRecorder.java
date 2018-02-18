@@ -1,8 +1,10 @@
 package com.creatubbles.ctbmod.client;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -21,8 +23,7 @@ import org.lwjgl.opengl.GL12;
 
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.config.Configs;
-import com.creatubbles.repack.dragon66.AnimatedGIFWriter;
-import com.creatubbles.repack.endercore.client.render.RenderUtil;
+import com.madgag.gif.fmsware.AnimatedGifEncoder;
 
 import jersey.repackaged.com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
@@ -69,11 +70,17 @@ public class GifRecorder {
             
             try {
 
-                final AnimatedGIFWriter writer = new AnimatedGIFWriter(true);
+                final AnimatedGifEncoder enc = new AnimatedGifEncoder();
                 final FileOutputStream os = new FileOutputStream(res);
+                
+                enc.start(os);
+                enc.setDelay(50);
+                enc.setRepeat(0);
+                enc.setQuality(1);
 
+                BufferedImage prevFrame = null;
+                
                 try {
-                    writer.prepareForWrite(os, -1, -1);
                     
                     while (!finished || !frames.isEmpty()) {
                         int[] frame = frames.poll();
@@ -114,12 +121,31 @@ public class GifRecorder {
                                 bufferedimage = resizedImg;
                             }
                             
-                            writer.writeFrame(os, bufferedimage, 50);
+                            if (prevFrame != null) { // Basic inter-frame compression by discarding similar pixels
+                                frame = ((DataBufferInt)bufferedimage.getRaster().getDataBuffer()).getData();
+                                int[] prevFrameData = ((DataBufferInt)prevFrame.getRaster().getDataBuffer()).getData();
+                                for (int i = 0; i < frame.length; i++) {
+                                    int newColor = frame[i];
+                                    int oldColor = prevFrameData[i];
+                                    // If this pixel is reasonably similar to the previous color, set it transparent
+                                    if (almostEqual(newColor, oldColor, 2 / 255f)) {
+                                        frame[i] = TRANSPARENT.getRGB();
+                                    } else {
+                                        prevFrameData[i] = newColor;
+                                    }
+                                }
+                                enc.setDispose(1);
+                            } else { // First frame, no transparency
+                                prevFrame = bufferedimage;
+                            }
+                            
+                            enc.addFrame(bufferedimage);
+                            enc.setTransparent(TRANSPARENT); // Initialize this *after* the first frame
                             framesProcessed++;
                         }
                     }
 
-                    writer.finishWrite(os);
+                    enc.finish();
                 } catch (Exception e) {
                     CTBMod.logger.error("Error writing gif.", e);
                     return null;
@@ -136,6 +162,23 @@ public class GifRecorder {
             
             return res;
         }
+
+        /**
+         * Returns true if the two colors are equal with in an epsilon value.
+         * @param col1 The first color
+         * @param col2 The second color
+         * @param i An epsilon value, in integer pixel color difference.
+         * @return
+         */
+        private boolean almostEqual(int col1, int col2, float eps) {
+            float[] c1 = new Color(col1, true).getComponents(null);
+            float[] c2 = new Color(col2, true).getComponents(null);
+            float sum = 0;
+            for (int i = 0; i < 4; i++) {
+                sum += Math.abs(c1[i] - c2[i]);
+            }
+            return sum <= eps;
+        }
     }
 
     /** A buffer to hold pixel values returned by OpenGL. */
@@ -148,6 +191,7 @@ public class GifRecorder {
     private static GifWriteTask task = null;
     
     private static final int MAX_STEPS = 30;
+    private static final Color TRANSPARENT = new Color(0, true);
     
     private static int framesRecorded, framesProcessed;
     private static int lastStep;

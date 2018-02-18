@@ -13,7 +13,7 @@ import com.creatubbles.ctbmod.client.gui.GuiButtonHideable;
 import com.creatubbles.repack.endercore.client.gui.GuiContainerBase;
 
 
-public class GuiScreenshotList extends GuiContainerBase {
+public class GuiMediaList extends GuiContainerBase {
    
     final GuiContainer parent;
     
@@ -22,7 +22,7 @@ public class GuiScreenshotList extends GuiContainerBase {
     private GuiButton pgPrev, pgNext;
     private GuiButton cancel;
     
-    public GuiScreenshotList(GuiContainer parent) {
+    public GuiMediaList(GuiContainer parent) {
         super(new Container() {
 
             @Override

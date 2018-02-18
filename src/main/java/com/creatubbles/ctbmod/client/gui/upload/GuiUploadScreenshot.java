@@ -4,20 +4,11 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Locale;
 
 import javax.imageio.ImageIO;
-
-import lombok.SneakyThrows;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.ClickEvent;
-import net.minecraft.util.text.event.HoverEvent;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -33,6 +24,7 @@ import com.creatubbles.api.response.amazon.UploadS3FileResponse;
 import com.creatubbles.api.response.creation.CreateCreationResponse;
 import com.creatubbles.api.response.creation.CreationsUploadsResponse;
 import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.ctbmod.client.gui.AnimatedTexture;
 import com.creatubbles.ctbmod.client.gui.GuiUtil;
 import com.creatubbles.ctbmod.client.gui.LazyLoadedTexture;
 import com.creatubbles.repack.endercore.client.gui.GuiContainerBase;
@@ -41,12 +33,24 @@ import com.creatubbles.repack.endercore.client.gui.widget.TextFieldEnder;
 import com.creatubbles.repack.endercore.client.render.EnderWidget;
 import com.creatubbles.repack.endercore.common.util.ChatUtil;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.madgag.gif.fmsware.GifDecoder;
+
+import lombok.SneakyThrows;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.util.text.event.HoverEvent;
 
 public class GuiUploadScreenshot extends GuiContainerBase {
 
     private static final ResourceLocation SCREENSHOT_RES = new ResourceLocation(CTBMod.DOMAIN, "screenshotprev");
 
-    private final GuiScreenshotList parent;
+    private final GuiMediaList parent;
     private final File[] files;
     private final int index;
 
@@ -69,7 +73,7 @@ public class GuiUploadScreenshot extends GuiContainerBase {
     }
     
     @SneakyThrows
-    public GuiUploadScreenshot(GuiScreenshotList parent, final File[] files, final int index) {
+    public GuiUploadScreenshot(GuiMediaList parent, final File[] files, final int index) {
         super(GuiUtil.dummyContainer());
         this.parent = parent;
         this.files = files;
@@ -80,9 +84,28 @@ public class GuiUploadScreenshot extends GuiContainerBase {
             @Override
             @SneakyThrows
             public void run() {
-                BufferedImage original = ImageIO.read(files[index]);
-                size = new Dimension(original.getWidth(), original.getHeight());
-                tex = new LazyLoadedTexture(GuiUtil.upsize(ImageIO.read(files[index]), false));
+                File file = files[index];
+                BufferedImage[] images;
+                if (file.getName().toLowerCase(Locale.ROOT).endsWith(".gif")) {
+                  GifDecoder decoder = new GifDecoder();
+                  decoder.read(new FileInputStream(files[index]));
+                  images = new BufferedImage[decoder.getFrameCount()];
+                  for(int i = 0; i < images.length; i++) {
+                      images[i] = decoder.getFrame(i);
+                  }
+                } else {
+                    images = new BufferedImage[] { ImageIO.read(file) };
+                }
+
+                size = new Dimension(images[0].getWidth(), images[0].getHeight());
+                for (int i = 0; i < images.length; i++) {
+                    images[i] = GuiUtil.upsize(images[i], false);
+                }
+                if (images.length > 1) {
+                    tex = new AnimatedTexture(images);
+                } else {
+                    tex = new LazyLoadedTexture(images[0]);
+                }
                 uploadTask = Minecraft.getMinecraft().addScheduledTask(new Runnable() {
 
                     @Override
@@ -149,6 +172,9 @@ public class GuiUploadScreenshot extends GuiContainerBase {
         super.updateScreen();
         if (confirm > 0 && confirm < Integer.MAX_VALUE) {
             confirm++;
+        }
+        if (uploadTask != null && uploadTask.isDone()) {
+            tex.updateTexture();
         }
     }
 
@@ -273,7 +299,7 @@ public class GuiUploadScreenshot extends GuiContainerBase {
             }).start();
 
         } else if (button.id == -99) {
-            Minecraft.getMinecraft().displayGuiScreen(parentInvalid ? new GuiScreenshotList(parent.parent) : parent);
+            Minecraft.getMinecraft().displayGuiScreen(parentInvalid ? new GuiMediaList(parent.parent) : parent);
         } else if (button.id == -98) {
             if (confirm > 20) {
                 files[index].delete();

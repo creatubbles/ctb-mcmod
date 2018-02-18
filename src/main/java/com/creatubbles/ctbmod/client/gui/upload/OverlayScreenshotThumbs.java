@@ -1,13 +1,9 @@
 package com.creatubbles.ctbmod.client.gui.upload;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -15,17 +11,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import lombok.Getter;
-import lombok.SneakyThrows;
-import lombok.Value;
-import lombok.experimental.NonFinal;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.util.math.MathHelper;
-
 import org.apache.commons.io.comparator.LastModifiedFileComparator;
-import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.lwjgl.input.Mouse;
 
 import com.creatubbles.ctbmod.client.gui.GuiUtil;
@@ -40,7 +26,18 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
-public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import lombok.Getter;
+import lombok.SneakyThrows;
+import lombok.Value;
+import lombok.experimental.NonFinal;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.math.MathHelper;
+
+public class OverlayScreenshotThumbs extends OverlayBase<GuiMediaList> {
 
     private static final ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
 
@@ -66,7 +63,7 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
     public OverlayScreenshotThumbs(int x, int y, Dimension dimension) {
         super(x, y, dimension);
 
-        final File[] files = new File(Minecraft.getMinecraft().mcDataDir, "screenshots").listFiles((FilenameFilter) FileFilterUtils.suffixFileFilter(".png"));
+        final File[] files = new File(Minecraft.getMinecraft().mcDataDir, "screenshots").listFiles();
                 
         if (files == null) {
             screenshots = Lists.newArrayList();

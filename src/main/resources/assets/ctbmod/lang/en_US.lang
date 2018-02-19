@@ -22,3 +22,8 @@ ctb.gui.creator.height=H: %d
 ctb.gui.creator.paper=Paper: %s
 ctb.gui.creator.dye=Dye: %s
 
+# Upload
+
+ctb.media.screenshot.name=Screenshots
+ctb.media.gif.name=GIFs
+

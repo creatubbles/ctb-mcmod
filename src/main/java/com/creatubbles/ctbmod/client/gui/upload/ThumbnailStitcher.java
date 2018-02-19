@@ -5,21 +5,22 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
-
-import lombok.Getter;
-import lombok.SneakyThrows;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
 
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.client.gui.LazyLoadedTexture;
 import com.google.common.collect.Maps;
+
+import lombok.Getter;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.ResourceLocation;
 
 public class ThumbnailStitcher {
     
@@ -45,15 +46,26 @@ public class ThumbnailStitcher {
 
     private Map<File, Rectangle> rects = Maps.newHashMap();
 
-    @SneakyThrows
-    public void loadFiles(final File... files) {
+    public void loadFiles(final File... files) throws IOException {
         Map<File, Image> images = Maps.newHashMap();
         progress.desc = "Resizing images to " + thumbWidth + "x" + thumbHeight;
         progress.max = files.length;
         progress.current = 0; // Could be a recursive call
         for (File f : files) {
             progress.current++;
-            BufferedImage img = ImageIO.read(f);
+            BufferedImage img = null;
+            try {
+                img = ImageIO.read(f);
+            } catch (IOException e) {
+                progress.desc = "Error!";
+                progress.current = progress.max = 1;
+                throw new IIOException("Could not load image file: " + f.getAbsolutePath(), e);
+            }
+            if (img == null) {
+                progress.desc = "Error!";
+                progress.current = progress.max = 1;
+                throw new IIOException("Could not determine loader for image file: " + f.getAbsolutePath());
+            }
             int w = img.getWidth(), h = img.getHeight();
             int scaledW, scaledH;
             if (w > h) {
@@ -145,7 +157,9 @@ public class ThumbnailStitcher {
     }
 
     public void dispose() {
-        GL11.glDeleteTextures(Minecraft.getMinecraft().getTextureManager().getTexture(res).getGlTextureId());
+        if (getRes() != null) {
+            GL11.glDeleteTextures(Minecraft.getMinecraft().getTextureManager().getTexture(getRes()).getGlTextureId());
+        }
     }
     
     public boolean isValid() {

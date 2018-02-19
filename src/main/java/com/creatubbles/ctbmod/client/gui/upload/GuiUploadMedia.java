@@ -11,7 +11,6 @@ import java.util.Locale;
 import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.opengl.GL11;
 
@@ -46,7 +45,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 
-public class GuiUploadScreenshot extends GuiContainerBase {
+public class GuiUploadMedia extends GuiContainerBase {
 
     private static final ResourceLocation SCREENSHOT_RES = new ResourceLocation(CTBMod.DOMAIN, "screenshotprev");
 
@@ -67,13 +66,13 @@ public class GuiUploadScreenshot extends GuiContainerBase {
 
     private final TextFieldEnder tfName;
 
-    private GuiUploadScreenshot(GuiUploadScreenshot old, File[] files, int index) {
+    private GuiUploadMedia(GuiUploadMedia old, File[] files, int index) {
         this(old.parent, files, index);
         this.parentInvalid = old.parentInvalid;
     }
     
     @SneakyThrows
-    public GuiUploadScreenshot(GuiMediaList parent, final File[] files, final int index) {
+    public GuiUploadMedia(GuiMediaList parent, final File[] files, final int index) {
         super(GuiUtil.dummyContainer());
         this.parent = parent;
         this.files = files;
@@ -110,7 +109,7 @@ public class GuiUploadScreenshot extends GuiContainerBase {
 
                     @Override
                     public void run() {
-                        if (Minecraft.getMinecraft().currentScreen == GuiUploadScreenshot.this) {
+                        if (Minecraft.getMinecraft().currentScreen == GuiUploadMedia.this) {
                             tex.uploadTexture();
                             Minecraft.getMinecraft().getTextureManager().loadTexture(SCREENSHOT_RES, tex);
                         }
@@ -130,7 +129,6 @@ public class GuiUploadScreenshot extends GuiContainerBase {
 
     @Override
     public void initGui() {
-        System.out.println("Init: " + Thread.currentThread());
         this.xSize = width;
         this.ySize = height;
 
@@ -249,7 +247,7 @@ public class GuiUploadScreenshot extends GuiContainerBase {
 
                         // create url for upload
                         buttonUpload.displayString = "Uploading...";
-                        CreationsUploadsRequest creationsUploads = new CreationsUploadsRequest(createCreationResponse.getId(), FilenameUtils.getExtension(files[index].getName()), accessToken);
+                        CreationsUploadsRequest creationsUploads = new CreationsUploadsRequest(createCreationResponse.getId(), "png", accessToken);
                         CreationsUploadsResponse creationsUploadsResponse = creationsUploads.execute().getResponse();
 
                         byte[] data = FileUtils.readFileToByteArray(files[index]);
@@ -305,14 +303,14 @@ public class GuiUploadScreenshot extends GuiContainerBase {
                 files[index].delete();
                 File[] newFiles = ArrayUtils.remove(files, index);
                 parentInvalid = true;
-                Minecraft.getMinecraft().displayGuiScreen(new GuiUploadScreenshot(this, newFiles, Math.min(newFiles.length - 1, index)));
+                Minecraft.getMinecraft().displayGuiScreen(new GuiUploadMedia(this, newFiles, Math.min(newFiles.length - 1, index)));
             } else {
                 confirm++;
             }
         } else {
             int newIndex = index + button.id;
             if (newIndex >= 0 && newIndex < files.length) {
-                Minecraft.getMinecraft().displayGuiScreen(new GuiUploadScreenshot(this, files, newIndex));
+                Minecraft.getMinecraft().displayGuiScreen(new GuiUploadMedia(this, files, newIndex));
             }
         }
     }

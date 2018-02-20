@@ -148,9 +148,9 @@ public class GuiUploadMedia extends GuiContainerBase {
         addButton(buttonBack = new GuiButton(-99, x + (w / 10), height - 30, w, 20, "Back"));
         
         x = width / 2;
-        w = (width - 150) / 4;
+        w = Math.min((width - 150) / 4, 397); // Buttons glitch out over this width
         addButton(buttonPrev = new GuiButton(-1, x - w - 10, height - 75, w, 20, "<< Prev"));
-        addButton(buttonNext = new GuiButton(1, x + 10, height - 75, w, 20, "Next >> "));
+        addButton(buttonNext = new GuiButton(1, x + 10, height - 75, w, 20, "Next >>"));
     }
 
     @Override

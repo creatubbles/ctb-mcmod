@@ -162,6 +162,9 @@ public class GifRecorder {
             
             return res;
         }
+        
+        private float[] comp1 = new float[4];
+        private float[] comp2 = new float[4];
 
         /**
          * Returns true if the two colors are equal with in an epsilon value.
@@ -171,11 +174,11 @@ public class GifRecorder {
          * @return
          */
         private boolean almostEqual(int col1, int col2, float eps) {
-            float[] c1 = new Color(col1, true).getComponents(null);
-            float[] c2 = new Color(col2, true).getComponents(null);
+            new Color(col1, true).getComponents(comp1);
+            new Color(col2, true).getComponents(comp2);
             float sum = 0;
             for (int i = 0; i < 4; i++) {
-                sum += Math.abs(c1[i] - c2[i]);
+                sum += Math.abs(comp1[i] - comp2[i]);
             }
             return sum <= eps;
         }

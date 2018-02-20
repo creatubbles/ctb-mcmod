@@ -81,7 +81,9 @@ jar {
 }
 
 shadowJar {
-	exclude 'META-INF/*', 'META-INF/maven/**'
+	exclude { e -> 
+	   e.name.startsWith('META-INF/') && !e.name.endsWith('ctbmod_at.cfg') && !e.name.contains('/services/')
+    }
 	dependencies {
 		exclude(dependency('org.projectlombok:lombok:.*'))
 	}

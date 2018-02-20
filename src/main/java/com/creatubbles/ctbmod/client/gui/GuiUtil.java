@@ -36,14 +36,18 @@ public class GuiUtil extends Gui {
 
     @AllArgsConstructor
     @Getter
-    public enum Bubbles implements IWidgetIcon {
+    public enum Widgets implements IWidgetIcon {
 
         BLUE(0, 0),
         GREEN(16, 0),
         CLEAR(32, 0),
         
         OUTER(0, 16),
-        INNER(16, 16);
+        INNER(16, 16),
+        
+        LIVE(0, 32),
+        
+        ;
         
         public static final ResourceLocation TEXTURE = new ResourceLocation(CTBMod.MODID, "textures/gui/bubbles.png");
 
@@ -55,15 +59,15 @@ public class GuiUtil extends Gui {
         public final int height;
         public final IWidgetIcon overlay;
 
-        Bubbles(int x, int y) {
+        Widgets(int x, int y) {
             this(x, y, null);
         }
 
-        Bubbles(int x, int y, IWidgetIcon overlay) {
+        Widgets(int x, int y, IWidgetIcon overlay) {
             this(x, y, 16, 16, overlay);
         }
 
-        Bubbles(int x, int y, int width, int height) {
+        Widgets(int x, int y, int width, int height) {
             this(x, y, width, height, null);
         }
 
@@ -80,17 +84,17 @@ public class GuiUtil extends Gui {
         float rot = (float) (((double) millis / 10) % 360f);
 
         TextureManager engine = Minecraft.getMinecraft().getTextureManager();
-        engine.bindTexture(Bubbles.TEXTURE);
+        engine.bindTexture(Widgets.TEXTURE);
 
         GlStateManager.pushMatrix();
         {
             GlStateManager.translate(x, y, 0);
 
             rotateAroundCenter(-rot, width, height);
-            Bubbles.map.render(Bubbles.OUTER, 0, 0, width, height, 0, true);
+            Widgets.map.render(Widgets.OUTER, 0, 0, width, height, 0, true);
 
             rotateAroundCenter(rot * 2, width, height);
-            Bubbles.map.render(Bubbles.INNER, 0, 0, width, height, 0, true);
+            Widgets.map.render(Widgets.INNER, 0, 0, width, height, 0, true);
         }
         GlStateManager.popMatrix();
     }

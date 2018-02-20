@@ -1,6 +1,8 @@
 package com.creatubbles.ctbmod.client;
 
 import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.ctbmod.client.gif.GifRecorder;
+import com.creatubbles.ctbmod.client.gif.RecordingOverlay;
 import com.creatubbles.ctbmod.client.gui.GuiUtil;
 import com.creatubbles.ctbmod.client.render.RenderPainting;
 import com.creatubbles.ctbmod.client.render.RenderPaintingItem;
@@ -50,6 +52,8 @@ public class ClientProxy extends CommonProxy {
         ModelBakery.registerItemVariants(Item.getItemFromBlock(CTBMod.painting), new ModelResourceLocation(new ResourceLocation(CTBMod.DOMAIN, "painting"), "inventory"));
 
         MinecraftForge.EVENT_BUS.register(new PaintingHighlightHandler());
+        
+        new RecordingOverlay().injectFramebuffer();
     }
     
     @SubscribeEvent

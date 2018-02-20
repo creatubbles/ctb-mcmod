@@ -54,7 +54,7 @@ public class RenderPainting extends TileEntitySpecialRenderer<TilePainting> {
         ResourceLocation res = image.getResource(type);
         
         if (res == DownloadableImage.MISSING_TEXTURE) {
-            res = GuiUtil.Bubbles.TEXTURE;
+            res = GuiUtil.Widgets.TEXTURE;
             scaledW = scaledH = width = height = 16;
             GlStateManager.enableBlend();
         }
@@ -81,8 +81,8 @@ public class RenderPainting extends TileEntitySpecialRenderer<TilePainting> {
         double maxV = height / scaledH;
 
         // FIXME Bit of a hack for now
-        if (res == GuiUtil.Bubbles.TEXTURE) {
-            IWidgetIcon icon = GuiUtil.Bubbles.CLEAR;
+        if (res == GuiUtil.Widgets.TEXTURE) {
+            IWidgetIcon icon = GuiUtil.Widgets.CLEAR;
             minU = (float) icon.getX() / icon.getMap().getSize();
             minV = (float) icon.getY() / icon.getMap().getSize();
             maxU = minU + ((float) icon.getWidth() / icon.getMap().getSize());

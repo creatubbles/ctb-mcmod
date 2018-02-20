@@ -27,3 +27,5 @@ ctb.gui.creator.dye=Dye: %s
 ctb.media.screenshot.name=Screenshots
 ctb.media.gif.name=GIFs
 
+ctb.recording.live=Recording
+

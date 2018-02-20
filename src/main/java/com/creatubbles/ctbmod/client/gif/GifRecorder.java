@@ -1,4 +1,4 @@
-package com.creatubbles.ctbmod.client;
+package com.creatubbles.ctbmod.client.gif;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -76,7 +76,7 @@ public class GifRecorder {
                 enc.start(os);
                 enc.setDelay(50);
                 enc.setRepeat(0);
-                enc.setQuality(1);
+//                enc.setQuality(1); TODO quality configurable?
 
                 BufferedImage prevFrame = null;
                 
@@ -195,6 +195,8 @@ public class GifRecorder {
     
     private static int framesRecorded, framesProcessed;
     private static int lastStep;
+    
+    public static RecordingStatus status = RecordingStatus.OFF;
 
     @SubscribeEvent
     @SneakyThrows
@@ -209,6 +211,8 @@ public class GifRecorder {
         int height = Minecraft.getMinecraft().displayHeight;
 
         if (Keyboard.isKeyDown(Keyboard.KEY_F7)) {
+            
+            status = RecordingStatus.LIVE;
 
             if (OpenGlHelper.isFramebufferEnabled()) {
                 width = buffer.framebufferTextureWidth;
@@ -242,11 +246,12 @@ public class GifRecorder {
             if (task == null) {
                 future = executor.submit(task = new GifWriteTask(frames, buffer, width, height));
             }
-        } else if (task != null) {
+        } else if (task != null) {            
             task.finished(true);
             StringBuffer sb = new StringBuffer("Writing Gif: ");
             int step = MathHelper.ceiling_float_int(MAX_STEPS * ((float) framesProcessed / framesRecorded));
             if (step != lastStep) {
+                status = RecordingStatus.SAVING;
                 sb.append("[");
                 for (int i = 0; i < step; i++) {
                     sb.append("||");
@@ -258,6 +263,7 @@ public class GifRecorder {
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new TextComponentString(sb.toString()), task.hashCode());
                 lastStep = step;
             } else if (future.isDone()) {
+                status = RecordingStatus.OFF;
                 TextComponentString msg = new TextComponentString(sb.toString());
                 if (future.get() == null) {
                     msg.appendSibling(new TextComponentString(TextFormatting.RED + "Failed! See console for errors."));

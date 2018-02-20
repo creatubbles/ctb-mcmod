@@ -13,6 +13,9 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 public class RecordingOverlay extends Gui {
@@ -32,6 +35,16 @@ public class RecordingOverlay extends Gui {
         };
         _framebufferMc.set(Minecraft.getMinecraft(), newbuf);
         current.deleteFramebuffer();
+        
+        MinecraftForge.EVENT_BUS.register(this);
+    }
+    
+    // For when VBOs are disabled, somehow this isn't picked up by the recording?
+    @SubscribeEvent
+    public void renderOverlayNoFBO(RenderGameOverlayEvent.Text event) {
+        if (!Minecraft.getMinecraft().gameSettings.useVbo) {
+            drawOverlay();
+        }
     }
     
     private float pulseTimer;
@@ -40,6 +53,8 @@ public class RecordingOverlay extends Gui {
         final RecordingStatus status = GifRecorder.status;
         if (status != RecordingStatus.OFF) {
             ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
+            
+            GlStateManager.pushMatrix();
             GlStateManager.scale(sr.getScaleFactor(), sr.getScaleFactor(), sr.getScaleFactor());
 
             GlStateManager.enableBlend();
@@ -55,6 +70,8 @@ public class RecordingOverlay extends Gui {
             Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation("textures/gui/widgets.png"));
             int u = status == RecordingStatus.PREPARING ? 196 : status == RecordingStatus.LIVE ? 208 : 224;
             drawTexturedModalRect(sr.getScaledWidth() - strWidth - 23, 2, u, 0, 16, 16);
+            
+            GlStateManager.popMatrix();
         }
     }
 }

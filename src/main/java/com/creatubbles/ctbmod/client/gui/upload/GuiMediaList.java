@@ -52,7 +52,7 @@ public class GuiMediaList extends GuiContainerBase {
         addButton(pgPrev = new GuiButtonHideable(-1, guiLeft + (width / 2) - 50 - 100 - 20, height - 25, 100, 20, "<< Prev"));
         addButton(pgNext = new GuiButtonHideable(1, guiLeft + (width / 2) + 50 + 20, height - 25, 100, 20, "Next >>"));
         addButton(cancel = new GuiButtonHideable(0, guiLeft + (width / 2) - 50, height - 25, 100, 20, "Cancel"));
-        addButton(mediaSelector = new GuiButton(2, guiLeft + width - 106, 6, 100, 20, type.getName()));
+        addButton(mediaSelector = new GuiButton(2, guiLeft + width - 156, 6, 150, 20, type.getName()));
         
         pgPrev.visible = false;
         pgNext.visible = false;

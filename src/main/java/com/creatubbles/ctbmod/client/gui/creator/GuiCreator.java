@@ -361,7 +361,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
         addOverlay(selectedCreation);
         
         uploadButton = new IconButton(this, ID_UPLOAD, 152, 106, EnderWidget.PLUS);
-        uploadButton.setToolTip("Upload Screenshot");
+        uploadButton.setToolTip("Upload New Creation");
 
         userInfo = new GuiToolTip(new Rectangle()) {
 

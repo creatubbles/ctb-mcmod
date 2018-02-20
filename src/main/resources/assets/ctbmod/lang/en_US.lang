@@ -24,8 +24,9 @@ ctb.gui.creator.dye=Dye: %s
 
 # Upload
 
-ctb.media.screenshot.name=Screenshots
-ctb.media.gif.name=GIFs
+ctb.media.type=Type
+ctb.media.type.screenshot=Screenshots
+ctb.media.type.gif=GIFs
 
 ctb.recording.live=Recording
 

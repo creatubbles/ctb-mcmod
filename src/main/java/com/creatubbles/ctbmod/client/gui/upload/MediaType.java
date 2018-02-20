@@ -27,7 +27,7 @@ public enum MediaType implements IStringSerializable {
 
     @Override
     public String getName() {
-        return I18n.format("ctb.media." + name().toLowerCase(Locale.US) + ".name");
+        return I18n.format("ctb.media.type") + ": " + I18n.format("ctb.media.type." + name().toLowerCase(Locale.US));
     }
    
 }

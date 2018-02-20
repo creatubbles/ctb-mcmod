@@ -3,6 +3,7 @@ package com.creatubbles.ctbmod.client.gui.upload;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -75,7 +76,13 @@ public class ThumbnailStitcher {
                 scaledH = thumbHeight;
                 scaledW = (int) (((double) w / h) * thumbWidth);
             }
-            images.put(f, img.getScaledInstance(scaledW, scaledH, BufferedImage.SCALE_SMOOTH));
+            // Force INT_ARGB type to avoid color indexing issues with GIFs
+            BufferedImage thumb = new BufferedImage(scaledW, scaledH, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = thumb.createGraphics();
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g.drawImage(img, 0, 0, scaledW, scaledH, null);
+            images.put(f, thumb);
+            g.dispose();
         }
         
         double sqrt = Math.sqrt(images.size());

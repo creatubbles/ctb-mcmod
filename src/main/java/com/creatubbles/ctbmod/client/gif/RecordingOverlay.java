@@ -1,6 +1,7 @@
 package com.creatubbles.ctbmod.client.gif;
 
 import java.lang.reflect.Field;
+import java.text.NumberFormat;
 
 import com.creatubbles.repack.endercore.client.render.RenderUtil;
 
@@ -10,7 +11,6 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -37,6 +37,7 @@ public class RecordingOverlay extends Gui {
         current.deleteFramebuffer();
         
         MinecraftForge.EVENT_BUS.register(this);
+        GifRecorder.state.getStatus(); // Classload this
     }
     
     // For when VBOs are disabled, somehow this isn't picked up by the recording?
@@ -50,7 +51,8 @@ public class RecordingOverlay extends Gui {
     private float pulseTimer;
     
     void drawOverlay() {
-        final RecordingStatus status = GifRecorder.status;
+        final GifState state = GifRecorder.state;
+        final RecordingStatus status = state.getStatus();
         if (status != RecordingStatus.OFF) {
             ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
             
@@ -58,18 +60,24 @@ public class RecordingOverlay extends Gui {
             GlStateManager.scale(sr.getScaleFactor(), sr.getScaleFactor(), sr.getScaleFactor());
 
             GlStateManager.enableBlend();
-            String toDraw = I18n.format("ctb.recording.live");
+            Object[] args = new Object[0];
+            if (status == RecordingStatus.PREPARING) {
+                args = new Object[] { (state.getCountdown() / 20) + 1 };
+            } else if (status == RecordingStatus.SAVING) {
+                args = new Object[] { NumberFormat.getPercentInstance().format(state.getSaveProgress()) };
+            }
+            String toDraw = status.getLocalizedName(args);
             FontRenderer fr = Minecraft.getMinecraft().fontRendererObj;
             int strWidth = fr.getStringWidth(toDraw);
-            fr.drawStringWithShadow(toDraw, sr.getScaledWidth() - strWidth - 5, 5, 0xCCFFFFFF);
+            fr.drawStringWithShadow(toDraw, sr.getScaledWidth() - strWidth - 5 - 16, 5, 0xCCFFFFFF);
 
             if (status == RecordingStatus.LIVE) {
                 pulseTimer += RenderUtil.getTimer().elapsedPartialTicks * 0.25f;
                 GlStateManager.color(1, 1, 1, ((float) Math.sin(pulseTimer) * 0.25f) + 0.75f);
             }
             Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation("textures/gui/widgets.png"));
-            int u = status == RecordingStatus.PREPARING ? 196 : status == RecordingStatus.LIVE ? 208 : 224;
-            drawTexturedModalRect(sr.getScaledWidth() - strWidth - 23, 2, u, 0, 16, 16);
+            int u = status == RecordingStatus.PREPARING ? 192 : status == RecordingStatus.LIVE ? 208 : 224;
+            drawTexturedModalRect(sr.getScaledWidth() - 16 - 2, 2, u, 0, 16, 16);
             
             GlStateManager.popMatrix();
         }

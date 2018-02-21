@@ -22,6 +22,7 @@ public class GuiMediaList extends GuiContainerBase {
     private GuiButton pgPrev, pgNext;
     private GuiButton cancel;
     private GuiButton mediaSelector;
+    private GuiButton recordNew;
     
     private MediaType type = MediaType.SCREENSHOT;
     
@@ -53,7 +54,9 @@ public class GuiMediaList extends GuiContainerBase {
         addButton(pgNext = new GuiButtonHideable(1, guiLeft + (width / 2) + 50 + 20, height - 25, 100, 20, "Next >>"));
         addButton(cancel = new GuiButtonHideable(0, guiLeft + (width / 2) - 50, height - 25, 100, 20, "Cancel"));
         addButton(mediaSelector = new GuiButton(2, guiLeft + width - 156, 6, 150, 20, type.getName()));
-        
+        addButton(recordNew = new GuiButton(3, 6, 6, 150, 20, "Record New"));
+        recordNew.visible = type.isRecordable();
+
         pgPrev.visible = false;
         pgNext.visible = false;
 
@@ -101,6 +104,9 @@ public class GuiMediaList extends GuiContainerBase {
             mediaSelector.displayString = type.getName();
             thumbs.setType(type);
             thumbs.init(this);
+            recordNew.visible = type.isRecordable();
+        } else if (button.id == recordNew.id) {
+            Minecraft.getMinecraft().displayGuiScreen(new GuiRecordNew(this));
         } else {
             thumbs.page(button.id);
         }

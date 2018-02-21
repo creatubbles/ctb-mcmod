@@ -34,9 +34,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.TextureUtil;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.util.ScreenShotHelper;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
@@ -76,7 +76,7 @@ public class GifRecorder {
                 enc.start(os);
                 enc.setDelay(50);
                 enc.setRepeat(0);
-//                enc.setQuality(1); TODO quality configurable?
+                enc.setQuality(state.getQuality());
 
                 BufferedImage prevFrame = null;
                 
@@ -128,7 +128,7 @@ public class GifRecorder {
                                     int newColor = frame[i];
                                     int oldColor = prevFrameData[i];
                                     // If this pixel is reasonably similar to the previous color, set it transparent
-                                    if (almostEqual(newColor, oldColor, 2 / 255f)) {
+                                    if (almostEqual(newColor, oldColor, state.getCompression())) {
                                         frame[i] = TRANSPARENT.getRGB();
                                     } else {
                                         prevFrameData[i] = newColor;
@@ -183,6 +183,8 @@ public class GifRecorder {
             return sum <= eps;
         }
     }
+    
+    public static final KeyBinding KEY_RECORD = new KeyBinding("ctb.key.record", Keyboard.KEY_F4, "key.categories.misc");
 
     /** A buffer to hold pixel values returned by OpenGL. */
     private static IntBuffer pixelBuffer;
@@ -193,13 +195,11 @@ public class GifRecorder {
     private static Future<File> future = null;
     private static GifWriteTask task = null;
     
-    private static final int MAX_STEPS = 30;
     private static final Color TRANSPARENT = new Color(0, true);
     
     private static int framesRecorded, framesProcessed;
-    private static int lastStep;
     
-    public static RecordingStatus status = RecordingStatus.OFF;
+    public static GifState state = GifState.DEFAULT;
 
     @SubscribeEvent
     @SneakyThrows
@@ -208,26 +208,38 @@ public class GifRecorder {
             return;
         }
 
-        final Framebuffer buffer = Minecraft.getMinecraft().getFramebuffer();
+        state.tick();
 
-        int width = Minecraft.getMinecraft().displayWidth;
-        int height = Minecraft.getMinecraft().displayHeight;
+        switch (state.getStatus()) {
+        case OFF:
+            // Begin a new recording with the same settings as previous
+            if (KEY_RECORD.isPressed()) {
+                state = new GifState(state.getQuality(), state.getCompression(), state.getMaxLength());
+            }
+            break;
+        case PREPARING:
+            break;
+        case LIVE:
+            // If record key is pressed again, immediately end the recording
+            if (GifRecorder.KEY_RECORD.isPressed()) {
+                state.stop();
+            }
+            final Framebuffer buffer = Minecraft.getMinecraft().getFramebuffer();
 
-        if (Keyboard.isKeyDown(Keyboard.KEY_F7)) {
-            
-            status = RecordingStatus.LIVE;
+            int width = Minecraft.getMinecraft().displayWidth;
+            int height = Minecraft.getMinecraft().displayHeight;
 
             if (OpenGlHelper.isFramebufferEnabled()) {
                 width = buffer.framebufferTextureWidth;
                 height = buffer.framebufferTextureHeight;
             }
 
-            int i = width * height;
+            int size = width * height;
 
-            int[] pixelValues = new int[i];
+            int[] pixelValues = new int[size];
 
-            if (pixelBuffer == null || pixelBuffer.capacity() < i) {
-                pixelBuffer = BufferUtils.createIntBuffer(i);
+            if (pixelBuffer == null || pixelBuffer.capacity() < size) {
+                pixelBuffer = BufferUtils.createIntBuffer(size);
             }
 
             GL11.glPixelStorei(GL11.GL_PACK_ALIGNMENT, 1);
@@ -245,45 +257,36 @@ public class GifRecorder {
             TextureUtil.processPixelValues(pixelValues, width, height);
             frames.add(pixelValues);
             framesRecorded++;
-            
+
             if (task == null) {
                 future = executor.submit(task = new GifWriteTask(frames, buffer, width, height));
             }
-        } else if (task != null) {            
+            break;
+        case SAVING:
             task.finished(true);
-            StringBuffer sb = new StringBuffer("Writing Gif: ");
-            int step = MathHelper.ceiling_float_int(MAX_STEPS * ((float) framesProcessed / framesRecorded));
-            if (step != lastStep) {
-                status = RecordingStatus.SAVING;
-                sb.append("[");
-                for (int i = 0; i < step; i++) {
-                    sb.append("||");
-                }
-                for (int i = step; i < MAX_STEPS; i++) {
-                    sb.append(" ");
-                }
-                sb.append("]");
-                Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(new TextComponentString(sb.toString()), task.hashCode());
-                lastStep = step;
-            } else if (future.isDone()) {
-                status = RecordingStatus.OFF;
-                TextComponentString msg = new TextComponentString(sb.toString());
+            state.setSaveProgress((float) framesProcessed / framesRecorded);
+            if (future.isDone()) {
+                TextComponentString msg;
                 if (future.get() == null) {
-                    msg.appendSibling(new TextComponentString(TextFormatting.RED + "Failed! See console for errors."));
+                    msg = new TextComponentString(TextFormatting.RED + "Failed! See console for errors.");
                 } else {
-                    TextComponentString doneTag = new TextComponentString(TextFormatting.GREEN.toString() + "[Done!]");
+                    TextComponentString doneTag = new TextComponentString(TextFormatting.GREEN.toString() + "[View " + future.get().getName() + "]");
                     doneTag.setStyle(new Style().setClickEvent(
-                            new ClickEvent(ClickEvent.Action.OPEN_FILE, future.get().getAbsolutePath())).setHoverEvent(
-                            new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString("Click to view gif: " + future.get().getName()))
-                    ));
+                            new ClickEvent(ClickEvent.Action.OPEN_FILE, future.get().getCanonicalPath())).setHoverEvent(
+                                    new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString("Click to open GIF"))
+                                    ));
 
-                    msg.appendSibling(doneTag);
+                    msg = doneTag;
                 }
                 Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(msg, task.hashCode());
                 future = null;
                 task = null;
-                framesRecorded = framesProcessed = lastStep = 0;
+                state.saved();
+                framesRecorded = framesProcessed = 0;
             }
         }
+        
+        // Clear unused key press
+        KEY_RECORD.isPressed();
     }
 }

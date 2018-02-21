@@ -56,10 +56,10 @@ public class CTBMod {
     public static final Lang lang = new Lang("ctb");
 
     @EventHandler
-    public void preInit(FMLPreInitializationEvent event) {
-        CreatubblesAPI.setStagingMode(Configs.staging);
-        
+    public void preInit(FMLPreInitializationEvent event) {       
         new ConfigProcessor(Configs.class, event.getSuggestedConfigurationFile(), MODID).process(true);
+
+        CreatubblesAPI.setStagingMode(Configs.staging);
 
         creator = BlockCreator.create();
         painting = BlockPainting.create();

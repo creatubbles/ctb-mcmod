@@ -11,6 +11,7 @@ import java.util.Locale;
 import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.opengl.GL11;
 
@@ -247,8 +248,13 @@ public class GuiUploadMedia extends GuiContainerBase {
 
                         // create url for upload
                         buttonUpload.displayString = "Uploading...";
-                        CreationsUploadsRequest creationsUploads = new CreationsUploadsRequest(createCreationResponse.getId(), "png", accessToken);
+                        CreationsUploadsRequest creationsUploads = new CreationsUploadsRequest(createCreationResponse.getId(), FilenameUtils.getExtension(files[index].getName()), accessToken);
                         CreationsUploadsResponse creationsUploadsResponse = creationsUploads.execute().getResponse();
+                        
+                        if (!creationsUploads.wasSuccessful()) {
+                            buttonUpload.displayString = "Failed!";
+                            throw new RuntimeException("Upload Failed: " + creationsUploadsResponse.getMessage());
+                        }
 
                         byte[] data = FileUtils.readFileToByteArray(files[index]);
 
@@ -257,6 +263,7 @@ public class GuiUploadMedia extends GuiContainerBase {
                         UploadS3FileResponse uploadS3Response = uploadS3Image.execute().getResponse();
 
                         if (!uploadS3Response.isSuccess()) {
+                            buttonUpload.displayString = "Failed!";
                             throw new RuntimeException("Upload Failed: " + uploadS3Response.getMessage());
                         }
 

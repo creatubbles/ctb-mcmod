@@ -54,6 +54,7 @@ public class ClientProxy extends CommonProxy {
         MinecraftForge.EVENT_BUS.register(new PaintingHighlightHandler());
         
         new RecordingOverlay().injectFramebuffer();
+        ClientRegistry.registerKeyBinding(GifRecorder.KEY_RECORD);
     }
     
     @SubscribeEvent

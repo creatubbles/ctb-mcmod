@@ -28,6 +28,8 @@ ctb.media.type=Type
 ctb.media.type.screenshot=Screenshots
 ctb.media.type.gif=GIFs
 
+ctb.key.record=Start/Stop GIF Recording
+
 ctb.recording.status.preparing=Countdown: %d
 ctb.recording.status.live=Recording
 ctb.recording.status.saving=Saving (%s)

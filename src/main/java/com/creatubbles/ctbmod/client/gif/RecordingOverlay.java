@@ -37,7 +37,6 @@ public class RecordingOverlay extends Gui {
         current.deleteFramebuffer();
         
         MinecraftForge.EVENT_BUS.register(this);
-        GifRecorder.state.getStatus(); // Classload this
     }
     
     // For when VBOs are disabled, somehow this isn't picked up by the recording?

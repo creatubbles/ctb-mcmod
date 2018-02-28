@@ -288,7 +288,7 @@ public class GuiUploadMedia extends GuiContainerBase {
                         public void run() {
 
                             if (error == null) {
-                                Minecraft.getMinecraft().thePlayer.addChatMessage(new TextComponentString(TextFormatting.GREEN.toString().concat("[Creation upload successful! (Click to view \"" + name + "\")]")).setStyle(new Style().setClickEvent(
+                                Minecraft.getMinecraft().thePlayer.addChatMessage(new TextComponentString("Creation upload successful!" + TextFormatting.GREEN + " [Click to view \"" + name + "\"]").setStyle(new Style().setClickEvent(
                                         new ClickEvent(ClickEvent.Action.OPEN_URL, landingUrlf)).setHoverEvent(
                                         new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString("Click to view creation on website.")))));
 

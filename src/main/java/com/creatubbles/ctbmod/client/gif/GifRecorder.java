@@ -23,12 +23,15 @@ import org.lwjgl.opengl.GL12;
 
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.common.config.Configs;
+import com.creatubbles.ctbmod.common.config.DataCache;
 import com.madgag.gif.fmsware.AnimatedGifEncoder;
 
 import jersey.repackaged.com.google.common.collect.Lists;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.Value;
 import lombok.experimental.Accessors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -49,11 +52,16 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 /** Most code taken from ScreenShotHelper with the File IO code replaced */
 public class GifRecorder {
     
+    @Value
+    private static class GifFrame {
+        int[] pixels;
+        int width, height;
+    }
+    
     @RequiredArgsConstructor
     private static class GifWriteTask implements Callable<File> {
         
-        private final Queue<int[]> frames;
-        private final Framebuffer buffer;
+        private final Queue<GifFrame> frames;
         private final int width, height;
         
         @Setter
@@ -83,7 +91,7 @@ public class GifRecorder {
                 try {
                     
                     while (!finished || !frames.isEmpty()) {
-                        int[] frame = frames.poll();
+                        GifFrame frame = frames.poll();
                         if (frame == null) {
                             try {
                                 Thread.sleep(50);
@@ -98,13 +106,8 @@ public class GifRecorder {
 
                             BufferedImage bufferedimage = null;
     
-                            if (OpenGlHelper.isFramebufferEnabled()) {
-                                bufferedimage = new BufferedImage(buffer.framebufferWidth, buffer.framebufferHeight, 1);
-                                bufferedimage.setRGB(0, 0, buffer.framebufferTextureWidth, buffer.framebufferTextureHeight, frame, 0, buffer.framebufferTextureWidth);
-                            } else {
-                                bufferedimage = new BufferedImage(width, height, 1);
-                                bufferedimage.setRGB(0, 0, width, height, frame, 0, width);
-                            }
+                            bufferedimage = new BufferedImage(frame.getWidth(), frame.getHeight(), 1);
+                            bufferedimage.setRGB(0, 0, frame.getWidth(), frame.getHeight(), frame.getPixels(), 0, frame.getWidth());
                             
                             float scale = Math.min(
                                 (float) Configs.maxGifWidth / width,
@@ -121,21 +124,22 @@ public class GifRecorder {
                                 bufferedimage = resizedImg;
                             }
                             
-                            if (prevFrame != null) { // Basic inter-frame compression by discarding similar pixels
-                                frame = ((DataBufferInt)bufferedimage.getRaster().getDataBuffer()).getData();
-                                int[] prevFrameData = ((DataBufferInt)prevFrame.getRaster().getDataBuffer()).getData();
-                                for (int i = 0; i < frame.length; i++) {
-                                    int newColor = frame[i];
-                                    int oldColor = prevFrameData[i];
+                            // Basic inter-frame compression by discarding similar pixels
+                            if (prevFrame != null && prevFrame.getWidth() == bufferedimage.getWidth() && prevFrame.getHeight() == bufferedimage.getHeight()) {
+                                int[] pixels = ((DataBufferInt)bufferedimage.getRaster().getDataBuffer()).getData();
+                                int[] prevPixels = ((DataBufferInt)prevFrame.getRaster().getDataBuffer()).getData();
+                                for (int i = 0; i < pixels.length; i++) {
+                                    int newColor = pixels[i];
+                                    int oldColor = prevPixels[i];
                                     // If this pixel is reasonably similar to the previous color, set it transparent
                                     if (almostEqual(newColor, oldColor, state.getCompression())) {
-                                        frame[i] = TRANSPARENT.getRGB();
+                                        pixels[i] = TRANSPARENT.getRGB();
                                     } else {
-                                        prevFrameData[i] = newColor;
+                                        prevPixels[i] = newColor;
                                     }
                                 }
                                 enc.setDispose(1);
-                            } else { // First frame, no transparency
+                            } else { // First frame or different size, no transparency
                                 prevFrame = bufferedimage;
                             }
                             
@@ -189,7 +193,7 @@ public class GifRecorder {
     /** A buffer to hold pixel values returned by OpenGL. */
     private static IntBuffer pixelBuffer;
 
-    private static Queue<int[]> frames = Lists.newLinkedList();
+    private static Queue<GifFrame> frames = Lists.newLinkedList();
 
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
     private static Future<File> future = null;
@@ -199,7 +203,8 @@ public class GifRecorder {
     
     private static int framesRecorded, framesProcessed;
     
-    public static GifState state = GifState.DEFAULT;
+    @Getter
+    private static GifState state = GifState.DEFAULT;
 
     @SubscribeEvent
     @SneakyThrows
@@ -255,11 +260,11 @@ public class GifRecorder {
 
             pixelBuffer.get(pixelValues);
             TextureUtil.processPixelValues(pixelValues, width, height);
-            frames.add(pixelValues);
+            frames.add(new GifFrame(pixelValues, width, height));
             framesRecorded++;
 
             if (task == null) {
-                future = executor.submit(task = new GifWriteTask(frames, buffer, width, height));
+                future = executor.submit(task = new GifWriteTask(frames, width, height));
             }
             break;
         case SAVING:
@@ -288,5 +293,11 @@ public class GifRecorder {
         
         // Clear unused key press
         KEY_RECORD.isPressed();
+    }
+    
+    public static void setState(GifState state) {
+        GifRecorder.state = state;
+        CTBMod.cache.setRecordingData(state);
+        CTBMod.cache.save();
     }
 }

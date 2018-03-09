@@ -3,14 +3,18 @@ package com.creatubbles.ctbmod.client.gui.upload;
 import java.awt.Dimension;
 import java.io.IOException;
 
+import com.creatubbles.ctbmod.client.gif.GifRecorder;
+import com.creatubbles.ctbmod.client.gif.GifState;
+import com.creatubbles.ctbmod.client.gif.RecordingStatus;
+import com.creatubbles.ctbmod.client.gui.GuiButtonHideable;
+import com.creatubbles.ctbmod.client.gui.GuiUtil;
+import com.creatubbles.repack.endercore.client.gui.GuiContainerBase;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
-
-import com.creatubbles.ctbmod.client.gui.GuiButtonHideable;
-import com.creatubbles.repack.endercore.client.gui.GuiContainerBase;
 
 
 public class GuiMediaList extends GuiContainerBase {
@@ -22,7 +26,7 @@ public class GuiMediaList extends GuiContainerBase {
     private GuiButton pgPrev, pgNext;
     private GuiButton cancel;
     private GuiButton mediaSelector;
-    private GuiButton recordNew;
+    private GuiButton recordNew, recordSettings;
     
     private MediaType type = MediaType.SCREENSHOT;
     
@@ -53,9 +57,16 @@ public class GuiMediaList extends GuiContainerBase {
         addButton(pgPrev = new GuiButtonHideable(-1, guiLeft + (width / 2) - 50 - 100 - 20, height - 25, 100, 20, "<< Prev"));
         addButton(pgNext = new GuiButtonHideable(1, guiLeft + (width / 2) + 50 + 20, height - 25, 100, 20, "Next >>"));
         addButton(cancel = new GuiButtonHideable(0, guiLeft + (width / 2) - 50, height - 25, 100, 20, "Cancel"));
-        addButton(mediaSelector = new GuiButton(2, guiLeft + width - 156, 6, 150, 20, type.getName()));
-        addButton(recordNew = new GuiButton(3, 6, 6, 150, 20, "Record New"));
-        recordNew.visible = type.isRecordable();
+        addButton(mediaSelector = new GuiButton(2, guiLeft + width - 126, 6, 120, 20, type.getName()));
+        addButton(recordNew = new GuiButton(3, 6, 6, 100, 20, "Record New"));
+        addButton(recordSettings = new GuiButton(4, 6 + recordNew.width + 1, 6, 20, 20, "") {
+            
+            @Override
+            public void drawButton(Minecraft mc, int mouseX, int mouseY) {
+                super.drawButton(mc, mouseX, mouseY);
+                GuiUtil.Widgets.map.render(GuiUtil.Widgets.GEAR, this.xPosition, this.yPosition, 20, 20, this.zLevel, true);
+            }
+        });
 
         pgPrev.visible = false;
         pgNext.visible = false;
@@ -74,6 +85,14 @@ public class GuiMediaList extends GuiContainerBase {
                 }
             }
         });
+        
+        updateScreen();
+    }
+    
+    @Override
+    public void updateScreen() {
+        super.updateScreen();
+        recordNew.enabled = recordSettings.enabled = GifRecorder.getState().getStatus() == RecordingStatus.OFF;
     }
     
     @Override
@@ -104,9 +123,12 @@ public class GuiMediaList extends GuiContainerBase {
             mediaSelector.displayString = type.getName();
             thumbs.setType(type);
             thumbs.init(this);
-            recordNew.visible = type.isRecordable();
         } else if (button.id == recordNew.id) {
-            Minecraft.getMinecraft().displayGuiScreen(new GuiRecordNew(this));
+            GifState oldState = GifRecorder.getState();
+            GifRecorder.setState(new GifState(oldState.getQuality(), oldState.getCompression(), oldState.getMaxLength()));
+            Minecraft.getMinecraft().displayGuiScreen(null);
+        } else if (button.id == recordSettings.id) {
+            Minecraft.getMinecraft().displayGuiScreen(new GuiRecordingSettings(this));
         } else {
             thumbs.page(button.id);
         }

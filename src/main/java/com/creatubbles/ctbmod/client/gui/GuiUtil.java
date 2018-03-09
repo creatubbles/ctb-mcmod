@@ -45,11 +45,11 @@ public class GuiUtil extends Gui {
         OUTER(0, 16),
         INNER(16, 16),
         
-        LIVE(0, 32),
+        GEAR(0, 32),
         
         ;
         
-        public static final ResourceLocation TEXTURE = new ResourceLocation(CTBMod.MODID, "textures/gui/bubbles.png");
+        public static final ResourceLocation TEXTURE = new ResourceLocation(CTBMod.MODID, "textures/gui/ctbwidgets.png");
 
         public static final IWidgetMap map = new IWidgetMap.WidgetMapImpl(64, TEXTURE);
 

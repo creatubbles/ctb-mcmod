@@ -23,21 +23,29 @@ public class GifState {
     private final float compression;
     private final int maxLength;
     
-    private RecordingStatus status = RecordingStatus.PREPARING;
-    private int countdown = 3 * 20;
-    private int time;
+    private transient RecordingStatus status = RecordingStatus.PREPARING;
+    private transient int countdown = 3 * 20;
+    private transient int time;
     
     @Setter
-    private float saveProgress;
+    private transient float saveProgress;
+    
+    public GifState() {
+        this(DEFAULT.getQuality(), DEFAULT.getCompression(), DEFAULT.getMaxLength());
+        stop();
+        saved();
+    }
     
     public void tick() {
         if (countdown <= 0) {
             if (time >= maxLength) {
                 // Only change LIVE to SAVING, otherwise ignore
                 status = status == RecordingStatus.LIVE ? RecordingStatus.SAVING : status;
-            } else {
+            } else if (status == RecordingStatus.PREPARING) {
                 time++;
                 status = RecordingStatus.LIVE;
+            } else {
+                stop();
             }
         } else {
             countdown--;
@@ -46,6 +54,7 @@ public class GifState {
     }
     
     public void stop() {
+        countdown = 0;
         time = maxLength;
     }
     

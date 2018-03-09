@@ -7,6 +7,7 @@ import com.creatubbles.ctbmod.client.gui.GuiUtil;
 import com.creatubbles.ctbmod.client.render.RenderPainting;
 import com.creatubbles.ctbmod.client.render.RenderPaintingItem;
 import com.creatubbles.ctbmod.common.CommonProxy;
+import com.creatubbles.ctbmod.common.config.DataCache;
 import com.creatubbles.ctbmod.common.painting.PaintingHighlightHandler;
 import com.creatubbles.ctbmod.common.painting.PaintingStateMapper;
 import com.creatubbles.ctbmod.common.painting.TilePainting;
@@ -65,5 +66,10 @@ public class ClientProxy extends CommonProxy {
     @Override
     public World getClientWorld() {
         return Minecraft.getMinecraft().theWorld;
+    }
+    
+    @Override
+    public void updateRecordingData(DataCache cache) {
+        GifRecorder.setState(cache.getRecordingData());
     }
 }

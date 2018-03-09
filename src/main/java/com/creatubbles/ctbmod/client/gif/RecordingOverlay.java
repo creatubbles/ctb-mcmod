@@ -50,7 +50,7 @@ public class RecordingOverlay extends Gui {
     private float pulseTimer;
     
     void drawOverlay() {
-        final GifState state = GifRecorder.state;
+        final GifState state = GifRecorder.getState();
         final RecordingStatus status = state.getStatus();
         if (status != RecordingStatus.OFF) {
             ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());

@@ -41,7 +41,7 @@ public class GifState {
             if (time >= maxLength) {
                 // Only change LIVE to SAVING, otherwise ignore
                 status = status == RecordingStatus.LIVE ? RecordingStatus.SAVING : status;
-            } else if (status == RecordingStatus.PREPARING) {
+            } else if (status != RecordingStatus.OFF) {
                 time++;
                 status = RecordingStatus.LIVE;
             } else {

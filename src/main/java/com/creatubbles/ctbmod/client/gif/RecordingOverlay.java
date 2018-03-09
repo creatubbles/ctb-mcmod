@@ -62,13 +62,15 @@ public class RecordingOverlay extends Gui {
             Object[] args = new Object[0];
             if (status == RecordingStatus.PREPARING) {
                 args = new Object[] { (state.getCountdown() / 20) + 1 };
+            } else if (status == RecordingStatus.LIVE) {
+                args = new Object[] { ((state.getMaxLength() - state.getTime()) / 20) + 1 };
             } else if (status == RecordingStatus.SAVING) {
                 args = new Object[] { NumberFormat.getPercentInstance().format(state.getSaveProgress()) };
             }
             String toDraw = status.getLocalizedName(args);
             FontRenderer fr = Minecraft.getMinecraft().fontRendererObj;
             int strWidth = fr.getStringWidth(toDraw);
-            fr.drawStringWithShadow(toDraw, sr.getScaledWidth() - strWidth - 5 - 16, 5, 0xCCFFFFFF);
+            fr.drawStringWithShadow(toDraw, sr.getScaledWidth() - strWidth - 6 - 16, 6, 0xCCFFFFFF);
 
             if (status == RecordingStatus.LIVE) {
                 pulseTimer += RenderUtil.getTimer().elapsedPartialTicks * 0.25f;

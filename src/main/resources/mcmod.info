@@ -1,0 +1,16 @@
+[
+{
+  "modid": "CTBMod",
+  "name": "Creatubbles",
+  "description": "Integration with the Creatubbles (\"The safe social platform for creative kids\") platform.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "http://creatubbles.com",
+  "updateUrl": "http://ci.tterrag.com/job/ctb-mcmod",
+  "authorList": ["tterrag", "Pahimar"],
+  "credits": "",
+  "logoFile": "logo.png",
+  "screenshots": [],
+  "dependencies": []
+}
+]

@@ -1,13 +1,10 @@
 package com.creatubbles.ctbmod.client.gui.upload;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.File;
-import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -15,17 +12,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import lombok.Getter;
-import lombok.SneakyThrows;
-import lombok.Value;
-import lombok.experimental.NonFinal;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.util.math.MathHelper;
-
 import org.apache.commons.io.comparator.LastModifiedFileComparator;
-import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.lwjgl.input.Mouse;
 
 import com.creatubbles.ctbmod.client.gui.GuiUtil;
@@ -40,7 +27,18 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
-public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import lombok.Getter;
+import lombok.SneakyThrows;
+import lombok.Value;
+import lombok.experimental.NonFinal;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.math.MathHelper;
+
+public class OverlayMediaThumbs extends OverlayBase<GuiMediaList> {
 
     private static final ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
 
@@ -51,7 +49,7 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
     private TIntObjectMap<ThumbnailStitcher> stitchers = new TIntObjectHashMap<ThumbnailStitcher>();
     private TIntObjectMap<ListenableFuture<?>> stitchTasks = new TIntObjectHashMap<ListenableFuture<?>>();
 
-    private List<File> screenshots;
+    private List<File> mediaFiles;
     private List<ThumbnailAndLocation> thumbnails = Lists.newArrayList();
     private ListenableFuture<?> listTask;
 
@@ -62,14 +60,21 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
     private int pages;
     @Getter
     private int page;
+    
+    private MediaType type;
 
-    public OverlayScreenshotThumbs(int x, int y, Dimension dimension) {
+    public OverlayMediaThumbs(int x, int y, Dimension dimension, MediaType type) {
         super(x, y, dimension);
+        this.type = type;
+        updateList();
+    }
+    
+    private void updateList() {
 
-        final File[] files = new File(Minecraft.getMinecraft().mcDataDir, "screenshots").listFiles((FilenameFilter) FileFilterUtils.suffixFileFilter(".png"));
+        final File[] files = new File(Minecraft.getMinecraft().mcDataDir, type.getFolder()).listFiles(type.getFilter());
                 
         if (files == null) {
-            screenshots = Lists.newArrayList();
+            mediaFiles = Lists.newArrayList();
             return;
         }
         
@@ -83,8 +88,8 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
             Arrays.fill(prevStitchers, null);
         }
 
-        screenshots = Lists.newArrayList(files);
-        Collections.sort(screenshots, LastModifiedFileComparator.LASTMODIFIED_REVERSE);
+        mediaFiles = Lists.newArrayList(files);
+        Collections.sort(mediaFiles, LastModifiedFileComparator.LASTMODIFIED_REVERSE);
     }
 
     private void load(int... pages) {
@@ -119,12 +124,17 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
                         }
                     });
                     if (!stitcher.isValid()) {
-                        stitcher.loadFiles(FluentIterable.from(iter).transform(new Function<ThumbnailAndLocation, File>() {
-
-                            public File apply(ThumbnailAndLocation t) {
-                                return t.file;
-                            }
-                        }).toArray(File.class));
+                        try {
+                            stitcher.loadFiles(FluentIterable.from(iter).transform(new Function<ThumbnailAndLocation, File>() {
+    
+                                public File apply(ThumbnailAndLocation t) {
+                                    return t.file;
+                                }
+                            }).toArray(File.class));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            return;
+                        }
                     }
                     for (ThumbnailAndLocation thumb : iter) {
                         thumb.slot = new Rectangle(stitcher.getRect(thumb.file));
@@ -175,14 +185,14 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
         int perRow = (getWidth() - padding) / (padding + thumbSize);
         int perCol = (getHeight() - padding) / (padding + thumbSize);
 
-        pages = Math.max(1, (int) Math.ceil(((double) screenshots.size() / (perRow * perCol))));
+        pages = Math.max(1, (int) Math.ceil(((double) mediaFiles.size() / (perRow * perCol))));
         page = MathHelper.clamp_int(page, 0, pages - 1);
 
         int xOff = (getWidth() - (padding + ((thumbSize + padding) * perRow))) / 2;
         int yOff = (getHeight() - (padding + ((thumbSize + padding) * perCol))) / 2;
 
         int row = 0, col = 0, p = 0;
-        for (File f : screenshots) {
+        for (File f : mediaFiles) {
             int x = getX() + xOff + padding + ((thumbSize + padding) * col);
             int y = getY() + yOff + padding + ((thumbSize + padding) * row);
             thumbnails.add(new ThumbnailAndLocation(f, new Point(x, y), p));
@@ -294,7 +304,7 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
         if (b == 0 && Mouse.getEventButtonState() /* ignore releases */) {
             for (ThumbnailAndLocation thumb : thumbnails) {
                 if (thumb.getPage() == page && thumb.getBounds() != null && thumb.getBounds().contains(x, y)) {
-                    Minecraft.getMinecraft().displayGuiScreen(new GuiUploadScreenshot(getGui(), screenshots.toArray(new File[0]), screenshots.indexOf(thumb.getFile())));
+                    Minecraft.getMinecraft().displayGuiScreen(new GuiUploadMedia(getGui(), mediaFiles.toArray(new File[0]), mediaFiles.indexOf(thumb.getFile())));
                 }
             }
         }
@@ -316,5 +326,10 @@ public class OverlayScreenshotThumbs extends OverlayBase<GuiScreenshotList> {
         delta = MathHelper.clamp_int(-1, delta, 1);
         this.page = MathHelper.clamp_int(page + delta, 0, pages - 1);
         load(page + 2, page - 2);
+    }
+    
+    public void setType(MediaType type) {
+        this.type = type;
+        updateList();
     }
 }

@@ -17,8 +17,15 @@ public class Configs {
     @Comment("The blocks that the painting item can be placed on in adventure mode")
     public static String[] canPlacePaintingOn = {};
     
-    @Config
+    @Config("Developer Settings")
     @Comment("Developers only. Tells the mod to use the creatubbles staging server for testing purposes.")
     public static boolean staging = false;
 
+    @Config("GIF Recording")
+    @Comment("Maximum width of recorded GIFs. Values larger than the default can greatly impact performance! Reduce this if recording gifs causes lag.")
+    public static int maxGifWidth = 500;
+    
+    @Config("GIF Recording")
+    @Comment("Maximum height of recorded GIFs. Values larger than the default can greatly impact performance! Reduce this if recording gifs causes lag.")
+    public static int maxGifHeight = 500;
 }

@@ -30,4 +30,6 @@ public class LazyLoadedTexture extends AbstractTexture {
 
     @Override
     public void loadTexture(IResourceManager resourceManager) throws IOException {}
+    
+    public void updateTexture() {};
 }

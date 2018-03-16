@@ -12,7 +12,7 @@ import net.minecraft.util.text.TextFormatting;
 import com.creatubbles.api.core.Creation;
 import com.creatubbles.api.core.Image.ImageType;
 import com.creatubbles.ctbmod.client.gui.GuiUtil;
-import com.creatubbles.ctbmod.client.gui.GuiUtil.Bubbles;
+import com.creatubbles.ctbmod.client.gui.GuiUtil.Widgets;
 import com.creatubbles.ctbmod.client.gui.TextUtil;
 import com.creatubbles.ctbmod.common.http.CreationRelations;
 import com.creatubbles.ctbmod.common.http.DownloadableImage;
@@ -72,7 +72,7 @@ public class OverlaySelectedCreation extends OverlayBase<GuiCreator> implements 
             y += 56;
             TextUtil.drawCenteredSplitString(fr, TextFormatting.ITALIC + selected.getName(), x, y, 54, 0xFFFFFF);
         } else {
-            Bubbles.CLEAR.getMap().render(Bubbles.CLEAR, x, y, 48, 48, 0, true);
+            Widgets.CLEAR.getMap().render(Widgets.CLEAR, x, y, 48, 48, 0, true);
             x += 24;
             y += 56;
             TextUtil.drawCenteredSplitString(fr, "No Selection", x, y, 54, 0xFFFFFF);

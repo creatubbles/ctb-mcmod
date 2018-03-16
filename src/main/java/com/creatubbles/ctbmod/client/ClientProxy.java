@@ -1,10 +1,13 @@
 package com.creatubbles.ctbmod.client;
 
 import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.ctbmod.client.gif.GifRecorder;
+import com.creatubbles.ctbmod.client.gif.RecordingOverlay;
 import com.creatubbles.ctbmod.client.gui.GuiUtil;
 import com.creatubbles.ctbmod.client.render.RenderPainting;
 import com.creatubbles.ctbmod.client.render.RenderPaintingItem;
 import com.creatubbles.ctbmod.common.CommonProxy;
+import com.creatubbles.ctbmod.common.config.DataCache;
 import com.creatubbles.ctbmod.common.painting.PaintingHighlightHandler;
 import com.creatubbles.ctbmod.common.painting.PaintingStateMapper;
 import com.creatubbles.ctbmod.common.painting.TilePainting;
@@ -34,6 +37,8 @@ public class ClientProxy extends CommonProxy {
     public void registerRenderers() {
         GuiUtil.init();
         
+        MinecraftForge.EVENT_BUS.register(new GifRecorder());
+        
         ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(CTBMod.creator), 0, new ModelResourceLocation(CTBMod.DOMAIN + ":creator", "inventory"));
         ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(CTBMod.painting), 0, new ModelResourceLocation(CTBMod.DOMAIN + ":painting_tesr", "inventory"));
 
@@ -49,6 +54,9 @@ public class ClientProxy extends CommonProxy {
 
         MinecraftForge.EVENT_BUS.register(new PaintingHighlightHandler());
         MinecraftForge.EVENT_BUS.register(ClientTickHandler.INSTANCE);
+
+        new RecordingOverlay().injectFramebuffer();
+        ClientRegistry.registerKeyBinding(GifRecorder.KEY_RECORD);
     }
     
     @Override
@@ -64,5 +72,10 @@ public class ClientProxy extends CommonProxy {
     @Override
     public World getClientWorld() {
         return Minecraft.getMinecraft().theWorld;
+    }
+    
+    @Override
+    public void updateRecordingData(DataCache cache) {
+        GifRecorder.setState(cache.getRecordingData());
     }
 }

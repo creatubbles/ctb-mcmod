@@ -23,6 +23,7 @@ import com.creatubbles.api.request.auth.OAuthAccessTokenRequest;
 import com.creatubbles.api.request.user.UserProfileRequest;
 import com.creatubbles.api.response.auth.OAuthAccessTokenResponse;
 import com.creatubbles.api.response.user.UserProfileResponse;
+import com.creatubbles.ctbmod.client.gif.GifState;
 import com.creatubbles.ctbmod.common.http.CreationRelations;
 import com.creatubbles.ctbmod.common.http.OAuthUtil;
 import com.creatubbles.ctbmod.common.util.ConcurrentUtil;
@@ -97,6 +98,10 @@ public class DataCache {
     
     @Getter
     private User activeUser;
+    
+    @Getter
+    @Setter
+    private GifState recordingData = GifState.DEFAULT;
     
     /**
      * This is not written to file, it is to save creations between openings of the GUI.

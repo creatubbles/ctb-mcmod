@@ -37,7 +37,7 @@ import com.creatubbles.api.response.meta.MetaPagination;
 import com.creatubbles.ctbmod.CTBMod;
 import com.creatubbles.ctbmod.client.gui.GuiButtonHideable;
 import com.creatubbles.ctbmod.client.gui.IHideable;
-import com.creatubbles.ctbmod.client.gui.upload.GuiScreenshotList;
+import com.creatubbles.ctbmod.client.gui.upload.GuiMediaList;
 import com.creatubbles.ctbmod.common.config.Configs;
 import com.creatubbles.ctbmod.common.config.DataCache.OAuth;
 import com.creatubbles.ctbmod.common.config.DataCache.UserAndAuth;
@@ -361,7 +361,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
         addOverlay(selectedCreation);
         
         uploadButton = new IconButton(this, ID_UPLOAD, 152, 106, EnderWidget.PLUS);
-        uploadButton.setToolTip("Upload Screenshot");
+        uploadButton.setToolTip("Upload New Creation");
 
         userInfo = new GuiToolTip(new Rectangle()) {
 
@@ -745,7 +745,7 @@ public class GuiCreator extends GuiContainerBase implements ISelectionCallback {
                 logout();
                 break;
             case ID_UPLOAD:
-                Minecraft.getMinecraft().displayGuiScreen(new GuiScreenshotList(this));
+                Minecraft.getMinecraft().displayGuiScreen(new GuiMediaList(this));
                 break;
             case ID_W_MINUS:
                 te.setWidth(te.getWidth() - 1);

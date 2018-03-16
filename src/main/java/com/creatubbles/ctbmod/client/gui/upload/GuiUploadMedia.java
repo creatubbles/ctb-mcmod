@@ -4,20 +4,11 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Locale;
 
 import javax.imageio.ImageIO;
-
-import lombok.SneakyThrows;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.ClickEvent;
-import net.minecraft.util.text.event.HoverEvent;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -33,6 +24,7 @@ import com.creatubbles.api.response.amazon.UploadS3FileResponse;
 import com.creatubbles.api.response.creation.CreateCreationResponse;
 import com.creatubbles.api.response.creation.CreationsUploadsResponse;
 import com.creatubbles.ctbmod.CTBMod;
+import com.creatubbles.ctbmod.client.gui.AnimatedTexture;
 import com.creatubbles.ctbmod.client.gui.GuiUtil;
 import com.creatubbles.ctbmod.client.gui.LazyLoadedTexture;
 import com.creatubbles.repack.endercore.client.gui.GuiContainerBase;
@@ -41,12 +33,24 @@ import com.creatubbles.repack.endercore.client.gui.widget.TextFieldEnder;
 import com.creatubbles.repack.endercore.client.render.EnderWidget;
 import com.creatubbles.repack.endercore.common.util.ChatUtil;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.madgag.gif.fmsware.GifDecoder;
 
-public class GuiUploadScreenshot extends GuiContainerBase {
+import lombok.SneakyThrows;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.util.text.event.HoverEvent;
+
+public class GuiUploadMedia extends GuiContainerBase {
 
     private static final ResourceLocation SCREENSHOT_RES = new ResourceLocation(CTBMod.DOMAIN, "screenshotprev");
 
-    private final GuiScreenshotList parent;
+    private final GuiMediaList parent;
     private final File[] files;
     private final int index;
 
@@ -63,13 +67,13 @@ public class GuiUploadScreenshot extends GuiContainerBase {
 
     private final TextFieldEnder tfName;
 
-    private GuiUploadScreenshot(GuiUploadScreenshot old, File[] files, int index) {
+    private GuiUploadMedia(GuiUploadMedia old, File[] files, int index) {
         this(old.parent, files, index);
         this.parentInvalid = old.parentInvalid;
     }
     
     @SneakyThrows
-    public GuiUploadScreenshot(GuiScreenshotList parent, final File[] files, final int index) {
+    public GuiUploadMedia(GuiMediaList parent, final File[] files, final int index) {
         super(GuiUtil.dummyContainer());
         this.parent = parent;
         this.files = files;
@@ -80,14 +84,33 @@ public class GuiUploadScreenshot extends GuiContainerBase {
             @Override
             @SneakyThrows
             public void run() {
-                BufferedImage original = ImageIO.read(files[index]);
-                size = new Dimension(original.getWidth(), original.getHeight());
-                tex = new LazyLoadedTexture(GuiUtil.upsize(ImageIO.read(files[index]), false));
+                File file = files[index];
+                BufferedImage[] images;
+                if (file.getName().toLowerCase(Locale.ROOT).endsWith(".gif")) {
+                  GifDecoder decoder = new GifDecoder();
+                  decoder.read(new FileInputStream(files[index]));
+                  images = new BufferedImage[decoder.getFrameCount()];
+                  for(int i = 0; i < images.length; i++) {
+                      images[i] = decoder.getFrame(i);
+                  }
+                } else {
+                    images = new BufferedImage[] { ImageIO.read(file) };
+                }
+
+                size = new Dimension(images[0].getWidth(), images[0].getHeight());
+                for (int i = 0; i < images.length; i++) {
+                    images[i] = GuiUtil.upsize(images[i], false);
+                }
+                if (images.length > 1) {
+                    tex = new AnimatedTexture(images);
+                } else {
+                    tex = new LazyLoadedTexture(images[0]);
+                }
                 uploadTask = Minecraft.getMinecraft().addScheduledTask(new Runnable() {
 
                     @Override
                     public void run() {
-                        if (Minecraft.getMinecraft().currentScreen == GuiUploadScreenshot.this) {
+                        if (Minecraft.getMinecraft().currentScreen == GuiUploadMedia.this) {
                             tex.uploadTexture();
                             Minecraft.getMinecraft().getTextureManager().loadTexture(SCREENSHOT_RES, tex);
                         }
@@ -107,7 +130,6 @@ public class GuiUploadScreenshot extends GuiContainerBase {
 
     @Override
     public void initGui() {
-        System.out.println("Init: " + Thread.currentThread());
         this.xSize = width;
         this.ySize = height;
 
@@ -127,9 +149,9 @@ public class GuiUploadScreenshot extends GuiContainerBase {
         addButton(buttonBack = new GuiButton(-99, x + (w / 10), height - 30, w, 20, "Back"));
         
         x = width / 2;
-        w = (width - 150) / 4;
+        w = Math.min((width - 150) / 4, 397); // Buttons glitch out over this width
         addButton(buttonPrev = new GuiButton(-1, x - w - 10, height - 75, w, 20, "<< Prev"));
-        addButton(buttonNext = new GuiButton(1, x + 10, height - 75, w, 20, "Next >> "));
+        addButton(buttonNext = new GuiButton(1, x + 10, height - 75, w, 20, "Next >>"));
     }
 
     @Override
@@ -149,6 +171,9 @@ public class GuiUploadScreenshot extends GuiContainerBase {
         super.updateScreen();
         if (confirm > 0 && confirm < Integer.MAX_VALUE) {
             confirm++;
+        }
+        if (uploadTask != null && uploadTask.isDone()) {
+            tex.updateTexture();
         }
     }
 
@@ -225,6 +250,11 @@ public class GuiUploadScreenshot extends GuiContainerBase {
                         buttonUpload.displayString = "Uploading...";
                         CreationsUploadsRequest creationsUploads = new CreationsUploadsRequest(createCreationResponse.getId(), FilenameUtils.getExtension(files[index].getName()), accessToken);
                         CreationsUploadsResponse creationsUploadsResponse = creationsUploads.execute().getResponse();
+                        
+                        if (!creationsUploads.wasSuccessful()) {
+                            buttonUpload.displayString = "Failed!";
+                            throw new RuntimeException("Upload Failed: " + creationsUploadsResponse.getMessage());
+                        }
 
                         byte[] data = FileUtils.readFileToByteArray(files[index]);
 
@@ -233,6 +263,7 @@ public class GuiUploadScreenshot extends GuiContainerBase {
                         UploadS3FileResponse uploadS3Response = uploadS3Image.execute().getResponse();
 
                         if (!uploadS3Response.isSuccess()) {
+                            buttonUpload.displayString = "Failed!";
                             throw new RuntimeException("Upload Failed: " + uploadS3Response.getMessage());
                         }
 
@@ -258,7 +289,7 @@ public class GuiUploadScreenshot extends GuiContainerBase {
                         public void run() {
 
                             if (error == null) {
-                                Minecraft.getMinecraft().thePlayer.addChatMessage(new TextComponentString(TextFormatting.GREEN.toString().concat("[Creation upload successful! (Click to view \"" + name + "\")]")).setStyle(new Style().setClickEvent(
+                                Minecraft.getMinecraft().thePlayer.addChatMessage(new TextComponentString("Creation upload successful!" + TextFormatting.GREEN + " [Click to view \"" + name + "\"]").setStyle(new Style().setClickEvent(
                                         new ClickEvent(ClickEvent.Action.OPEN_URL, landingUrlf)).setHoverEvent(
                                         new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString("Click to view creation on website.")))));
 
@@ -274,20 +305,20 @@ public class GuiUploadScreenshot extends GuiContainerBase {
             }).start();
 
         } else if (button.id == -99) {
-            Minecraft.getMinecraft().displayGuiScreen(parentInvalid ? new GuiScreenshotList(parent.parent) : parent);
+            Minecraft.getMinecraft().displayGuiScreen(parentInvalid ? new GuiMediaList(parent.parent) : parent);
         } else if (button.id == -98) {
             if (confirm > 20) {
                 files[index].delete();
                 File[] newFiles = ArrayUtils.remove(files, index);
                 parentInvalid = true;
-                Minecraft.getMinecraft().displayGuiScreen(new GuiUploadScreenshot(this, newFiles, Math.min(newFiles.length - 1, index)));
+                Minecraft.getMinecraft().displayGuiScreen(new GuiUploadMedia(this, newFiles, Math.min(newFiles.length - 1, index)));
             } else {
                 confirm++;
             }
         } else {
             int newIndex = index + button.id;
             if (newIndex >= 0 && newIndex < files.length) {
-                Minecraft.getMinecraft().displayGuiScreen(new GuiUploadScreenshot(this, files, newIndex));
+                Minecraft.getMinecraft().displayGuiScreen(new GuiUploadMedia(this, files, newIndex));
             }
         }
     }

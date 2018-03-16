@@ -325,7 +325,7 @@ public class TileCreator extends TileEntityBase implements ISidedInventory, ITic
 
     @Override
     public ITextComponent getDisplayName() {
-        return new TextComponentString("This is stupid");
+        return new TextComponentString("Creator");
     }
 
     @Override

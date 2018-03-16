@@ -30,7 +30,6 @@ public class CommandLogin extends ClientCommandBase {
         if (args.length < 2) {
             throw new WrongUsageException(getCommandUsage(sender));
         }
-        CreatubblesAPI.setStagingMode(false);
         OAuthAccessTokenResponse resp = new OAuthAccessTokenRequest(args[0], args[1]).execute().getResponse();
         if (resp.getAccessToken() == null) {
             ChatUtil.sendNoSpamClient("Login failed! Invalid email or password.");

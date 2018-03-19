@@ -1,3 +1,12 @@
+0.5.0:
+New
+- Add GIF recording! Press F4 to begin a new recording, and again to stop. More settings can be found in the creator's upload menu.
+- Add an mcmod.info file
+Fixes
+- Fix some issues with thumbnail buttons on small GUI sizes
+- Fix uploaded creation link not respecting account language
+- Improve the loading speed of screenshot thumbnails
+
 0.4.2:
 Changes
 - Extend the draw distance of paintings
